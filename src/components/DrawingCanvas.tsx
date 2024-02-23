@@ -18,10 +18,9 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ width, height, children }
     }, [width, height]); // Ensure canvas context is updated if width or height changes
 
     return (
-        <div>
+        <div style={{"border": "2px dashed red"}}>
             <canvas ref={canvasRef} width={width} height={height} />
             <CanvasContext.Provider value={context}>
-                {/* Render children within the context provider */}
                 {context ? children : null}
             </CanvasContext.Provider>
         </div>
