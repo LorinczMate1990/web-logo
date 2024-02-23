@@ -13,7 +13,6 @@ type GraphTurtle = {
 export default function useTurtle(context : CanvasRenderingContext2D | null) {
   const [graphTurtle, setGraphTurtle] = useState<GraphTurtle | null>(null);
 	const turtleInstance = useRef<TurtleInstance>();
-	const [dummy, setDummy] = useState(0);
 	useEffect(() => {
 		if (turtleInstance.current === null || turtleInstance.current === undefined) {
 			turtleInstance.current = new TurtleInstance("turtle0", "turtles", {x: 400, y: 400}, 0, context, "down", "black", 1);
@@ -24,13 +23,13 @@ export default function useTurtle(context : CanvasRenderingContext2D | null) {
 	useSubscriber<TurtleCommandMessage>(turtleCommandPubSub, (message) => {
 		const instance = turtleInstance.current;
 		console.log("Message received: ", message, instance);
+    if (instance === undefined) return;
 		switch (message.command) {
-			case "forward": instance?.go(message.distance); break;
-			case "backward": instance?.go(-message.distance); break;
-			case "left": instance?.rotate(message.radian); break;
-			case "right": instance?.rotate(-message.radian); break;
+			case "forward": instance.go(message.distance); break;
+			case "backward": instance.go(-message.distance); break;
+			case "left": instance.rotate(message.radian); break;
+			case "right": instance.rotate(-message.radian); break;
 		}
-    if (instance == undefined) return;
 		setGraphTurtle({
       x : instance.position.x,
       y : instance.position.y,

@@ -1,8 +1,5 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext } from 'react';
 import CanvasContext from '../CanvasContext';
-import { turtleCommandPubSub, useSubscriber } from '../../pubsub/pubsubs';
-import { TurtleCommandMessage } from '../../pubsub/types';
-import TurtleInstance from '../../models/TurtleInstance';
 import useTurtle from './useTurtle';
 
 interface TurtleProps {

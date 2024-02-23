@@ -1,0 +1,32 @@
+/* CommandLine.css */
+
+.commandLineContainer {
+    font-family: monospace;
+    width: 100%;
+  }
+  
+  .responseContainer {
+    overflow-y: auto;
+    padding: 4px;
+    background-color: #242424;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  
+  .response {
+    color: white;
+    margin: 0;
+    line-height: 20px; /* Adjust as needed */
+  }
+  
+  .responseError {
+    color: red;
+  }
+  
+  .commandInput {
+    width: 100%;
+    line-height: 20px; /* Adjust line height as needed */
+    font-family: monospace;
+    padding: 0 4px;
+  }
+  
