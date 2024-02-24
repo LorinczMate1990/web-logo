@@ -1,32 +1,32 @@
+import { tokensToCommandList } from "./CommandList";
+import { tokenizer } from "./Tokenizer";
+import Core from "./core";
+
 type SuccesfulExecuteResponse = {
-    success: true,
-    response: string,
+  success: true,
+  response: string,
 }
 
 type WrongfulExecuteResponse = {
-    success: false,
-    phase : string,
-    errorCode: number,
-    errorLine : number,
-    errorChar : number,
+  success: false,
+  phase: string,
+  errorCode: number,
+  errorLine: number,
+  errorChar: number,
 }
 
-type ExecuteResponse = WrongfulExecuteResponse |  SuccesfulExecuteResponse;
+type ExecuteResponse = WrongfulExecuteResponse | SuccesfulExecuteResponse;
+
+
 
 class Interpreter {
-     /*
-    Now I want to create an Interpreter.
-The interpreter must do the followings:
-Must have an execute function that must execute a part of code and return with a status (later)
+  core : Core = new Core();
 
-The functions of the interpreter are the following:
-1) Tokenization: Classic tokenization. Mustly split by spaces
-2) Command iteration: My dialect of logo language will 
-    */
-
-    async execute(code : string) : ExecuteResponse {
-
-    }
+  async execute(code: string) {
+    const tokens = tokenizer(code);
+    const commandList = tokensToCommandList(tokens);
+    this.core.executeCommands(commandList);
+  }
 }
 
 export default Interpreter;

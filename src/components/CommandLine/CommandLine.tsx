@@ -1,5 +1,6 @@
-import React, { useState, KeyboardEvent } from 'react';
+import React, { useState, KeyboardEvent, useRef } from 'react';
 import './CommandLine.css'; // Import the CSS file
+import Interpreter from '../../controllers/Interpreter';
 
 
 interface CommandResponse {
@@ -16,6 +17,7 @@ const CommandLine: React.FC<{maxLines: number}> = ({maxLines} : {maxLines : numb
   const [history, setHistory] = useState<CommandHistory>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
   const [responses, setResponses] = useState<CommandResponse[]>([]);
+  const interpreter = useRef<Interpreter>(new Interpreter());
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -23,19 +25,12 @@ const CommandLine: React.FC<{maxLines: number}> = ({maxLines} : {maxLines : numb
 
   const executeCommand = async (command: string): Promise<CommandResponse> => {
     // Simulate an async operation with a promise
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (command.trim() === '') {
-          resolve({ accepted: false });
-        } else {
-          resolve({
-            accepted: true,
-            error: false, // simulate command success or failure
-            response: `Response to: ${command}`,
-          });
-        }
-      }, 1000); // Simulate delay
-    });
+    await interpreter.current.execute(command);
+    return {
+      accepted: true,
+      error: false, // simulate command success or failure
+      response: command,
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
