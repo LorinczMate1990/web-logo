@@ -27,7 +27,7 @@ export class CommandsWithContext {
       // Now I only handle the built-in functions
       if (label in BuiltinDictionary) {
         const func = BuiltinDictionary[label];
-        await func(packedArguments);
+        await func(packedArguments, this.context);
       } else {
         throw new Error("This is not implemented yet Or command not found");
       }
@@ -35,9 +35,18 @@ export class CommandsWithContext {
   }
 }
 
-type ParamType = string | CommandsWithContext | number;
+// TODO This whole code is too coupled. I have to create interfaces
+export type ParamType = string | CommandsWithContext | number;
 
-class Memory {
+export interface VariableGetter {
+  getVariable(key : string) : ParamType;
+}
+
+export interface VariableSetter {
+  setVariable(key : string, value : ParamType) : void;
+}
+
+class Memory implements VariableGetter, VariableSetter {
   parent? : Memory;
   variables : {[key : string] : ParamType} = {};
 

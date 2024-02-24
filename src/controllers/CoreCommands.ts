@@ -1,10 +1,12 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs";
-import { ArgType, CommandsWithContext } from "./core";
+import { ArgType, CommandsWithContext, VariableGetter, VariableSetter } from "./core";
+import numericEval from "./numericEval";
 
 export default class CoreCommands {
   // TODO Arguments must be parsed, also I need here the memory
-  static async forward(args: ArgType) {
-    const distance = Number(args[0]);
+  static async forward(args: ArgType, memory : VariableGetter & VariableSetter) {
+    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
+    const distance = numericEval(args[0], memory);
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "forward",
@@ -12,8 +14,9 @@ export default class CoreCommands {
     });
   }
 
-  static async backward(args: ArgType) {
-    const distance = Number(args[0]);
+  static async backward(args: ArgType, memory : VariableGetter & VariableSetter) {
+    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
+    const distance = numericEval(args[0], memory);
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "backward",
@@ -21,8 +24,9 @@ export default class CoreCommands {
     });
   }
 
-  static async left(args: ArgType) {
-    const radian = Number(args[0]) / 180.0 * Math.PI;
+  static async left(args: ArgType, memory : VariableGetter & VariableSetter) {
+    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
+    const radian = numericEval(args[0], memory) / 180.0 * Math.PI;
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "left",
@@ -30,8 +34,9 @@ export default class CoreCommands {
     });
   }
 
-  static async right(args: ArgType) {
-    const radian = Number(args[0]) / 180.0 * Math.PI;
+  static async right(args: ArgType, memory : VariableGetter & VariableSetter) {
+    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
+    const radian = numericEval(args[0], memory) / 180.0 * Math.PI;
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "right",
@@ -39,8 +44,9 @@ export default class CoreCommands {
     });
   }
 
-  static async repeat(args: ArgType) {
-    const repeatNumber = Number(args[0]);
+  static async repeat(args: ArgType, memory : VariableGetter & VariableSetter) {
+    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
+    const repeatNumber = numericEval(args[0], memory);
     const cycleCore = args[1] as CommandsWithContext;
     console.log("Repeat called: ", repeatNumber, cycleCore);
     for (let i=0; i<repeatNumber; ++i) {
