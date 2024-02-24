@@ -1,4 +1,4 @@
-import { TooManyClosingBracketError, UnclosedBracketError } from "./errors";
+import { TooManyClosingBraceletError, TooManyClosingBracketError, UnclosedBracketError } from "./errors";
 
 
 export function tokenizer(command: string): string[] {
@@ -7,6 +7,7 @@ export function tokenizer(command: string): string[] {
   let tokens: string[] = [];
   let currentToken: string = "";
   let braketCounter = 0;
+  let braceletCounter = 0;
 
   function startNewToken() {
     tokens.push(currentToken);
@@ -19,6 +20,8 @@ export function tokenizer(command: string): string[] {
     if (c == " " && braketCounter == 0) {
       startNewToken();
     } else if (c == "\n") {
+      charCounter = 0;
+      lineCounter += 1;
       if (braketCounter > 0) throw new UnclosedBracketError(lineCounter);
       startNewToken();
       currentToken = "\n";
@@ -35,6 +38,12 @@ export function tokenizer(command: string): string[] {
       if (braketCounter == 0) startNewToken();
     } else if (c == "{" || c == "}") {
       if (braketCounter == 0) {
+        if (c == "{") {
+          braceletCounter++;
+        } else {
+          braceletCounter--;
+        }
+        if (braceletCounter < 0) throw new TooManyClosingBraceletError(lineCounter, charCounter);
         startNewToken();
         currentToken = c;
         startNewToken();
@@ -47,6 +56,7 @@ export function tokenizer(command: string): string[] {
   }
   startNewToken();
   if (braketCounter > 0) throw new UnclosedBracketError(lineCounter);
+  if (braketCounter > 0) throw new UnclosedBraceletError(lineCounter);
   return filterTokens(tokens);
 }
 

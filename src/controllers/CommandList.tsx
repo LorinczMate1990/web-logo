@@ -24,6 +24,8 @@ class Command {
  *      An argument can be a series of commands. These commands must be between { and }. 
  */
 
-export default function toCommandList(tokens : Token[]) : Commands {
+export default function toCommandList(tokens : string[]) : Commands {
     let state : "command" | "arguments" = "command";
+    let ret : Commands = [];
+    
 }
