@@ -24,7 +24,9 @@ class Interpreter {
 
   async execute(code: string) {
     const tokens = tokenizer(code);
+    console.log("tokens: ", tokens);
     const commandList = tokensToCommandList(tokens);
+    console.log("commandList: ", commandList);
     this.core.executeCommands(commandList);
   }
 }

@@ -165,5 +165,22 @@ describe('tokensToCommandList', () => {
     expect(commands[0].arguments[0]).toEqual("arg9");
     const nestedCommands = commands[0].arguments[1] as Commands;
     expect(nestedCommands[0].label).toEqual("subCommand8");
-  });  
+  });
+
+  it('parses commands with arguments followed directly by nested commands without the new line before closing }', () => {
+    const tokens = [
+      new Token("rep", 0, 0), new Token("10", 0, 10),
+      new Token("{", 0, 14), new Token("f", 1, 0), new Token("10", 1, 11),
+      new Token("}", 2, 0), new Token("\n", 2, 1)
+    ];
+    const commands = tokensToCommandList(tokens);
+    expect(commands.length).toEqual(1);
+    expect(commands[0].label).toEqual("rep");
+    expect(commands[0].arguments.length).toEqual(2);
+    expect(commands[0].arguments[0]).toEqual("10");
+    const nestedCommands = commands[0].arguments[1] as Commands;
+    expect(nestedCommands[0].label).toEqual("f");
+    expect(nestedCommands[0].arguments.length).toEqual(1);
+    
+  }); 
 });

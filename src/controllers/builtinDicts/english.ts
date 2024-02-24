@@ -11,6 +11,8 @@ const BuiltinDictionary : {[i : string] : (args: ArgType) => Promise<void>} = {
   "l": CoreCommands.left,
   "right": CoreCommands.right,
   "r": CoreCommands.right,
+  "repeat": CoreCommands.repeat,
+  "rep": CoreCommands.repeat,
 };
 
 export default BuiltinDictionary;

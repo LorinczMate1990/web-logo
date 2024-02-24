@@ -58,6 +58,9 @@ function _tokensToCommandList(w : Wrapper) : Commands {
         currentCommand.addArgument(subCommands);
       }
     } else if (w.tokens[w.pointer].eq("}")) {
+      if (currentCommand !== null) {
+        commands.push(currentCommand);
+      }
       w.pointer++;
       return commands;
     } else if (w.tokens[w.pointer].eq("\n")) {

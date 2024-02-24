@@ -38,4 +38,13 @@ export default class CoreCommands {
       radian
     });
   }
+
+  static async repeat(args: ArgType) {
+    const repeatNumber = Number(args[0]);
+    const cycleCore = args[1] as CommandsWithContext;
+    console.log("Repeat called: ", repeatNumber, cycleCore);
+    for (let i=0; i<repeatNumber; ++i) {
+      cycleCore.execute();
+    }
+  }
 }
