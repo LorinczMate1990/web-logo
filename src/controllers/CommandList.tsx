@@ -24,8 +24,14 @@ class Command {
  *      An argument can be a series of commands. These commands must be between { and }. 
  */
 
-export default function toCommandList(tokens : string[]) : Commands {
+export default function toCommandList(tokens : string[], tracers : Tracer[]) : Commands {
     let state : "command" | "arguments" = "command";
     let ret : Commands = [];
-    
+    for (let i=0; i<tokens.length; ++i) {
+        let token = tokens[i];
+        if (token == "{") {
+            // I have to find its closing pair
+        }
+    }
+
 }

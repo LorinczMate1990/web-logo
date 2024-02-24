@@ -1,17 +1,46 @@
-import { TooManyClosingBraceletError, TooManyClosingBracketError, UnclosedBracketError } from "./errors";
+import { TooManyClosingBraceletError, TooManyClosingBracketError, UnclosedBraceletError, UnclosedBracketError } from "./errors";
 
+export class Token {
+  lineNumber : number;
+  charNumber : number;
+  val : string;
 
-export function tokenizer(command: string): string[] {
+  constructor(val : string, lineNumber : number, charNumber : number) {
+    this.val = val;
+    this.lineNumber = lineNumber;
+    this.charNumber = charNumber;
+  }
+
+  // Override the toString method to return the primitive string value
+  toString() {
+    return this.val;
+  }
+
+  push(c : string) {
+    this.val += c;
+  }
+
+  get length() {
+    return this.val.length;
+  }
+
+  eq(c : string) {
+    return this.val === c;
+  }
+
+}
+
+export function tokenizer(command: string): Token[] {
   let lineCounter = 0;
   let charCounter = 0;
-  let tokens: string[] = [];
-  let currentToken: string = "";
+  let tokens: Token[] = [];
+  let currentToken: Token = new Token("", lineCounter, charCounter);
   let braketCounter = 0;
   let braceletCounter = 0;
 
   function startNewToken() {
     tokens.push(currentToken);
-    currentToken = "";
+    currentToken = new Token("", lineCounter, charCounter);
   }
 
   for (let i = 0; i < command.length; ++i) {
@@ -24,17 +53,17 @@ export function tokenizer(command: string): string[] {
       lineCounter += 1;
       if (braketCounter > 0) throw new UnclosedBracketError(lineCounter);
       startNewToken();
-      currentToken = "\n";
+      currentToken = new Token("\n", lineCounter, charCounter);;
       startNewToken();
     } else if (c == "(") {
       braketCounter++;
       if (braketCounter > 1) {
-        currentToken += c;
+        currentToken.push(c);
       }
     } else if (c == ")") {
       braketCounter--;
       if (braketCounter < 0) throw new TooManyClosingBracketError(lineCounter, charCounter);
-      if (braketCounter > 0) currentToken += c;
+      if (braketCounter > 0) currentToken.push(c);
       if (braketCounter == 0) startNewToken();
     } else if (c == "{" || c == "}") {
       if (braketCounter == 0) {
@@ -45,13 +74,13 @@ export function tokenizer(command: string): string[] {
         }
         if (braceletCounter < 0) throw new TooManyClosingBraceletError(lineCounter, charCounter);
         startNewToken();
-        currentToken = c;
+        currentToken = new Token(c, lineCounter, charCounter);;
         startNewToken();
       } else {
-        currentToken += c;
+        currentToken.push(c);
       }
     } else {
-      currentToken += c;
+      currentToken.push(c);
     }
   }
   startNewToken();
@@ -60,15 +89,15 @@ export function tokenizer(command: string): string[] {
   return filterTokens(tokens);
 }
 
-export function filterTokens(tokens : string[]) : string[] {
+export function filterTokens(tokens : Token[]) : Token[] {
   const nonEmptyTokens = tokens.filter((t) => t.length > 0);
-  const nonEmptyLines : string[] = [];
+  const nonEmptyLines : Token[] = [];
   let emptyLine = true;
   for (const token of nonEmptyTokens) {
-    if (token === "\n" && emptyLine) continue;
-    emptyLine = token === "\n";
+    if (token.eq("\n") && emptyLine) continue;
+    emptyLine = token.eq("\n");
     nonEmptyLines.push(token);
   }
-  if (nonEmptyLines[nonEmptyLines.length-1] == "\n") nonEmptyLines.pop();
+  if (nonEmptyLines.length > 0 && nonEmptyLines[nonEmptyLines.length-1].eq("\n")) nonEmptyLines.pop();
   return nonEmptyLines;
 }
