@@ -54,4 +54,11 @@ export default class CoreCommands {
       await cycleCore.execute();
     }
   }
+
+  static async createVar(args: ArgType, memory : VariableGetter & VariableSetter) {
+    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
+    if (typeof args[1] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
+    // TODO : args[1] can be string or CommandsWithContext, both are valid. But I have to create decorators, this is out of hand
+    //memory.setVariable(arg[0])
+  }
 }
