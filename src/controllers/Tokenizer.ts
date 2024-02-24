@@ -55,6 +55,10 @@ export function tokenizer(command: string): Token[] {
       startNewToken();
       currentToken = new Token("\n", lineCounter, charCounter);;
       startNewToken();
+    } else if (c == ";" && braketCounter == 0) {
+      startNewToken();
+      currentToken = new Token("\n", lineCounter, charCounter);;
+      startNewToken();
     } else if (c == "(") {
       braketCounter++;
       if (braketCounter > 1) {

@@ -44,7 +44,7 @@ export default class CoreCommands {
     const cycleCore = args[1] as CommandsWithContext;
     console.log("Repeat called: ", repeatNumber, cycleCore);
     for (let i=0; i<repeatNumber; ++i) {
-      cycleCore.execute();
+      await cycleCore.execute();
     }
   }
 }
