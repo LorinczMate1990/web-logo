@@ -61,4 +61,23 @@ export default class CoreCommands {
     // TODO : args[1] can be string or CommandsWithContext, both are valid. But I have to create decorators, this is out of hand
     //memory.setVariable(arg[0])
   }
+
+  static async learn(args: ArgType, memory : VariableGetter & VariableSetter) {
+    /**
+     * usage: learn commandName param1 param2 param3 ... paramN { code block }
+     */
+    if (args.length <= 1) throw Error("I have to create a custom error for this. And decorators");
+    if (!(args[args.length-1] instanceof CommandsWithContext)) throw Error("I have to create a custom error for this. And decorators")
+    for (let i=0; i<args.length-1; ++i) {
+      if (typeof args[i] !== "string") throw new Error("I have to create a custom error for this");
+    }
+    const commandName = args[0] as string;
+    const argNames = args.slice(1, args.length-1) as string[];
+    const code = args[args.length - 1] as CommandsWithContext;
+    for (const argName of argNames) {
+      code.context.setVariable(argName, "");
+    }
+    code.context.meta = {type: "command", arguments: argNames};
+    memory.setVariable(commandName, code);
+  }
 }

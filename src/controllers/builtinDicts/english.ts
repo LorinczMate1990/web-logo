@@ -13,6 +13,7 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: VariableGetter
   "r": CoreCommands.right,
   "repeat": CoreCommands.repeat,
   "rep": CoreCommands.repeat,
+  "learn": CoreCommands.learn,
 };
 
 export default BuiltinDictionary;

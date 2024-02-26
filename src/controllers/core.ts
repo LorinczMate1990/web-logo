@@ -29,7 +29,21 @@ export class CommandsWithContext {
         const func = BuiltinDictionary[label];
         await func(packedArguments, this.context);
       } else {
-        throw new Error("This is not implemented yet Or command not found");
+        const possibleCommand = this.context.getVariable(label); // TODO Check if it exists
+        if (possibleCommand instanceof CommandsWithContext && possibleCommand.context.meta?.type == "command") {
+          // Set variables
+          // Check the numbers! This dialect doesn't support variable argument list
+          const numOfArguments = packedArguments.length;
+          if (possibleCommand.context.meta.arguments.length != numOfArguments) throw Error("TODO : Custom Error"); // TODO
+          
+          for (let i = 0; i < numOfArguments; ++i) {
+            const commandArgumentName = possibleCommand.context.meta.arguments[i];
+            possibleCommand.context.setVariable(commandArgumentName, packedArguments[i]);
+          }
+          await possibleCommand.execute();
+        } else {
+          throw new Error("Command not found"); // TODO Custom error
+        }
       }
     }
   }
@@ -46,8 +60,14 @@ export interface VariableSetter {
   setVariable(key : string, value : ParamType) : void;
 }
 
+type Meta = {
+  type: "command", 
+  arguments: string[]
+}
+
 class Memory implements VariableGetter, VariableSetter {
   parent? : Memory;
+  meta? : Meta;
   variables : {[key : string] : ParamType} = {};
 
   constructor(parent : Memory | undefined) {
