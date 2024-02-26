@@ -1,13 +1,11 @@
-import { turtleCommandPubSub } from "../pubsub/pubsubs";
-import { Command, Commands } from "./CommandList";
+import { Commands } from "./CommandList";
 import BuiltinDictionary from "./builtinDicts/english";
+import { AbstractMemory, ExecutableWithContext, MemoryMetaData, ParamType } from "./types";
 
-export type ArgType = (string | CommandsWithContext)[];
-
-export class CommandsWithContext {
+export class CommandsWithContext implements ExecutableWithContext {
   commands : Commands;
-  context : Memory;
-  constructor(commands: Commands, context : Memory) {
+  context : AbstractMemory;
+  constructor(commands: Commands, context : AbstractMemory) {
     this.commands = commands;
     this.context = context;
   }
@@ -50,27 +48,13 @@ export class CommandsWithContext {
 }
 
 // TODO This whole code is too coupled. I have to create interfaces
-export type ParamType = string | CommandsWithContext | number;
 
-export interface VariableGetter {
-  getVariable(key : string) : ParamType;
-}
-
-export interface VariableSetter {
-  setVariable(key : string, value : ParamType) : void;
-}
-
-type Meta = {
-  type: "command", 
-  arguments: string[]
-}
-
-class Memory implements VariableGetter, VariableSetter {
-  parent? : Memory;
-  meta? : Meta;
+class Memory implements AbstractMemory {
+  parent? : AbstractMemory;
+  meta : MemoryMetaData | undefined;
   variables : {[key : string] : ParamType} = {};
 
-  constructor(parent : Memory | undefined) {
+  constructor(parent : AbstractMemory | undefined) {
     this.parent = parent;
   }
 
@@ -88,7 +72,7 @@ class Memory implements VariableGetter, VariableSetter {
 }
 
 class Core {
-  globalMemory : Memory;
+  globalMemory : AbstractMemory;
 
   constructor() {
     this.globalMemory = new Memory(undefined);

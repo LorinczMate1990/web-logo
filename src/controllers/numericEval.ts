@@ -1,4 +1,5 @@
-import { VariableGetter } from "./core";
+import { VariableGetter } from "./types";
+
 
 type ParamType = number | string;
 

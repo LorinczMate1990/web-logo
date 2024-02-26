@@ -1,4 +1,4 @@
-import { ParamType, VariableGetter } from './core';
+import { ParamType, VariableGetter } from './types';
 import numericEval from './numericEval';
 
 describe('numericEval', () => {
