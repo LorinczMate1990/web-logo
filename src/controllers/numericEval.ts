@@ -1,8 +1,5 @@
 import { VariableGetter } from "./types";
 
-
-type ParamType = number | string;
-
 // Helper function to determine if a string is numeric
 function isNumeric(str: string): boolean {
   return !isNaN(str as any) && !isNaN(parseFloat(str));
@@ -26,11 +23,43 @@ function precedence(op: string): number {
   }
 }
 
+export function tokenize(expression: string): string[] {
+  const atomicTokens = new Set(['+', '-', '*', '/', '(', ')']);
+  const isAtomicToken = (char: string) => atomicTokens.has(char);
+
+  // Pretokenization: Split at whitespaces
+  const pretokens = expression.split(/\s+/).filter(token => token !== '');
+
+  // Finetokenization: Further split tokens if they contain atomic tokens
+  const tokens: string[] = [];
+
+  pretokens.forEach(pretoken => {
+    let buffer = '';
+    for (const char of pretoken) {
+      if (isAtomicToken(char)) {
+        if (buffer.length > 0) {
+          tokens.push(buffer);
+          buffer = '';
+        }
+        tokens.push(char); // Add the atomic token
+      } else {
+        buffer += char;
+      }
+    }
+    if (buffer.length > 0) {
+      tokens.push(buffer);
+    }
+  });
+
+  return tokens;
+}
+
+
 // Converts an infix expression to Polish notation (prefix notation)
 function toPolishNotation(infix: string): string[] {
   const outputQueue: string[] = [];
   const operatorStack: string[] = [];
-  const tokens = infix.split(/\s+/);
+  const tokens = tokenize(infix);
 
   tokens.reverse().forEach(token => {
     if (isOperator(token)) {
@@ -67,7 +96,11 @@ function toPolishNotation(infix: string): string[] {
   return outputQueue.reverse();
 }
 
-export default function numericEval(expression: string, memory: VariableGetter): number {
+export function stringEval(expression : string, memory : VariableGetter) : string {
+  return expression; // TODO
+}
+
+export function numericEval(expression: string, memory: VariableGetter): number {
   // Convert to Polish notation first (placeholder implementation)
   const polishNotation = toPolishNotation(expression);
 

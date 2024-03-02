@@ -1,5 +1,5 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs";
-import numericEval from "./numericEval";
+import { numericEval } from "./numericEval";
 import { AbstractMemory, ArgType, ExecutableWithContext } from "./types";
 
 export default class CoreCommands {
