@@ -4,14 +4,14 @@ import { VariableGetter } from './types';
 describe('Structured Variable Evaluation', () => {
   // Mock the VariableGetter
   const mockGetter: VariableGetter = {
-    getVariable: jest.fn((name: string): string => {
+    getVariable: (name: string): string => {
       const variables: { [key: string]: string } = {
         'foo': JSON.stringify({ bar: { spam: "42" }, arr: ["1", "2", "3"] }),
         'num': '5',
         'str': 'hello'
       };
       return variables[name] || "";
-    })
+    }
   };
 
   describe('isStructuredVariableName', () => {
@@ -34,7 +34,7 @@ describe('Structured Variable Evaluation', () => {
 
     it('evaluates < > and [ ] expressions', () => {
       expect(evaluateVariableName('<str>.length', mockGetter)).toBe('hello.length'); // Example assuming simple substitution
-      expect(evaluateVariableName('arr[<num>]', mockGetter)).toBe('arr[5]'); // Example mixing both types
+      expect(evaluateVariableName('arr[num]', mockGetter)).toBe('arr[5]'); // Example mixing both types
     });
   });
 

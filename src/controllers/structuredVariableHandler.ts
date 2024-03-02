@@ -11,13 +11,13 @@ export function evaluateVariableName(name: string, getter: VariableGetter): stri
     if (match.startsWith('[')) {
       // Handle numeric expression
       const expression = match.slice(1, -1); // Remove the brackets
-      console.log("expression: ", expression);
       const result = numericEval(expression, getter); // Assuming numericEval is synchronous
       return `[${result}]`; // Preserving brackets as per requirement
     } else if (match.startsWith('<')) {
       // Handle simple variable substitution
       const varName = match.slice(1, -1); // Remove the angle brackets
       const varValue = getter.getVariable(varName);
+      console.log({varName, varValue, t: typeof varValue})
       if (typeof varValue !== 'string') {
         throw new Error(`Variable ${varName} is not a string.`);
       }
