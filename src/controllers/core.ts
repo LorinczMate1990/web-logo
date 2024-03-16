@@ -1,11 +1,13 @@
 import { Commands } from "./CommandList";
 import BuiltinDictionary from "./builtinDicts/english";
+import { Memory } from "./memory/memory";
 import { AbstractMemory, ExecutableWithContext, MemoryMetaData, ParamType } from "./types";
 
-export class CommandsWithContext implements ExecutableWithContext {
+export class CommandsWithContext extends ExecutableWithContext {
   commands : Commands;
   context : AbstractMemory;
   constructor(commands: Commands, context : AbstractMemory) {
+    super();
     this.commands = commands;
     this.context = context;
   }
@@ -48,28 +50,6 @@ export class CommandsWithContext implements ExecutableWithContext {
 }
 
 // TODO This whole code is too coupled. I have to create interfaces
-
-class Memory implements AbstractMemory {
-  parent? : AbstractMemory;
-  meta : MemoryMetaData | undefined;
-  variables : {[key : string] : ParamType} = {};
-
-  constructor(parent : AbstractMemory | undefined) {
-    this.parent = parent;
-  }
-
-  setVariable(key : string, value : ParamType) {
-    this.variables[key] = value;
-  }
-
-  getVariable(key : string) : ParamType {
-    if (key in this.variables) {
-      return this.variables[key];
-    } 
-    if (this.parent === undefined) return 0; 
-    return this.parent.getVariable(key);
-  }
-}
 
 class Core {
   globalMemory : AbstractMemory;
