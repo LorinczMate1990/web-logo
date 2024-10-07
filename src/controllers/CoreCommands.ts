@@ -50,14 +50,16 @@ export default class CoreCommands {
     const cycleCore = args[1] as ExecutableWithContext;
     console.log("Repeat called: ", repeatNumber, cycleCore);
     for (let i=0; i<repeatNumber; ++i) {
-      cycleCore.context.setVariable("i", i);
+      cycleCore.context.setVariable("i", String(i));
       await cycleCore.execute();
     }
   }
 
   static async createVar(args: ArgType, memory : AbstractMemory) {
+    if (args.length == 2 || args.length == 3) throw new Error("I have to create a custom error for this"); 
     if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
     if (typeof args[1] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
+    
     // TODO : args[1] can be string or ExecutableWithContext, both are valid. But I have to create decorators, this is out of hand
     //memory.setVariable(arg[0])
   }
@@ -79,5 +81,29 @@ export default class CoreCommands {
     }
     code.context.meta = {type: "command", arguments: argNames};
     memory.setVariable(commandName, code);
+  }
+
+  static async conditionalBranching(args: ArgType, memory : AbstractMemory) {
+    /**
+     * usage: if condition { code block if true} { code block if false }
+     */
+    if (args.length != 2 && args.length != 3) throw Error("I have to create a custom error for this. And decorators");
+    if (typeof (args[1]) === "string") throw Error("The second parameter is string");
+    if (typeof (args[args.length-1]) === "string") throw Error("The last parameter is string");
+    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this");
+
+    const condition = numericEval(args[0], memory);
+    const trueBranch = args[1] as ExecutableWithContext;
+    const falseBranch = (args.length == 3)? args[1] as ExecutableWithContext : null; 
+
+    console.log({condition})
+    
+    if (condition) {
+      await trueBranch.execute();
+    } else {
+      if (falseBranch) {
+        await falseBranch.execute();
+      }
+    }
   }
 }

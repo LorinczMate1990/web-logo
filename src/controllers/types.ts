@@ -13,7 +13,7 @@ export type WrongfulExecuteResponse = {
 
 export type ExecuteResponse = WrongfulExecuteResponse | SuccesfulExecuteResponse;
 
-export type ParamType = string | ExecutableWithContext | StructuredMemoryData;
+export type ParamType = string | ExecutableWithContext | StructuredMemoryData | number;
 
 export function isParamType(v : any) : v is ParamType {
   return (typeof v === "string" || isExecutableWithContext(v) || isStructuredMemoryData(v));

@@ -14,6 +14,7 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory
   "repeat": CoreCommands.repeat,
   "rep": CoreCommands.repeat,
   "learn": CoreCommands.learn,
+  "if": CoreCommands.conditionalBranching,
 };
 
 export default BuiltinDictionary;

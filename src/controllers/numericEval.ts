@@ -5,26 +5,35 @@ function isNumeric(str: string): boolean {
   return !isNaN(str as any) && !isNaN(parseFloat(str));
 }
 
+const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|'];
+
 function isOperator(c: string): boolean {
-  return ['+', '-', '*', '/'].includes(c);
+  return operators.includes(c);
 }
 
 // Returns the precedence of an operator
 function precedence(op: string): number {
   switch (op) {
+    case '&':
+    case '|':
+      return 7;
+    case '<':
+    case '>':
+    case '=':
+      return 8;
     case '+':
     case '-':
-      return 1;
+      return 9;
     case '*':
     case '/':
-      return 2;
+      return 10;
     default:
       return 0;
   }
 }
 
 export function tokenize(expression: string): string[] {
-  const atomicTokens = new Set(['+', '-', '*', '/', '(', ')']);
+  const atomicTokens = new Set([...operators, '(', ')']);
   const isAtomicToken = (char: string) => atomicTokens.has(char);
 
   // Pretokenization: Split at whitespaces
@@ -101,6 +110,8 @@ export function stringEval(expression : string, memory : VariableGetter) : strin
 }
 
 export function numericEval(expression: string, memory: VariableGetter): number {
+  console.log({expression, memory});
+  
   // Convert to Polish notation first (placeholder implementation)
   const polishNotation = toPolishNotation(expression);
 
@@ -109,7 +120,7 @@ export function numericEval(expression: string, memory: VariableGetter): number 
 
     for (let i = tokens.length - 1; i >= 0; i--) {
       const token = tokens[i];
-      if (["+", "-", "*", "/"].includes(token)) {
+      if (isOperator(token)) {
         const a = stack.pop();
         const b = stack.pop();
         if (a === undefined || b === undefined) throw new Error("Invalid expression");
@@ -118,6 +129,12 @@ export function numericEval(expression: string, memory: VariableGetter): number 
           case "-": stack.push(a - b); break;
           case "*": stack.push(a * b); break;
           case "/": stack.push(a / b); break;
+          case "=": stack.push(Number(a == b)); break;
+          case ">": stack.push(Number(a > b)); break;
+          case "<": stack.push(Number(a < b)); break;
+          case "&": stack.push(Number(a && b)); break;
+          case "|": stack.push(Number(a || b)); break;
+          
         }
       } else if (isNumeric(token)) {
         stack.push(parseFloat(token));
