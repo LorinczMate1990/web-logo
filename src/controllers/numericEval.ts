@@ -110,7 +110,7 @@ export function stringEval(expression : string, memory : VariableGetter) : strin
 }
 
 export function numericEval(expression: string, memory: VariableGetter): number {
-  console.log({expression, memory});
+  console.log({expression, memory });
   
   // Convert to Polish notation first (placeholder implementation)
   const polishNotation = toPolishNotation(expression);

@@ -1,4 +1,4 @@
-import { AbstractMemory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types";
+import { AbstractMemory, ExecutableFactory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, isExecutableFactory, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types";
 import { evaluateVariableName, getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from "./structuredVariableHandler";
 
 type StringMemoryCell = {
@@ -13,21 +13,21 @@ type StructMemoryCell = {
 
 type CodeMemoryCell = {
   type: "code",
-  value: ExecutableWithContext,
+  value: ExecutableFactory,
 }
 
 type MemoryCell = StringMemoryCell | StructMemoryCell | CodeMemoryCell;
 
 export class Memory implements AbstractMemory {
   parent?: AbstractMemory;
-  meta: MemoryMetaData | undefined;
   variables: { [key: string]: MemoryCell } = {};
 
   constructor(parent: AbstractMemory | undefined) {
     this.parent = parent;
   }
 
-  setVariable(key: string, value: ParamType) {
+  setVariable(key: string, value: ParamType) { // TODO maybe it exists in parent. I should create a separate declarator
+    console.log("isExecutableFactory: ", {key, isExecutableFactory: isExecutableFactory(value)})
     if (isStructuredVariableName(key)){
       const base = getBaseVariableName(key);
       if (!(base in this.variables)) {
@@ -50,7 +50,7 @@ export class Memory implements AbstractMemory {
           type: "string",
           value,
         }
-      } else if (isExecutableWithContext(value)) {
+      } else if (isExecutableFactory(value)) {
         this.variables[key] = {
           type: "code",
           value,

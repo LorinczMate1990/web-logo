@@ -2,6 +2,11 @@ import { ParamType, VariableGetter } from './types';
 import { numericEval, tokenize } from './numericEval';
 
 describe('tokenize', () => {
+  it('handles negative numbers', () => {
+    const result = tokenize('-5');
+    expect(result).toEqual(['-', '5']);
+  });
+
   it('splits numbers and operators correctly', () => {
     const result = tokenize('3+4-5');
     expect(result).toEqual(['3', '+', '4', '-', '5']);
@@ -52,8 +57,8 @@ describe('numericEval', () => {
     memoryMock = {
       getVariable: jest.fn((key: string) => {
         const variables: { [key: string]: ParamType } = {
-          'x': 5,
-          'y': 10,
+          'x': "5",
+          'y': "10",
           'z': "15", // Example of string that is a valid number
           'invalid': "not a number" // Example of invalid variable value
         };
@@ -65,6 +70,19 @@ describe('numericEval', () => {
   it('evaluates constant expression', () => {
     expect(numericEval('4', memoryMock)).toEqual(4);
   }); 
+
+  it('evaluates constant negative expression', () => {
+    expect(numericEval('-4', memoryMock)).toEqual(-4);
+  }); 
+
+  it('evaluates constant real number', () => {
+    expect(numericEval('3.4', memoryMock)).toEqual(3.4);
+  }); 
+
+  it('evaluates constant negative real number', () => {
+    expect(numericEval('-3.4', memoryMock)).toEqual(-3.4);
+  }); 
+
   it('evaluates constant expression with space', () => {
     expect(numericEval('   4  ', memoryMock)).toEqual(4);
   });

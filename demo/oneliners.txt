@@ -8,3 +8,5 @@ if 3 { f 10 } { f 100 }
 learn fractal deep len { f len; if deep {right 30; fractal deep-1 len; left 60; fractal deep-1 len; right 30;}; b len; }
 
 learn fractal deep len { f len; if deep {right 30; f len/2; b len/2; left 60; f len/2; b len/2; right 30;}; b len; }
+
+learn fractal deep len { f len; if deep {right 30; fractal deep-1 len/2; left 60; fractal deep-1 len/2; right 30;}; b len; }

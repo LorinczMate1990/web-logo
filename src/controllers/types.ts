@@ -13,7 +13,7 @@ export type WrongfulExecuteResponse = {
 
 export type ExecuteResponse = WrongfulExecuteResponse | SuccesfulExecuteResponse;
 
-export type ParamType = string | ExecutableWithContext | StructuredMemoryData | number;
+export type ParamType = string | ExecutableFactory | StructuredMemoryData;
 
 export function isParamType(v : any) : v is ParamType {
   return (typeof v === "string" || isExecutableWithContext(v) || isStructuredMemoryData(v));
@@ -21,6 +21,10 @@ export function isParamType(v : any) : v is ParamType {
 
 export function isExecutableWithContext(v : any) : v is ExecutableWithContext {
   return v.ExecutableWithContextSymbol === ExecutableWithContext.StaticExecutableWithContextSymbol;
+}
+
+export function isExecutableFactory(v : any) : v is ExecutableFactory {
+  return v.ExecutableFactorySymbol === ExecutableFactory.StaticExecutableFactorySymbol;
 }
 
 export function isStructuredMemoryData(v : any) : v is StructuredMemoryData {
@@ -50,6 +54,16 @@ export abstract class ExecutableWithContext implements Executable, HasContextMem
   
   abstract get context(): AbstractMemory;
   abstract execute(): Promise<void>;
+  abstract get meta() : MemoryMetaData | undefined;
+}
+
+export abstract class ExecutableFactory {
+  static StaticExecutableFactorySymbol = Symbol('ExecutableFactory');
+  ExecutableFactorySymbol = ExecutableFactory.StaticExecutableFactorySymbol;
+
+  abstract getNewExecutableWithContext(parentContext : AbstractMemory) : ExecutableWithContext;
+  abstract get meta() : MemoryMetaData | undefined;
+  abstract set meta(m : MemoryMetaData | undefined);
 }
 
 export interface VariableGetter {
@@ -66,12 +80,11 @@ export type MemoryMetaData = {
 }
 
 export interface AbstractMemory extends VariableGetter, VariableSetter {
-  get meta() : MemoryMetaData | undefined;
-  set meta(m : MemoryMetaData | undefined);
+
 }
 
 export interface HasContextMemory {
   get context() : AbstractMemory;
 }
 
-export type ArgType = (string | ExecutableWithContext)[];
+export type ArgType = (string | ExecutableFactory)[];
