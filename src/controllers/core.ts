@@ -35,7 +35,6 @@ export class CommandsWithContext extends ExecutableWithContext {
         await func(packedArguments, this.context);
       } else {
         const possibleCommandFactory = this.context.getVariable(label); // TODO Check if it exists
-        alert(possibleCommandFactory);
         console.log({possibleCommandFactory});
         if (possibleCommandFactory instanceof CommandsWithContextFactory && possibleCommandFactory.meta?.type == "command") {
           // Set variables
