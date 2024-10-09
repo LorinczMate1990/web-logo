@@ -70,8 +70,8 @@ export default class CoreCommands {
     /**
      * usage: learn commandName param1 param2 param3 ... paramN { code block }
      */
-    if (args.length <= 1) throw Error("I have to create a custom error for this. And decorators");
-    if (typeof (args[args.length-1]) === "string") throw Error("The last parameter is string")
+    if (args.length <= 1) throw Error("Learn needs at least 2 parameters");
+    if (typeof (args[args.length-1]) === "string") throw Error("The last parameter of learn must be a codeblock")
     for (let i=0; i<args.length-1; ++i) {
       if (typeof args[i] !== "string") throw new Error("I have to create a custom error for this");
     }

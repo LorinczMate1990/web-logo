@@ -36,23 +36,23 @@ export class CommandsWithContext extends ExecutableWithContext {
       } else {
         const possibleCommandFactory = this.context.getVariable(label); // TODO Check if it exists
         console.log({possibleCommandFactory});
-        if (possibleCommandFactory instanceof CommandsWithContextFactory && possibleCommandFactory.meta?.type == "command") {
+        if (possibleCommandFactory instanceof CommandsWithContextFactory) {
           // Set variables
           // Check the numbers! This dialect doesn't support variable argument list
           const possibleCommand = possibleCommandFactory.getNewExecutableWithContext(this.context);
-          if (possibleCommand.meta == undefined) {
-            throw new Error("This is an impossible case, the command factory returned with a command without meta");
-          }
-          const numOfArguments = packedArguments.length;
-          if (possibleCommand.meta.arguments.length != numOfArguments) throw Error("TODO : Custom Error"); // TODO
-          
-          for (let i = 0; i < numOfArguments; ++i) {
-            const commandArgumentName = possibleCommand.meta.arguments[i];
-            possibleCommand.context.setVariable(commandArgumentName, packedArguments[i]);
+          if (possibleCommand.meta != undefined) { // If it has no meta, it can't accept any argument, it's just an inline codeblock
+            const numOfArguments = packedArguments.length;
+            if (possibleCommand.meta.arguments.length != numOfArguments) throw Error("TODO : Custom Error"); // TODO
+            
+            for (let i = 0; i < numOfArguments; ++i) {
+              const commandArgumentName = possibleCommand.meta.arguments[i];
+              possibleCommand.context.setVariable(commandArgumentName, packedArguments[i]);
+            }
           }
           await possibleCommand.execute(); // TODO This is terrible, because every instances the command is executed share the same memory. These kind of executables in the memory should be just a factory, not the executables themselfs
         } else {
-          throw new Error("Command not found"); // TODO Custom error
+          console.log({possibleCommandFactory});
+          throw new Error(`Command '${label}' not found`); // TODO Custom error
         }
       }
     }
