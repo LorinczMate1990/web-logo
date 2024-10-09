@@ -95,7 +95,7 @@ export default class CoreCommands {
     console.log({args})
     const condition = numericEval(args[0], memory);
     const trueBranchFactory = args[1] as ExecutableFactory;
-    const falseBranchFactory = (args.length == 3)? args[1] as ExecutableFactory : undefined; 
+    const falseBranchFactory = (args.length == 3)? args[2] as ExecutableFactory : undefined; 
 
     const trueBranch = trueBranchFactory.getNewExecutableWithContext(memory);
     const falseBranch = falseBranchFactory?.getNewExecutableWithContext(memory);

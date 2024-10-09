@@ -123,7 +123,7 @@ export function numericEval(expression: string, memory: VariableGetter): number 
       if (isOperator(token)) {
         const a = stack.pop();
         const b = stack.pop();
-        if (a === undefined || b === undefined) throw new Error("Invalid expression");
+        if (a === undefined || b === undefined) throw new Error(`Invalid expression. Polish form stack: ${tokens}`);
         switch (token) {
           case "+": stack.push(a + b); break;
           case "-": stack.push(a - b); break;
