@@ -38,9 +38,10 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const result = await executeCommand(input);
-
-    if (result.accepted && result.response) {
+    let result;
+    result = await executeCommand(input); // TODO How to catch this exception?
+    
+    if (result && result.accepted && result.response) {
       setResponses([...responses, { ...result }]);
       setHistory([...history, input]);
       setHistoryIndex(history.length + 1);
