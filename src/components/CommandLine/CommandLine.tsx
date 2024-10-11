@@ -77,7 +77,11 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
     <div className="commandLineContainer">
       <div className="responseContainer" style={{ maxHeight: maxHeight }}>
         {responses.map((res, index) => (
-          <p key={index} className={`response ${res.error ? 'responseError' : ''}`}>
+          <p
+            key={index}
+            className={`response ${res.error ? 'responseError' : ''}`}
+            style={{ backgroundColor: index % 2 === 0 ? '#000000' : '#404040' }} // Alternating background colors
+          >
             {formatResponse(res.response || '')}
           </p>
         ))}
