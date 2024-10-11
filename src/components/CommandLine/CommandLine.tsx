@@ -92,13 +92,19 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
         setInput(history[newIndex] || '');
       }
     } else if (e.key === 'ArrowDown') {
-      if (historyIndex < history.length-1) {
-        // Navigate down in history
-        setHistoryIndex(historyIndex + 1);
-        setInput(history[historyIndex + 1]);
-      } else {
-        // After the last history entry, restore the last edited command
-        setInput(lastEditedCommand);
+      const textarea = e.target as HTMLTextAreaElement;
+      const cursorPosition = textarea.selectionStart;
+      const linesAfterCursor = input.slice(cursorPosition).split('\n').length;
+
+      if (linesAfterCursor === 1) {
+        if (historyIndex < history.length-1) {
+          // Navigate down in history
+          setHistoryIndex(historyIndex + 1);
+          setInput(history[historyIndex + 1]);
+        } else {
+          // After the last history entry, restore the last edited command
+          setInput(lastEditedCommand);
+        }
       }
     }
   };
