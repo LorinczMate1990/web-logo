@@ -119,7 +119,7 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
   const formatResponse = (response: string) => {
     return response.split('\n').map((line, index) => (
       <React.Fragment key={index}>
-        {line}
+        {line.replaceAll(" ", '\u00A0')}
         <br />
       </React.Fragment>
     ));
