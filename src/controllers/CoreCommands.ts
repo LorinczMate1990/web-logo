@@ -45,6 +45,56 @@ export default class CoreCommands {
     });
   }
 
+  static async penUp(args: ArgType, memory : AbstractMemory) {
+    turtleCommandPubSub.publish({
+      topic: "turtleCommand",
+      command: "setPenState",
+      penState: 'up'
+    });
+  }
+
+  static async penDown(args: ArgType, memory : AbstractMemory) {
+    turtleCommandPubSub.publish({
+      topic: "turtleCommand",
+      command: "setPenState",
+      penState: 'down'
+    });
+  }
+
+  static async setPenColor(args: ArgType, memory : AbstractMemory) {
+    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this");
+    turtleCommandPubSub.publish({
+      topic: "turtleCommand",
+      command: "setPenColor",
+      color: args[0],
+    });
+  }
+
+  static async setPenWidth(args: ArgType, memory : AbstractMemory) {
+    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this");
+    const width = parseFloat(args[0]);
+    if (isNaN(width)) throw new Error("The width has invalid format");
+    
+    turtleCommandPubSub.publish({
+      topic: "turtleCommand",
+      command: "setPenWidth",
+      width,
+    });
+  }
+
+  static async goHome(args: ArgType, memory : AbstractMemory) {
+    turtleCommandPubSub.publish({
+      topic: "turtleCommand",
+      command: "goHome",
+    });
+  }
+  
+  static async setHome(args: ArgType, memory : AbstractMemory) {
+    // TODO
+  }
+
+  // Program control
+
   static async repeat(args: ArgType, memory : AbstractMemory) {
     if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
     const repeatNumber = numericEval(args[0], memory);

@@ -15,6 +15,12 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory
   "rep": CoreCommands.repeat,
   "learn": CoreCommands.learn,
   "if": CoreCommands.conditionalBranching,
+  "penup": CoreCommands.penUp,
+  "pendown": CoreCommands.penDown,
+  "pencolor": CoreCommands.setPenColor,
+  "penwidth": CoreCommands.setPenWidth,
+  "home": CoreCommands.goHome,
+  "sethome": CoreCommands.setHome,
 };
 
 export default BuiltinDictionary;

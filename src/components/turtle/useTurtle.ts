@@ -24,12 +24,35 @@ export default function useTurtle(context : CanvasRenderingContext2D | null) {
 		const instance = turtleInstance.current;
 		console.log("Message received: ", message, instance);
     if (instance === undefined) return;
-		switch (message.command) {
-			case "forward": instance.go(message.distance); break;
-			case "backward": instance.go(-message.distance); break;
-			case "left": instance.rotate(message.radian); break;
-			case "right": instance.rotate(-message.radian); break;
-		}
+	switch (message.command) {
+		case "forward":
+		  instance.go(message.distance);
+		  break;
+		case "backward":
+		  instance.go(-message.distance);
+		  break;
+		case "left":
+		  instance.rotate(message.radian);
+		  break;
+		case "right":
+		  instance.rotate(-message.radian);
+		  break;
+		case "setPenState":
+		  instance.setPenState(message.penState);
+		  break;
+		case "setPenColor":
+		  instance.setPenColor(message.color);
+		  break;
+		case "setPenWidth":
+		  instance.setPenWidth(message.width);
+		  break;
+		case "goHome":
+		  instance.goHome();
+		  break;
+		case "setHome":
+		  instance.setHome(message.x, message.y, message.orientation);
+		  break;
+	  }
 		setGraphTurtle({
       x : instance.position.x,
       y : instance.position.y,
