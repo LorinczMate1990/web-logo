@@ -221,23 +221,3 @@ learn fractal deep len {
 
 fractal 5 100;
 ```
-
-And here is a more complex fractal:
-
-```
-learn lineFractal length depth {
-    if depth {
-        side length/3 depth-1;
-        l 60;
-        side length/3  depth-1;
-        r 120;
-        side length/3  depth-1;
-        l 60;
-        side length/3  depth-1;
-    } {
-        f length;
-    }
-};
-
-
-```

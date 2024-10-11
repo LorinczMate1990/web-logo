@@ -16,11 +16,15 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
   const [input, setInput] = useState<string>('');
   const [history, setHistory] = useState<CommandHistory>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
+  const [lastEditedCommand, setLastEditedCommand] = useState<string>(''); // State for storing last edited command
   const [responses, setResponses] = useState<CommandResponse[]>([]);
   const interpreter = useRef<Interpreter>(new Interpreter());
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
+    const newValue = e.target.value;
+    setHistoryIndex(0);
+    setInput(newValue);
+    setLastEditedCommand(newValue); // Update last edited command whenever the input changes
   };
 
   const executeCommand = async (command: string): Promise<CommandResponse> => {
@@ -64,6 +68,7 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
       const currentIndentLevel = getIndentationLevel(input);
       const newIndentation = ' '.repeat(currentIndentLevel * DEFAULT_INDENT_LEVEL); // 3 spaces per indentation level
       setInput((prevInput) => `${prevInput}\n${newIndentation}`);
+      setLastEditedCommand((prevInput) => `${prevInput}\n${newIndentation}`); // Update last edited command for indentation
     } else if (e.key === '}') {
       // Detect if there are three spaces before the `}` character and delete them
       setInput((prevInput) => {
@@ -75,19 +80,31 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
         }
       });
       e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      const textarea = e.target as HTMLTextAreaElement;
+      const cursorPosition = textarea.selectionStart;
+      const linesBeforeCursor = input.slice(0, cursorPosition).split('\n').length;
+
+      // Only recall the previous command if we are on the first line
+      if (linesBeforeCursor === 1) {
+        const newIndex = Math.max(historyIndex - 1, 0);
+        setHistoryIndex(newIndex);
+        setInput(history[newIndex] || '');
+      }
+    } else if (e.key === 'ArrowDown') {
+      if (historyIndex < history.length-1) {
+        // Navigate down in history
+        setHistoryIndex(historyIndex + 1);
+        setInput(history[historyIndex + 1]);
+      } else {
+        // After the last history entry, restore the last edited command
+        setInput(lastEditedCommand);
+      }
     }
   };
 
   const handleKeyUp = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'ArrowUp') {
-      const newIndex = Math.max(historyIndex - 1, 0);
-      setHistoryIndex(newIndex);
-      setInput(history[newIndex] || '');
-    } else if (e.key === 'ArrowDown') {
-      const newIndex = Math.min(historyIndex + 1, history.length);
-      setHistoryIndex(newIndex);
-      setInput(history[newIndex] || '');
-    }
+
   };
 
   const lineHeight = 20; // Example line height in pixels
