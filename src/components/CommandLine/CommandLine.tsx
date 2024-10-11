@@ -28,7 +28,16 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
   };
 
   const executeCommand = async (command: string): Promise<CommandResponse> => {
+    try {
     await interpreter.current.execute(command);
+    } catch (e) {
+      const error = e as Error;
+      return {
+        accepted: true,
+        error: true,
+        response: `${command}\n\n${error.message}`,
+      };  
+    }
     return {
       accepted: true,
       error: false,

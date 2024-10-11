@@ -10,7 +10,7 @@ class Interpreter {
     console.log("tokens: ", tokens);
     const commandList = tokensToCommandList(tokens);
     console.log("commandList: ", commandList);
-    this.core.executeCommands(commandList);
+    await this.core.executeCommands(commandList);
   }
 }
 
