@@ -225,8 +225,7 @@ fractal 5 100;
 And here is a more complex fractal:
 
 ```
-learn side length depth {
-    f 0;
+learn lineFractal length depth {
     if depth {
         side length/3 depth-1;
         l 60;
@@ -240,5 +239,5 @@ learn side length depth {
     }
 };
 
-side 400 5;
+
 ```
