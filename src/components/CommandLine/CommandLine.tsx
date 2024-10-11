@@ -8,6 +8,8 @@ interface CommandResponse {
   response?: string;
 }
 
+const DEFAULT_INDENT_LEVEL = 3;
+
 type CommandHistory = string[];
 
 const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: number }) => {
@@ -42,10 +44,37 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
     setInput('');
   };
 
+  const getIndentationLevel = (text: string): number => {
+    const lines = text.split('\n');
+    let indentLevel = 0;
+    lines.forEach((line) => {
+      const openBraces = (line.match(/{/g) || []).length;
+      const closeBraces = (line.match(/}/g) || []).length;
+      indentLevel += openBraces - closeBraces;
+    });
+    return Math.max(0, indentLevel);
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>);
+    } else if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault();
+      const currentIndentLevel = getIndentationLevel(input);
+      const newIndentation = ' '.repeat(currentIndentLevel * DEFAULT_INDENT_LEVEL); // 3 spaces per indentation level
+      setInput((prevInput) => `${prevInput}\n${newIndentation}`);
+    } else if (e.key === '}') {
+      // Detect if there are three spaces before the `}` character and delete them
+      setInput((prevInput) => {
+        const lastThreeChars = prevInput.slice(-DEFAULT_INDENT_LEVEL);
+        if (lastThreeChars === '   ') {
+          return prevInput.slice(0, -DEFAULT_INDENT_LEVEL) + '}';
+        } else {
+          return prevInput + '}';
+        }
+      });
+      e.preventDefault();
     }
   };
 
