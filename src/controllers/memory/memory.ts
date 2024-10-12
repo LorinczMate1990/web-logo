@@ -27,7 +27,6 @@ export class Memory implements AbstractMemory {
   }
 
   setVariable(key: string, value: ParamType) { // TODO maybe it exists in parent. I should create a separate declarator
-    console.log("isExecutableFactory: ", {key, isExecutableFactory: isExecutableFactory(value)})
     if (isStructuredVariableName(key)){
       const base = getBaseVariableName(key);
       if (!(base in this.variables)) {

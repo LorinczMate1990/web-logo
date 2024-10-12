@@ -100,7 +100,6 @@ export default class CoreCommands {
     const repeatNumber = numericEval(args[0], memory);
     const cycleCoreFactory = args[1] as ExecutableFactory; // TODO It is?
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext(memory);
-    console.log("Repeat called: ", repeatNumber, cycleCore);
     for (let i=0; i<repeatNumber; ++i) {
       cycleCore.context.setVariable("i", String(i));
       await cycleCore.execute();
@@ -130,7 +129,6 @@ export default class CoreCommands {
     const codeFactory = args[args.length - 1] as ExecutableFactory;
     codeFactory.meta = {type: "command", arguments: argNames};
     memory.setVariable(commandName, codeFactory);
-    console.log("Memory after learn: ", {memory, commandName, codeFactory})
   }
 
   static async conditionalBranching(args: ArgType, memory : AbstractMemory) {
@@ -142,7 +140,6 @@ export default class CoreCommands {
     if (typeof (args[args.length-1]) === "string") throw Error("The last parameter is string");
     if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this");
     
-    console.log({args})
     const condition = numericEval(args[0], memory);
     const trueBranchFactory = args[1] as ExecutableFactory;
     const falseBranchFactory = (args.length == 3)? args[2] as ExecutableFactory : undefined; 
@@ -150,15 +147,10 @@ export default class CoreCommands {
     const trueBranch = trueBranchFactory.getNewExecutableWithContext(memory);
     const falseBranch = falseBranchFactory?.getNewExecutableWithContext(memory);
 
-    console.log({condition})
-    console.log({memory})
-    
     if (condition) {
-      console.log("True branch will be executed")
       await trueBranch.execute();
     } else {
       if (falseBranch) {
-        console.log("False branch will be executed")
         await falseBranch.execute();
       }
     }

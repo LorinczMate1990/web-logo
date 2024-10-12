@@ -25,8 +25,6 @@ export class CommandsWithContext extends ExecutableWithContext {
           //  - A single variable containing a number/string or an Executable
           //  - Some simple string without "
           if (this.context.hasVariable(arg)) {
-            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            console.log("So I found a variable. It is: ", this.context.getVariable(arg), typeof this.context.getVariable(arg));
             return this.context.getVariable(arg);
           } else if (arg[0] == "\"") {
             return stringEval(arg, this.context);
@@ -51,7 +49,6 @@ export class CommandsWithContext extends ExecutableWithContext {
           throw new Error(`Command '${label}' not found`);
         }
         const possibleCommandFactory = this.context.getVariable(label); // TODO Check if it exists
-        console.log({possibleCommandFactory});
         if (possibleCommandFactory instanceof CommandsWithContextFactory) {
           // Set variables
           // Check the numbers! This dialect doesn't support variable argument list
@@ -67,7 +64,6 @@ export class CommandsWithContext extends ExecutableWithContext {
           }
           await possibleCommand.execute(); // TODO This is terrible, because every instances the command is executed share the same memory. These kind of executables in the memory should be just a factory, not the executables themselfs
         } else {
-          console.log({possibleCommandFactory});
           throw new Error(`'${label}' contains '${this.context.getVariable(label)}', not an executable`);
         }
       }

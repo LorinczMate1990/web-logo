@@ -22,7 +22,6 @@ export default function useTurtle(context : CanvasRenderingContext2D | null) {
   }, [context]);
   useSubscriber<TurtleCommandMessage>(turtleCommandPubSub, (message) => {
     const instance = turtleInstance.current;
-    console.log("Message received: ", message, instance);
     if (instance === undefined) return;
     switch (message.command) {
       case "forward":
