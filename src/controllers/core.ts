@@ -37,7 +37,7 @@ export class CommandsWithContext extends ExecutableWithContext {
               return arg
             }
         } else {
-          return new CommandsWithContextFactory(arg);
+          return new CommandsWithContextFactory(arg, this.context);
         }
       });
       // The label can be a built-in command or a command in memory.
@@ -52,7 +52,7 @@ export class CommandsWithContext extends ExecutableWithContext {
         if (possibleCommandFactory instanceof CommandsWithContextFactory) {
           // Set variables
           // Check the numbers! This dialect doesn't support variable argument list
-          const possibleCommand = possibleCommandFactory.getNewExecutableWithContext(this.context);
+          const possibleCommand = possibleCommandFactory.getNewExecutableWithContext();
           if (possibleCommand.meta != undefined) { // If it has no meta, it can't accept any argument, it's just an inline codeblock
             const numOfArguments = packedArguments.length;
             if (possibleCommand.meta.arguments.length != numOfArguments) throw Error("TODO : Custom Error"); // TODO
@@ -73,16 +73,18 @@ export class CommandsWithContext extends ExecutableWithContext {
 
 export class CommandsWithContextFactory extends ExecutableFactory {
   commands : Commands;
+  parentContext : AbstractMemory;
   
-  constructor(commands: Commands) {
+  constructor(commands: Commands, parentContext: AbstractMemory) {
     super();
     this.commands = commands;
+    this.parentContext = parentContext;
   }
   
   meta: MemoryMetaData | undefined;
 
-  getNewExecutableWithContext(parentContext: AbstractMemory): ExecutableWithContext {
-    const newMemory = new Memory(parentContext);
+  getNewExecutableWithContext(): ExecutableWithContext {
+    const newMemory = new Memory(this.parentContext);
     return new CommandsWithContext(this.commands, newMemory, this.meta);
   }
 

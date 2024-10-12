@@ -99,7 +99,7 @@ export default class CoreCommands {
     if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
     const repeatNumber = numericEval(args[0], memory);
     const cycleCoreFactory = args[1] as ExecutableFactory; // TODO It is?
-    const cycleCore = cycleCoreFactory.getNewExecutableWithContext(memory);
+    const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
     for (let i=0; i<repeatNumber; ++i) {
       cycleCore.context.setVariable("i", String(i));
       await cycleCore.execute();
@@ -144,8 +144,8 @@ export default class CoreCommands {
     const trueBranchFactory = args[1] as ExecutableFactory;
     const falseBranchFactory = (args.length == 3)? args[2] as ExecutableFactory : undefined; 
 
-    const trueBranch = trueBranchFactory.getNewExecutableWithContext(memory);
-    const falseBranch = falseBranchFactory?.getNewExecutableWithContext(memory);
+    const trueBranch = trueBranchFactory.getNewExecutableWithContext();
+    const falseBranch = falseBranchFactory?.getNewExecutableWithContext();
 
     if (condition) {
       await trueBranch.execute();

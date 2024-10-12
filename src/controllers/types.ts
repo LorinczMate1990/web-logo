@@ -62,7 +62,7 @@ export abstract class ExecutableFactory {
   static StaticExecutableFactorySymbol = Symbol('ExecutableFactory');
   ExecutableFactorySymbol = ExecutableFactory.StaticExecutableFactorySymbol;
 
-  abstract getNewExecutableWithContext(parentContext : AbstractMemory) : ExecutableWithContext;
+  abstract getNewExecutableWithContext() : ExecutableWithContext;
   abstract get meta() : MemoryMetaData | undefined;
   abstract set meta(m : MemoryMetaData | undefined);
 }
