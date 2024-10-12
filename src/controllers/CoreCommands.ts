@@ -1,13 +1,12 @@
 import { memo } from "react";
 import { turtleCommandPubSub } from "../pubsub/pubsubs";
-import { numericEval } from "./numericEval";
 import { AbstractMemory, ArgType, ExecutableFactory, ExecutableWithContext } from "./types";
 
 export default class CoreCommands {
   // TODO Arguments must be parsed, also I need here the memory
   static async forward(args: ArgType, memory : AbstractMemory) : Promise<void> {
     if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    const distance = numericEval(args[0], memory);
+    const distance = parseFloat(args[0])
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "forward",
@@ -17,7 +16,7 @@ export default class CoreCommands {
 
   static async backward(args: ArgType, memory : AbstractMemory) {
     if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    const distance = numericEval(args[0], memory);
+    const distance = parseFloat(args[0]);
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "backward",
@@ -27,7 +26,7 @@ export default class CoreCommands {
 
   static async left(args: ArgType, memory : AbstractMemory) {
     if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    const radian = numericEval(args[0], memory) / 180.0 * Math.PI;
+    const radian = parseFloat(args[0]) / 180.0 * Math.PI;
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "left",
@@ -37,7 +36,7 @@ export default class CoreCommands {
 
   static async right(args: ArgType, memory : AbstractMemory) {
     if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    const radian = numericEval(args[0], memory) / 180.0 * Math.PI;
+    const radian = parseFloat(args[0]) / 180.0 * Math.PI;
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "right",
@@ -97,7 +96,7 @@ export default class CoreCommands {
 
   static async repeat(args: ArgType, memory : AbstractMemory) {
     if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    const repeatNumber = numericEval(args[0], memory);
+    const repeatNumber = parseFloat(args[0]);
     const cycleCoreFactory = args[1] as ExecutableFactory; // TODO It is?
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
     for (let i=0; i<repeatNumber; ++i) {
@@ -140,7 +139,7 @@ export default class CoreCommands {
     if (typeof (args[args.length-1]) === "string") throw Error("The last parameter is string");
     if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this");
     
-    const condition = numericEval(args[0], memory);
+    const condition = parseFloat(args[0]);
     const trueBranchFactory = args[1] as ExecutableFactory;
     const falseBranchFactory = (args.length == 3)? args[2] as ExecutableFactory : undefined; 
 
@@ -154,5 +153,9 @@ export default class CoreCommands {
         await falseBranch.execute();
       }
     }
+  }
+
+  static async setParameter(arg : ArgType, memory : AbstractMemory) {
+
   }
 }
