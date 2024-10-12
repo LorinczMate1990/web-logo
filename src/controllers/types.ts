@@ -14,6 +14,7 @@ export type WrongfulExecuteResponse = {
 export type ExecuteResponse = WrongfulExecuteResponse | SuccesfulExecuteResponse;
 
 export type ParamType = string | ExecutableFactory | StructuredMemoryData;
+export type ArgType = ParamType[];
 
 export function isParamType(v : any) : v is ParamType {
   return (typeof v === "string" || isExecutableWithContext(v) || isStructuredMemoryData(v));
@@ -68,6 +69,7 @@ export abstract class ExecutableFactory {
 
 export interface VariableGetter {
   getVariable(key : string) : ParamType;
+  hasVariable(key : string) : boolean;
 }
 
 export interface VariableSetter {
@@ -86,5 +88,3 @@ export interface AbstractMemory extends VariableGetter, VariableSetter {
 export interface HasContextMemory {
   get context() : AbstractMemory;
 }
-
-export type ArgType = (string | ExecutableFactory)[];

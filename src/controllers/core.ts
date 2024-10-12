@@ -1,7 +1,7 @@
 import { Commands } from "./CommandList";
 import BuiltinDictionary from "./builtinDicts/english";
 import { Memory } from "./memory/memory";
-import { numericEval } from "./numericEval";
+import { numericEval, stringEval } from "./numericEval";
 import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType } from "./types";
 
 export class CommandsWithContext extends ExecutableWithContext {
@@ -18,13 +18,26 @@ export class CommandsWithContext extends ExecutableWithContext {
     for (let command of this.commands) {
       const label = command.label;
       const packedArguments = command.arguments.map((arg) => {
-        if (typeof arg === "string") { // Maybe this is numeric expression and I have the context to evaluate it right here, so I have to evaluate it.
-          // If I can't evaluate it, I just give it toward as a string, but this is not correct, if it's an expression, I should evaluate it and not otherwise.
-          try {
-            return ""+numericEval(arg, this.context);
-          } catch {
+        if (typeof arg === "string") {
+          // This can be many things:
+          //  - A numeric expression containing numbers and variables
+          //  - A string expression containing a template string
+          //  - A single variable containing a number/string or an Executable
+          //  - Some simple string without "
+          if (this.context.hasVariable(arg)) {
+            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            console.log("So I found a variable. It is: ", this.context.getVariable(arg), typeof this.context.getVariable(arg));
+            return this.context.getVariable(arg);
+          } else if (arg[0] == "\"") {
+            return stringEval(arg, this.context);
+          } else if (arg in BuiltinDictionary) {
             return arg;
-          }
+          } else 
+            try {
+              return ""+numericEval(arg, this.context);
+            } catch {
+              return arg
+            }
         } else {
           return new CommandsWithContextFactory(arg);
         }
@@ -34,6 +47,9 @@ export class CommandsWithContext extends ExecutableWithContext {
         const func = BuiltinDictionary[label];
         await func(packedArguments, this.context);
       } else {
+        if (!this.context.hasVariable(label)) {
+          throw new Error(`Command '${label}' not found`);
+        }
         const possibleCommandFactory = this.context.getVariable(label); // TODO Check if it exists
         console.log({possibleCommandFactory});
         if (possibleCommandFactory instanceof CommandsWithContextFactory) {
@@ -52,7 +68,7 @@ export class CommandsWithContext extends ExecutableWithContext {
           await possibleCommand.execute(); // TODO This is terrible, because every instances the command is executed share the same memory. These kind of executables in the memory should be just a factory, not the executables themselfs
         } else {
           console.log({possibleCommandFactory});
-          throw new Error(`Command '${label}' not found`); // TODO Custom error
+          throw new Error(`'${label}' contains '${this.context.getVariable(label)}', not an executable`);
         }
       }
     }

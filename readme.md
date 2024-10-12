@@ -180,12 +180,12 @@ formRepeater 6 {
 };
 ```
 
-!!! Important: When a command is passed to be executed, the { and } must be used. Without them, the interpreter tries to evaluate the command by converting it to string.
+It is possible to pass a named function to an other function, too. In this case, the function can have parameters.
 
 ```
-learn formRepeater number codeblock {
+learn formRepeater length number form {
     rep number { 
-        codeblock; 
+        form length; 
         l 360/number;
     }
 };
@@ -197,9 +197,7 @@ learn rectangle sideLength {
     }
 };
 
-formRepeater 6 { 
-    rectangle 100
-};
+formRepeater 100 6 rectangle
 ```
 
 ### Recursion

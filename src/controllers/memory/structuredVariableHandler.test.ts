@@ -4,6 +4,9 @@ import { VariableGetter } from '../types';
 describe('Structured Variable Evaluation', () => {
   // Mock the VariableGetter
   const mockGetter: VariableGetter = {
+    hasVariable: (name : string): boolean => {
+      return name in ["foo", "num", "str"];
+    },
     getVariable: (name: string): string => {
       const variables: { [key: string]: string } = {
         'foo': JSON.stringify({ bar: { spam: "42" }, arr: ["1", "2", "3"] }),

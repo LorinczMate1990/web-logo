@@ -55,6 +55,9 @@ describe('numericEval', () => {
   beforeEach(() => {
     // Setup the mock for Memory before each test
     memoryMock = {
+      hasVariable: jest.fn((key: string) => {
+        return key in ["x", "y", "z", "invalid"];
+      }),
       getVariable: jest.fn((key: string) => {
         const variables: { [key: string]: ParamType } = {
           'x': "5",

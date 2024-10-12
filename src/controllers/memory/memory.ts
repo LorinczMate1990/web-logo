@@ -64,6 +64,15 @@ export class Memory implements AbstractMemory {
     }
   }
 
+  hasVariable(key: string): boolean {
+    const structured = isStructuredVariableName(key);
+    let baseName = key;
+    if (structured) {
+      baseName = getBaseVariableName(key);
+    }
+    return baseName in this.variables || (this.parent != undefined && this.parent.hasVariable(baseName));
+  }
+
   getVariable(key: string): ParamType {
     // First of all I have to know if it's structured or not
     const structured = isStructuredVariableName(key);
