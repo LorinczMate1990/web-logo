@@ -211,6 +211,7 @@ Using the custom commands, fractals can be made. Here is a tree fractal:
 ```
 learn fractal deep len { 
     f len; 
+    penwidtg deep
     if deep>0 {
         right 30; 
         fractal deep-1 len/2; 
@@ -223,3 +224,8 @@ learn fractal deep len {
 
 fractal 5 100;
 ```
+
+rep 36 {
+   penup; rep 10 {f 1; l 1;}; pendown;
+   rep 360 { f 0.5; l 1;}
+}

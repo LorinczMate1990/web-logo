@@ -1,12 +1,112 @@
 import { memo } from "react";
 import { turtleCommandPubSub } from "../pubsub/pubsubs";
-import { AbstractMemory, ArgType, ExecutableFactory, ExecutableWithContext } from "./types";
+import { AbstractMemory, ArgType, ExecutableFactory, ExecutableWithContext, isExecutableFactory, ParamType } from "./types";
+import { numericEval, stringEval } from "./numericEval";
+import BuiltinDictionary from "./builtinDicts/english";
+import { CommandsWithContextFactory } from "./core";
+
+/*
+  These must be converted to ParamType which is = string | ExecutableFactory | StructuredMemoryData
+  Rules:
+    * word : will be string, will be handled as a string literal
+    * 
+*/
+
+type PossibleArgumentParsingMethods = 'word' | 'string' | 'numeric' | 'code' | 'variable';
+
+type ArgumentListConstraint = {
+  front?: Set<PossibleArgumentParsingMethods>[],
+  back?: Set<PossibleArgumentParsingMethods>[],
+  default?: Set<PossibleArgumentParsingMethods>,
+  min?: number,
+  max?: number,
+  exact?: number,
+} | PossibleArgumentParsingMethods[];
+
+function Arguments(constraints : ArgumentListConstraint) {
+  return function(
+    target: Object,
+    propertyKey: string | symbol,
+    descriptor: TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory) => Promise<void>>
+  ) : TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory) => Promise<void>> {
+    const originalMethod = descriptor.value!;
+    descriptor.value = async function(args: ArgType, context: AbstractMemory) {
+      if (Array.isArray(constraints)) {
+        const simplifiedConstraints = constraints
+        constraints = {
+          front: [],
+          exact: simplifiedConstraints.length
+        };
+        for (const i of simplifiedConstraints) {
+          constraints.front!.push(new Set([i]));
+        }
+      }
+      let useFrontUntil = constraints.front?.length ?? 0;
+      let useBackAfter = args.length - (constraints.back?.length ?? 0);
+      if (constraints.exact && constraints.exact != args.length) throw new Error(`${String(propertyKey)} must have exactly ${constraints.exact} arguments. (Got ${args.length})`);
+      if (constraints.min && constraints.min > args.length) throw new Error(`${String(propertyKey)} must have at least ${constraints.min} arguments. (Got ${args.length})`);
+      if (constraints.max && constraints.max < args.length) throw new Error(`${String(propertyKey)} must have max ${constraints.max} arguments. (Got ${args.length})`);
+
+      const validatedArgs : ArgType = [];
+      for (let i=0; i<args.length; ++i) {
+        let arg = args[i];
+        let enabledTypes = new Set<PossibleArgumentParsingMethods>();
+        if (constraints.front && i<useFrontUntil) {
+          enabledTypes = constraints.front[i];
+        } else if (constraints.front && i>useBackAfter) {
+          enabledTypes = constraints.front[i-useBackAfter];
+        } else if (constraints.default) {
+          enabledTypes = constraints.default;
+        }
+
+        if (typeof arg === "string") {
+          // This can be many things:
+          //  - A numeric expression containing numbers and variables
+          //  - A string expression containing a template string
+          //  - A single variable containing a number/string or an Executable
+          //
+          if (context.hasVariable(arg) && (enabledTypes.has('variable') || enabledTypes.has('code'))) {
+            // TODO I should check the variable type
+            validatedArgs.push(context.getVariable(arg));
+          } else if (arg[0] == "\"" && enabledTypes.has('string')) {
+            validatedArgs.push(stringEval(arg, context));
+          } else if (arg in BuiltinDictionary && enabledTypes.has('code')) {
+            // TODO This won't even work. I should handle the elements of BuiltinDictionary as any other variable containing a code
+            validatedArgs.push(arg);
+          } else if (enabledTypes.has('numeric')) {
+            try {
+              validatedArgs.push(""+numericEval(arg, context));
+            } catch (e) {
+              throw new Error(`${String(propertyKey)}: Arg ${i} is not a valid numeric expression: ${e}`);
+            }
+          } else {
+            throw new Error(`${String(propertyKey)}: Arg ${i} is not valid. Enabled variables: ${Array.from(enabledTypes).join(", ")}`);
+          }
+        } else {
+          if (enabledTypes.has('code')) {
+            if (isExecutableFactory(arg)) {
+              validatedArgs.push(arg);
+            } else {
+              throw new Error(`The ${i}. input of ${String(propertyKey)} is a memory block, not a code block`);
+            }
+          } else {
+            throw new Error(`The ${i}. input of ${String(propertyKey)} can't be a code block`);
+          }
+        }
+  
+      }
+
+      // Call the original function
+      await originalMethod(validatedArgs, context);
+    };
+    return descriptor;
+  }
+}
 
 export default class CoreCommands {
-  // TODO Arguments must be parsed, also I need here the memory
-  static async forward(args: ArgType, memory : AbstractMemory) : Promise<void> {
-    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    const distance = parseFloat(args[0])
+  @Arguments(['numeric'])
+  static async forward(args: ArgType, memory : AbstractMemory) {
+    const distance = parseFloat(String(args[0]))
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "forward",
@@ -14,9 +114,9 @@ export default class CoreCommands {
     });
   }
 
+  @Arguments(['numeric'])
   static async backward(args: ArgType, memory : AbstractMemory) {
-    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    const distance = parseFloat(args[0]);
+    const distance = parseFloat(String(args[0]));
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "backward",
@@ -24,9 +124,9 @@ export default class CoreCommands {
     });
   }
 
+  @Arguments(['numeric'])
   static async left(args: ArgType, memory : AbstractMemory) {
-    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    const radian = parseFloat(args[0]) / 180.0 * Math.PI;
+    const radian = parseFloat(String(args[0])) / 180.0 * Math.PI;
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "left",
@@ -34,9 +134,9 @@ export default class CoreCommands {
     });
   }
 
+  @Arguments(['numeric'])
   static async right(args: ArgType, memory : AbstractMemory) {
-    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    const radian = parseFloat(args[0]) / 180.0 * Math.PI;
+    const radian = parseFloat(String(args[0])) / 180.0 * Math.PI;
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "right",
@@ -44,6 +144,7 @@ export default class CoreCommands {
     });
   }
 
+  @Arguments([])
   static async penUp(args: ArgType, memory : AbstractMemory) {
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
@@ -52,6 +153,7 @@ export default class CoreCommands {
     });
   }
 
+  @Arguments([])
   static async penDown(args: ArgType, memory : AbstractMemory) {
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
@@ -155,7 +257,6 @@ export default class CoreCommands {
     }
   }
 
-  static async setParameter(arg : ArgType, memory : AbstractMemory) {
-
+  static async setLocalParameter(arg : ArgType, memory : AbstractMemory) {
   }
 }
