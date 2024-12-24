@@ -237,20 +237,9 @@ rep 36 {
 
 ### Nested learning
 
+Learn keywords can be nested. In this case, the nested function can "reuse" the same variables. This is the so-called "shadowing".
+
 ```
-learn foo a b c {
-    repeat a {
-        f b
-        r c
-    }
-
-}
-
-foo 4 50 90
-
-
-
-
 learn foo a b c {
     learn bar a b c {
         repeat a {
@@ -268,4 +257,27 @@ learn foo a b c {
 }
 
 foo 4 50 90
+```
+
+### Using keywords as code parameter
+
+Keywords cannot be used as user-defined functions in an argument list, a wrapper function must be used.
+
+The following code demonstates this. The first call of example will throw an error.
+
+```
+
+learn foo n { f n }
+learn bar n { l n }
+
+learn example go turn {
+    repeat 4 {
+        go 50
+        turn 90
+    }
+}
+
+example f l
+example foo bar
+
 ```

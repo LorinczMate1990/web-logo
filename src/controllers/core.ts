@@ -18,6 +18,7 @@ export class CommandsWithContext extends ExecutableWithContext {
   async execute() {
     for (let command of this.commands) {
       const label = command.label;
+      // TODO This should be done from the ArgumentParser,
       const packedArguments = command.arguments.map((arg) => {
         if (typeof arg === "string") {
           return arg;

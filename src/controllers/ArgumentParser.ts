@@ -43,8 +43,7 @@ export function getProcessedArgumentList(args : ArgType, enabledTypes : Set<Poss
       } else if (arg[0] == "\"" && enabledType.has('string')) {
         validatedArgs.push(stringEval(arg, context));
       } else if (arg in BuiltinDictionary && enabledType.has('code')) {
-        // TODO This won't even work. I should handle the elements of BuiltinDictionary as any other variable containing a code
-        validatedArgs.push(arg);
+        throw new Error(`Arg ${i} seems like a built-in command, but it cannot be used as argument. Use a wrapper function`);
       } else if (enabledType.has('numeric')) {
         try {
           validatedArgs.push(""+numericEval(arg, context));
@@ -70,6 +69,7 @@ export function getProcessedArgumentList(args : ArgType, enabledTypes : Set<Poss
   return validatedArgs;
 }
 
+// This is a decorator
 export function Arguments(constraints : ArgumentListConstraint) {
   return function(
     target: Object,
