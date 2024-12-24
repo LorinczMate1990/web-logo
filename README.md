@@ -134,7 +134,9 @@ if 4 {
 
 ## Functions
 
-The `learn` instruction can create new keywords. These keywords can have a fixed number of parameters. Currently the parameters must be numbers or expressions, custom commands can not execute code blocks.
+The `learn` instruction can create new keywords. These keywords can have a fixed number of parameters. 
+
+In the background, the `learn` keyword defines a new variable that has a codeblock as value, so learns can be nested, and the learned name should not be an already existing parameter (it will be overwritten). The learn keyword has a syntax sugar: its non-last parameters are interpreted as string literals. This means that a learned word can reuse already existing parameter names, and expressions cannot be used.
 
 ### Rectangle as a function
 
@@ -231,4 +233,39 @@ rep 36 {
    penup; rep 10 {f 1; l 1;}; pendown;
    rep 360 { f 0.5; l 1;}
 }
+```
+
+### Nested learning
+
+```
+learn foo a b c {
+    repeat a {
+        f b
+        r c
+    }
+
+}
+
+foo 4 50 90
+
+
+
+
+learn foo a b c {
+    learn bar a b c {
+        repeat a {
+            f b
+            l c
+        }
+    }
+
+    repeat a {
+        bar a b c
+        f b
+        r c
+    }
+
+}
+
+foo 4 50 90
 ```

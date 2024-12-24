@@ -1,4 +1,5 @@
 import { Commands } from "./CommandList";
+import { getProcessedArgumentList, PossibleArgumentParsingMethods } from "./ArgumentParser";
 import BuiltinDictionary from "./builtinDicts/english";
 import { Memory } from "./memory/memory";
 import { numericEval, stringEval } from "./numericEval";
@@ -19,23 +20,7 @@ export class CommandsWithContext extends ExecutableWithContext {
       const label = command.label;
       const packedArguments = command.arguments.map((arg) => {
         if (typeof arg === "string") {
-          // This can be many things:
-          //  - A numeric expression containing numbers and variables
-          //  - A string expression containing a template string
-          //  - A single variable containing a number/string or an Executable
-          //  - Some simple string without "
-          if (this.context.hasVariable(arg)) {
-            return this.context.getVariable(arg);
-          } else if (arg[0] == "\"") {
-            return stringEval(arg, this.context);
-          } else if (arg in BuiltinDictionary) {
-            return arg;
-          } else 
-            try {
-              return ""+numericEval(arg, this.context);
-            } catch {
-              return arg
-            }
+          return arg;
         } else {
           return new CommandsWithContextFactory(arg, this.context);
         }
@@ -55,14 +40,15 @@ export class CommandsWithContext extends ExecutableWithContext {
           const possibleCommand = possibleCommandFactory.getNewExecutableWithContext();
           if (possibleCommand.meta != undefined) { // If it has no meta, it can't accept any argument, it's just an inline codeblock
             const numOfArguments = packedArguments.length;
-            if (possibleCommand.meta.arguments.length != numOfArguments) throw Error("TODO : Custom Error"); // TODO
+            const argTypes = Array.from({ length: packedArguments.length }, () => new Set<PossibleArgumentParsingMethods>(['numeric', 'string', 'code']));
+            const processedArguments = getProcessedArgumentList(packedArguments, argTypes, this.context);
             
             for (let i = 0; i < numOfArguments; ++i) {
               const commandArgumentName = possibleCommand.meta.arguments[i];
-              possibleCommand.context.setVariable(commandArgumentName, packedArguments[i]);
+              possibleCommand.context.setVariable(commandArgumentName, processedArguments[i]);
             }
           }
-          await possibleCommand.execute(); // TODO This is terrible, because every instances the command is executed share the same memory. These kind of executables in the memory should be just a factory, not the executables themselfs
+          await possibleCommand.execute();
         } else {
           throw new Error(`'${label}' contains '${this.context.getVariable(label)}', not an executable`);
         }

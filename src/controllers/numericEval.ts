@@ -143,7 +143,7 @@ export function numericEval(expression: string, memory: VariableGetter): number 
         } else if (typeof variableValue === "string" && isNumeric(variableValue)) {
           stack.push(parseFloat(variableValue));
         } else {
-          throw new Error(`Variable ${token} is not a number.`);
+          throw new Error(`Variable ${token} is not a number. Its value: "${variableValue}"`);
         }
       }
     }
