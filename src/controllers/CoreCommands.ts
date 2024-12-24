@@ -15,13 +15,24 @@ import { CommandsWithContextFactory } from "./core";
 type PossibleArgumentParsingMethods = 'word' | 'string' | 'numeric' | 'code' | 'variable';
 
 type ArgumentListConstraint = {
-  front?: Set<PossibleArgumentParsingMethods>[],
-  back?: Set<PossibleArgumentParsingMethods>[],
-  default?: Set<PossibleArgumentParsingMethods>,
+  front?: (PossibleArgumentParsingMethods | Set<PossibleArgumentParsingMethods>)[],
+  back?: (PossibleArgumentParsingMethods | Set<PossibleArgumentParsingMethods>)[],
+  default?: (PossibleArgumentParsingMethods | Set<PossibleArgumentParsingMethods>),
   min?: number,
   max?: number,
   exact?: number,
 } | PossibleArgumentParsingMethods[];
+
+function isValidWord(possibleWord : string) {
+  return /^\p{L}+\p{N}*$/u.test(possibleWord);
+}
+
+function toSet(a: PossibleArgumentParsingMethods | Set<PossibleArgumentParsingMethods>): Set<PossibleArgumentParsingMethods> {
+  if (typeof a === "string") {
+    return new Set([a]);
+  }
+  return a;
+}
 
 function Arguments(constraints : ArgumentListConstraint) {
   return function(
@@ -42,7 +53,7 @@ function Arguments(constraints : ArgumentListConstraint) {
         }
       }
       let useFrontUntil = constraints.front?.length ?? 0;
-      let useBackAfter = args.length - (constraints.back?.length ?? 0);
+      let useBackAfter = args.length - (constraints.back?.length ?? 0) - 1;
       if (constraints.exact && constraints.exact != args.length) throw new Error(`${String(propertyKey)} must have exactly ${constraints.exact} arguments. (Got ${args.length})`);
       if (constraints.min && constraints.min > args.length) throw new Error(`${String(propertyKey)} must have at least ${constraints.min} arguments. (Got ${args.length})`);
       if (constraints.max && constraints.max < args.length) throw new Error(`${String(propertyKey)} must have max ${constraints.max} arguments. (Got ${args.length})`);
@@ -52,12 +63,17 @@ function Arguments(constraints : ArgumentListConstraint) {
         let arg = args[i];
         let enabledTypes = new Set<PossibleArgumentParsingMethods>();
         if (constraints.front && i<useFrontUntil) {
-          enabledTypes = constraints.front[i];
-        } else if (constraints.front && i>useBackAfter) {
-          enabledTypes = constraints.front[i-useBackAfter];
+          enabledTypes = toSet(constraints.front[i]);
+        } else if (constraints.back && i>useBackAfter) {
+          enabledTypes = toSet(constraints.back[i - useBackAfter - 1]);
         } else if (constraints.default) {
-          enabledTypes = constraints.default;
+          enabledTypes = toSet(constraints.default);
         }
+        if (enabledTypes.has('word') && enabledTypes.size > 1) {
+          // word can't be diferentiated from other things. I could use string here, but currently I won't let it
+          // NOTE: If it is needed, numeric and string can be enabled
+          throw new Error(`Coding error: ${String(propertyKey)} for ${i}. argument lets word and other types`)
+        } 
 
         if (typeof arg === "string") {
           // This can be many things:
@@ -65,7 +81,9 @@ function Arguments(constraints : ArgumentListConstraint) {
           //  - A string expression containing a template string
           //  - A single variable containing a number/string or an Executable
           //
-          if (context.hasVariable(arg) && (enabledTypes.has('variable') || enabledTypes.has('code'))) {
+          if (enabledTypes.has('word') && isValidWord(arg)) {
+            validatedArgs.push(arg);
+          } else if (context.hasVariable(arg) && (enabledTypes.has('variable') || enabledTypes.has('code'))) {
             // TODO I should check the variable type
             validatedArgs.push(context.getVariable(arg));
           } else if (arg[0] == "\"" && enabledTypes.has('string')) {
@@ -90,7 +108,7 @@ function Arguments(constraints : ArgumentListConstraint) {
               throw new Error(`The ${i}. input of ${String(propertyKey)} is a memory block, not a code block`);
             }
           } else {
-            throw new Error(`The ${i}. input of ${String(propertyKey)} can't be a code block`);
+            throw new Error(`The ${i}. input of ${String(propertyKey)} can't be a code block. It can be ${Array.from(enabledTypes).join(", ")}`);
           }
         }
   
@@ -162,18 +180,18 @@ export default class CoreCommands {
     });
   }
 
+  @Arguments(['word'])
   static async setPenColor(args: ArgType, memory : AbstractMemory) {
-    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this");
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "setPenColor",
-      color: args[0],
+      color: String(args[0]),
     });
   }
 
+  @Arguments(['numeric'])
   static async setPenWidth(args: ArgType, memory : AbstractMemory) {
-    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this");
-    const width = parseFloat(args[0]);
+    const width = parseFloat(String(args[0]));
     if (isNaN(width)) throw new Error("The width has invalid format");
     
     turtleCommandPubSub.publish({
@@ -183,6 +201,7 @@ export default class CoreCommands {
     });
   }
 
+  @Arguments([])
   static async goHome(args: ArgType, memory : AbstractMemory) {
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
@@ -190,16 +209,17 @@ export default class CoreCommands {
     });
   }
   
+  @Arguments([])
   static async setHome(args: ArgType, memory : AbstractMemory) {
     // TODO
   }
 
   // Program control
 
+  @Arguments(['numeric', 'code'])
   static async repeat(args: ArgType, memory : AbstractMemory) {
-    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    const repeatNumber = parseFloat(args[0]);
-    const cycleCoreFactory = args[1] as ExecutableFactory; // TODO It is?
+    const repeatNumber = parseFloat(String(args[0]));
+    const cycleCoreFactory = args[1] as ExecutableFactory;
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
     for (let i=0; i<repeatNumber; ++i) {
       cycleCore.context.setVariable("i", String(i));
@@ -207,24 +227,17 @@ export default class CoreCommands {
     }
   }
 
+  @Arguments({exact: 2, front: ['numeric', new Set(['code', 'numeric', 'string'])]})
   static async createVar(args: ArgType, memory : AbstractMemory) {
-    if (args.length == 2 || args.length == 3) throw new Error("I have to create a custom error for this"); 
-    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    if (typeof args[1] !== "string") throw new Error("I have to create a custom error for this"); // TODO decorator?
-    
-    // TODO : args[1] can be string or ExecutableWithContext, both are valid. But I have to create decorators, this is out of hand
-    //memory.setVariable(arg[0])
+    // TODO: args[1] can be too many things and I can't make proper difference between them,
+    // I need typed createVar-s
   }
 
+  @Arguments({min: 2, back: ['code'], default: 'word'})
   static async learn(args: ArgType, memory : AbstractMemory) {
     /**
      * usage: learn commandName param1 param2 param3 ... paramN { code block }
      */
-    if (args.length <= 1) throw Error("Learn needs at least 2 parameters");
-    if (typeof (args[args.length-1]) === "string") throw Error("The last parameter of learn must be a codeblock")
-    for (let i=0; i<args.length-1; ++i) {
-      if (typeof args[i] !== "string") throw new Error("I have to create a custom error for this");
-    }
     const commandName = args[0] as string;
     const argNames = args.slice(1, args.length-1) as string[];
     const codeFactory = args[args.length - 1] as ExecutableFactory;
@@ -232,16 +245,12 @@ export default class CoreCommands {
     memory.setVariable(commandName, codeFactory);
   }
 
+  @Arguments({min: 2, max: 3, front: ['numeric', 'code', 'code']})
   static async conditionalBranching(args: ArgType, memory : AbstractMemory) {
     /**
      * usage: if condition { code block if true} { code block if false }
      */
-    if (args.length != 2 && args.length != 3) throw Error("I have to create a custom error for this. And decorators");
-    if (typeof (args[1]) === "string") throw Error("The second parameter is string");
-    if (typeof (args[args.length-1]) === "string") throw Error("The last parameter is string");
-    if (typeof args[0] !== "string") throw new Error("I have to create a custom error for this");
-    
-    const condition = parseFloat(args[0]);
+    const condition = parseFloat(String(args[0]));
     const trueBranchFactory = args[1] as ExecutableFactory;
     const falseBranchFactory = (args.length == 3)? args[2] as ExecutableFactory : undefined; 
 
@@ -256,6 +265,7 @@ export default class CoreCommands {
       }
     }
   }
+
 
   static async setLocalParameter(arg : ArgType, memory : AbstractMemory) {
   }
