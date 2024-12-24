@@ -1,6 +1,6 @@
 import React, { useState, KeyboardEvent, useRef } from 'react';
 import './CommandLine.css'; // Import the CSS file
-import Interpreter from '../../controllers/Interpreter';
+import { Interpreter } from 'web-logo-core';
 
 interface CommandResponse {
   accepted: boolean;

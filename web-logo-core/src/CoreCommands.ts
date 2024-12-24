@@ -1,5 +1,4 @@
-import { memo } from "react";
-import { turtleCommandPubSub } from "../pubsub/pubsubs";
+import { turtleCommandPubSub } from "./pubsub/pubsubs";
 import { AbstractMemory, ArgType, ExecutableFactory, ExecutableWithContext, isExecutableFactory, ParamType } from "./types";
 import { numericEval, stringEval } from "./numericEval";
 import BuiltinDictionary from "./builtinDicts/english";

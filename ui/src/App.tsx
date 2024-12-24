@@ -1,7 +1,7 @@
 import React from 'react';
 import DrawingCanvas from './components/DrawingCanvas';
 import Turtle from './components/turtle/Turtle';
-import { turtleCommandPubSub } from './pubsub/pubsubs';
+import { turtleCommandPubSub } from 'web-logo-core';
 import CommandLine from './components/CommandLine/CommandLine';
 
 function App() {

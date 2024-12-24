@@ -2,8 +2,6 @@ import PubSub, { Subscribe } from "typesafe-bus";
 import { TurtleCommandMessage, } from "./types";
 import { useEffect } from "react";
 
-export const turtleCommandPubSub = new PubSub<TurtleCommandMessage>();
-
 // TODO Should be exported from pubsub
 type Callback<Message> = (message: Message) => void | boolean | Promise<void> | Promise<boolean>;
 

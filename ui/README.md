@@ -259,7 +259,7 @@ learn foo a b c {
 foo 4 50 90
 ```
 
-### Using keywords as code parameter
+### Using keywords as input parameter
 
 Keywords cannot be used as user-defined functions in an argument list, a wrapper function must be used.
 
