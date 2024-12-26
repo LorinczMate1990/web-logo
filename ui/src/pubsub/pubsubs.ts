@@ -1,5 +1,4 @@
-import PubSub, { Subscribe } from "typesafe-bus";
-import { TurtleCommandMessage, } from "./types";
+import { Subscribe } from "typesafe-bus";
 import { useEffect } from "react";
 
 // TODO Should be exported from pubsub

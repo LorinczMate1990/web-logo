@@ -1,17 +1,10 @@
-type Position = {
-  x: number;
-  y: number;
-};
-
-type Orientation = number; // Orientation is now just a number (radians)
-
-export type PenState = 'up' | 'down';
+import { PenState, Orientation, Position } from "web-logo-core";
 
 class TurtleInstance {
   name: string;
   group: string;
   position: Position;
-  orientation: Orientation; // Now just a number
+  orientation: Orientation;
   drawingProperties: {
     penState: PenState;
     penColor: string;

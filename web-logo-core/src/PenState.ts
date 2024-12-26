@@ -1,1 +1,0 @@
-export type PenState = 'up' | 'down';

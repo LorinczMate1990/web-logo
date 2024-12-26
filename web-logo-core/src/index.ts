@@ -1,5 +1,10 @@
 import Interpreter from './Interpreter';
-import { PenState } from './PenState';
+import { PenState, Orientation, Position } from './turtle-types/PenState';
 import { turtleCommandPubSub } from "./pubsub/pubsubs";
 
-export { Interpreter, turtleCommandPubSub };
+export { Interpreter, 
+    turtleCommandPubSub,
+    PenState,
+    Orientation,
+    Position,
+};

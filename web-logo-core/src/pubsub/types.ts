@@ -1,4 +1,4 @@
-import { PenState } from "../PenState";
+import { PenState } from "../turtle-types/PenState";
 
 type MoveMessage = {
   topic: "turtleCommand";
