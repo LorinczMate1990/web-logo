@@ -47,6 +47,41 @@ describe('tokenize', () => {
     expect(result).toEqual(['var_1', '+', 'var_2', '*', '3']);
   });
 
+  it('handles structured variables without expressions', () => {
+    const result = tokenize('a[23].b+c');
+    expect(result).toEqual(['a[23].b', '+', 'c']);
+  });
+
+  it('handles structured variables', () => {
+    const result = tokenize('a[23+34].b+c');
+    expect(result).toEqual(['a[23+34].b', '+', 'c']);
+  });
+
+  it('handles structured variables with spaces', () => {
+    const result = tokenize('a[23 + 34].b+c');
+    expect(result).toEqual(['a[23 + 34].b', '+', 'c']);
+  });
+
+  it('handles structured variables - 2', () => {
+    const result = tokenize('a[23 + 34]+c');
+    expect(result).toEqual(['a[23 + 34]', '+', 'c']);
+  });
+
+  it('handles structured variables - 3', () => {
+    const result = tokenize('a[23 + 34][ddd]+c');
+    expect(result).toEqual(['a[23 + 34][ddd]', '+', 'c']);
+  });
+
+  it('handles structured variables - 4', () => {
+    const result = tokenize('a[23 + 34] [ddd]+c');
+    expect(result).toEqual(['a[23 + 34]', '[ddd]', '+', 'c']);
+  });
+
+  it('handles structured variables with nested indexing', () => {
+    const result = tokenize('a[23 + b[3]] [ddd]+c');
+    expect(result).toEqual(['a[23 + b[3]]', '[ddd]', '+', 'c']);
+  });
+
 });
 
 describe('numericEval', () => {
