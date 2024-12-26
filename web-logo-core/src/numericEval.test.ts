@@ -1,5 +1,5 @@
 import { ParamType, VariableGetter } from './types';
-import { numericEval, tokenize } from './numericEval';
+import { evaluateVariableName, numericEval, tokenize } from './numericEval';
 
 describe('tokenize', () => {
   it('handles negative numbers', () => {
@@ -191,7 +191,71 @@ describe('numericEval', () => {
     expect(numericEval('(x+y)*2', memoryMock)).toEqual(30);
     expect(numericEval('3+(x*(2+y))', memoryMock)).toEqual(63);
   });
+});
 
+describe('evaluateVariableName', () => {
+  const mockGetter: VariableGetter = {
+    hasVariable: (name : string): boolean => {
+      return name in ["foo", "num", "str", "foo.arr[0]"];
+    },
+    getVariable: (name: string): string => {
+      const variables: { [key: string]: string } = {
+        'foo': JSON.stringify({ bar: { spam: "42" }, arr: ["1", "2", "3"] }),
+        'num': '5',
+        'str': 'hello',
+        'foo.arr[0]': '1'
+      };
+      return variables[name] || "";
+    }
+  };
 
-  // Add more tests as needed...
+  it('evaluates static variable name', () => {
+    expect(evaluateVariableName('foo.bar.spam', mockGetter)).toBe('foo.bar.spam');
+  });
+
+  it('evaluates expressions within [ and ] variable name', () => {
+    expect(evaluateVariableName('foo.arr[ 1 ]', mockGetter)).toBe('foo.arr[1]');
+    expect(evaluateVariableName('foo.arr[ 1 + 1 ]', mockGetter)).toBe('foo.arr[2]');
+  });
+
+  it('evaluates nested indexing', () => {
+    expect(evaluateVariableName('foo.arr[ foo.arr[0] ]', mockGetter)).toBe('foo.arr[1]');
+  });
+
+  it('evaluates < > and [ ] expressions', () => {
+    expect(evaluateVariableName('<str>.length', mockGetter)).toBe('hello.length'); // Example assuming simple substitution
+    expect(evaluateVariableName('arr[num]', mockGetter)).toBe('arr[5]'); // Example mixing both types
+  });
+});
+
+describe('Handle structured variables', () => {
+  const mockGetter: VariableGetter = {
+    hasVariable: (name : string): boolean => {
+      return true;
+    },
+    getVariable: (name: string): string => {
+      const variables: { [key: string]: string } = {
+        'foo.bar.spam': "42",
+        'foo.arr[0]': "1",
+        'foo.arr[1][1]': "100"
+      };
+      return variables[name] || `Received: ${name}`;
+    }
+  };
+
+  it('Reach simple fields - 1', () => {
+    expect(numericEval('foo.bar.spam', mockGetter)).toEqual(42);
+  });
+  it('Reach simple fields - 2', () => {
+    expect(numericEval('foo.arr[0]', mockGetter)).toEqual(1);
+  });
+  it('Reach simple fields - 3', () => {
+    expect(numericEval('foo.arr[1][1]', mockGetter)).toEqual(100);
+  });
+  it('Reach fields based on expression - 1', () => {
+    expect(numericEval('foo.arr[32-31][1]', mockGetter)).toEqual(100);
+  });
+  it('Reach fields based on nested indexing', () => {
+    expect(numericEval('foo.arr[foo.arr[0]][1]', mockGetter)).toEqual(100);
+  });
 });

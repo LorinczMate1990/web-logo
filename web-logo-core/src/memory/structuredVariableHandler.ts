@@ -11,27 +11,6 @@ export function getBaseVariableName(variablePath: string): string {
   return match ? match[0] : variablePath;
 }
 
-export function evaluateVariableName(name: string, getter: VariableGetter): string {
-  const re = /\[.*?]|<.*?>/g; // Regular expression to find expressions within [] and <>
-  return name.replace(re, (match) => {
-    if (match.startsWith('[')) {
-      // Handle numeric expression
-      const expression = match.slice(1, -1); // Remove the brackets
-      const result = numericEval(expression, getter); // Assuming numericEval is synchronous
-      return `[${result}]`; // Preserving brackets as per requirement
-    } else if (match.startsWith('<')) {
-      // Handle simple variable substitution
-      const varName = match.slice(1, -1); // Remove the angle brackets
-      const varValue = getter.getVariable(varName);
-      if (typeof varValue !== 'string') {
-        throw new Error(`Variable ${varName} is not a string.`);
-      }
-      return varValue;
-    }
-    return ''; // Default case, should not be reached
-  });
-}
-
 export function getDataMember(variablePath: string, variable: object): string {
   // Split the variablePath into parts to handle dot and bracket notations
   const parts = variablePath.split(/\.|\[|\]/).filter(Boolean);

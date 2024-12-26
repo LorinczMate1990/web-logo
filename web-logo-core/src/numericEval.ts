@@ -1,3 +1,4 @@
+import { isStructuredVariableName } from "./memory/structuredVariableHandler";
 import { VariableGetter } from "./types";
 
 // Helper function to determine if a string is numeric
@@ -66,6 +67,8 @@ function pretokenize(expression: string): string[] {
   if (currentToken !== '') {
       tokens.push(currentToken);
   }
+
+  console.log({tokens})
 
   // Check for unclosed brackets
   if (bracketDepth !== 0) {
@@ -197,7 +200,8 @@ export function numericEval(expression: string, memory: VariableGetter): number 
       } else if (isNumeric(token)) {
         stack.push(parseFloat(token));
       } else {
-        const variableValue = memory.getVariable(token);
+        const variableName = evaluateVariableName(token, memory);
+        const variableValue = memory.getVariable(variableName);
         if (typeof variableValue === "number") {
           stack.push(variableValue);
         } else if (typeof variableValue === "string" && isNumeric(variableValue)) {
@@ -205,6 +209,7 @@ export function numericEval(expression: string, memory: VariableGetter): number 
         } else {
           throw new Error(`Variable ${token} is not a number. Its value: "${variableValue}"`);
         }
+        
       }
     }
     if (stack.length !== 1) throw new Error("Invalid expression");
@@ -212,4 +217,57 @@ export function numericEval(expression: string, memory: VariableGetter): number 
   }
 
   return evaluate(polishNotation);
+}
+
+// TODO: I don't like this function, it's very complex
+// I also hate that the [ and ] logic is implemented at least twice (pretokenize is the other part)
+export function evaluateVariableName(name: string, getter: VariableGetter): string {
+
+  const re = /<.*?>/g; // Regular expression to find expressions within <>. We don't handle nested < and >
+  const firstStage = name.replace(re, (match) => {
+    if (match.startsWith('<')) {
+      // Handle simple variable substitution
+      const varName = match.slice(1, -1); // Remove the angle brackets
+      const varValue = getter.getVariable(varName);
+      if (typeof varValue !== 'string') {
+        throw new Error(`Variable ${varName} is not a string.`);
+      }
+      return varValue;
+    }
+    return ''; // Default case, should not be reached
+  });
+
+  const parts : string[] = [];
+  let part = "";
+  let bracketCounter = 0;
+  for (let char of firstStage) {
+    if (char == ']') {
+      bracketCounter--;
+      if (bracketCounter == 0) {
+        parts.push(part);
+        part = "";
+      }
+    }
+    if (char == '[') {
+      if (bracketCounter == 0) {
+        parts.push(part+"[");
+        part = "";
+        char = "";
+      }
+      bracketCounter++;
+    }
+    part += char;
+  }
+  parts.push(part);
+
+  let result = parts[0];
+  // Every second part is between two upper-level []
+  // Also there must be odd number of parts. (The upper level closing bracket is a new part)
+  for (let i=1; i<parts.length; i+=2) {
+    result += String(numericEval(parts[i], getter));
+    result += parts[i+1];
+  }
+
+  return result;
+
 }

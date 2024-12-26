@@ -1,4 +1,4 @@
-import { evaluateVariableName, getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from './structuredVariableHandler'; // Adjust the import path based on your project structure
+import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from './structuredVariableHandler'; // Adjust the import path based on your project structure
 import { VariableGetter } from '../types';
 
 describe('Structured Variable Evaluation', () => {
@@ -25,21 +25,6 @@ describe('Structured Variable Evaluation', () => {
     });
   });
 
-  describe('evaluateVariableName', () => {
-    it('evaluates static variable name', () => {
-      expect(evaluateVariableName('foo.bar.spam', mockGetter)).toBe('foo.bar.spam');
-    });
-
-    it('evaluates expressions within [ and ] variable name', () => {
-      expect(evaluateVariableName('foo.arr[ 1 ]', mockGetter)).toBe('foo.arr[1]');
-      expect(evaluateVariableName('foo.arr[ 1 + 1 ]', mockGetter)).toBe('foo.arr[2]');
-    });
-
-    it('evaluates < > and [ ] expressions', () => {
-      expect(evaluateVariableName('<str>.length', mockGetter)).toBe('hello.length'); // Example assuming simple substitution
-      expect(evaluateVariableName('arr[num]', mockGetter)).toBe('arr[5]'); // Example mixing both types
-    });
-  });
   describe('getBaseVariableName', () => {
     it('extracts the base name from a simple variable', () => {
       expect(getBaseVariableName('variable')).toBe('variable');
