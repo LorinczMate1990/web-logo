@@ -5,7 +5,7 @@ function isNumeric(str: string): boolean {
   return !isNaN(str as any) && !isNaN(parseFloat(str));
 }
 
-const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|'];
+const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|', '!'];
 
 function isOperator(c: string): boolean {
   return operators.includes(c);
@@ -14,6 +14,8 @@ function isOperator(c: string): boolean {
 // Returns the precedence of an operator
 function precedence(op: string): number {
   switch (op) {
+    case '!':
+      return 6;
     case '&':
     case '|':
       return 7;
@@ -120,19 +122,30 @@ export function numericEval(expression: string, memory: VariableGetter): number 
       const token = tokens[i];
       if (isOperator(token)) {
         const a = stack.pop();
-        const b = stack.pop();
-        if (a === undefined || b === undefined) throw new Error(`Invalid expression. Polish form stack: ${tokens}`);
-        switch (token) {
-          case "+": stack.push(a + b); break;
-          case "-": stack.push(a - b); break;
-          case "*": stack.push(a * b); break;
-          case "/": stack.push(a / b); break;
-          case "=": stack.push(Number(a == b)); break;
-          case ">": stack.push(Number(a > b)); break;
-          case "<": stack.push(Number(a < b)); break;
-          case "&": stack.push(Number(a && b)); break;
-          case "|": stack.push(Number(a || b)); break;
-          
+        if (stack.length === 0) {
+          if (a==undefined) throw new Error(`Invalid expression. Polish form stack: ${tokens}`);
+          switch (token) {
+            case "+": stack.push(a); break;
+            case "-": stack.push(-a); break;
+            case "!": stack.push((a == 0)?1:0); break;
+            default: throw new Error(`Invalid expression. Unhandled prefix operator: ${token}`);
+          }
+        } else {
+          const b = stack.pop();
+          if (a === undefined || b === undefined) throw new Error(`This exception is impossible, check the core logic itself. Polish form stack: ${tokens}`);
+          switch (token) {
+            case "+": stack.push(a + b); break;
+            case "-": stack.push(a - b); break;
+            case "*": stack.push(a * b); break;
+            case "/": stack.push(a / b); break;
+            case "=": stack.push(Number(a == b)); break;
+            case ">": stack.push(Number(a > b)); break;
+            case "<": stack.push(Number(a < b)); break;
+            case "&": stack.push(Number(a && b)); break;
+            case "|": stack.push(Number(a || b)); break;
+            default: throw new Error(`Invalid expression. Unhandled infix operator: ${token}`);
+            
+          }
         }
       } else if (isNumeric(token)) {
         stack.push(parseFloat(token));

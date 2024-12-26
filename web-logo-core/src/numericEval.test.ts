@@ -74,8 +74,20 @@ describe('numericEval', () => {
     expect(numericEval('4', memoryMock)).toEqual(4);
   }); 
 
+  it('evaluates constant positive expression', () => {
+    expect(numericEval('+4', memoryMock)).toEqual(4);
+  }); 
+
   it('evaluates constant negative expression', () => {
     expect(numericEval('-4', memoryMock)).toEqual(-4);
+  }); 
+
+  it('evaluates positive and negative signs', () => {
+    expect(numericEval('--++--++--++--++4', memoryMock)).toEqual(4);
+  }); 
+
+  it('evaluates positive and negative signs - 2', () => {
+    expect(numericEval('--+-+--++--++--++4', memoryMock)).toEqual(-4);
   }); 
 
   it('evaluates constant real number', () => {
@@ -89,6 +101,14 @@ describe('numericEval', () => {
   it('evaluates constant expression with space', () => {
     expect(numericEval('   4  ', memoryMock)).toEqual(4);
   });
+
+  it('evaluates logical negation', () => {
+    expect(numericEval('!4', memoryMock)).toEqual(0);
+  }); 
+
+  it('evaluates double logical negation', () => {
+    expect(numericEval('!!4', memoryMock)).toEqual(1);
+  }); 
 
   // Test case for simple arithmetic without variables
   it('evaluates simple arithmetic expressions', () => {

@@ -12,7 +12,6 @@ describe('Memory', () => {
     const mem = new Memory(undefined);
     mem.setVariable('structured', new StructuredMemoryData({ some: 'data' })); // Assuming this is how you intended structured data to be set
     const retrived = mem.getVariable('structured');
-    console.log({retrived})
     expect(retrived).toEqual(new StructuredMemoryData({ some: 'data' }));
   });
 
@@ -42,9 +41,6 @@ describe('Memory', () => {
     const child = new Memory(parent);
     child.setVariable('sharedKey', 'childValue');
     expect(child.getVariable('sharedKey')).toBe('childValue');
-  });
-
-  it.skip('sets and retrieves executable with context', () => {
   });
 
   it('sets and retrieves structured variables via complex paths', () => {
