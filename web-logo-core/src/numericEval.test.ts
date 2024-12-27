@@ -168,7 +168,7 @@ describe('numericEval', () => {
 
   // Test case for handling invalid variable values
   it('throws an error for invalid variable values', () => {
-    expect(() => numericEval('invalid + 5', memoryMock)).toThrow('Variable invalid is not a number.');
+    expect(() => numericEval('invalid + 5', memoryMock)).toThrow('+ needs numeric input but received not a number');
   });
 
   // Test case for nested expressions
@@ -260,13 +260,16 @@ describe('Handle structured variables', () => {
   });
 });
 
-describe.only('Handle builtin functions', () => {
+describe('Handle builtin functions', () => {
   const mockGetter: VariableGetter = {
     hasVariable: (name : string): boolean => {
-      return false;
+      return name in ['foo'];
     },
     getVariable: (name: string): string => {
-      return "0";
+      if (name == "foo") {
+        return "[1,2,3]";
+      }
+      return "";
     }
   };
 
@@ -286,8 +289,16 @@ describe.only('Handle builtin functions', () => {
     expect(numericEval('vecsize(2+1, 2*2)', mockGetter)).toEqual(5);
   });
 
-  it.only('Function on multiple arguments (with complex expressions)', () => {
+  it('Function on multiple arguments (with complex expressions)', () => {
     expect(numericEval('vecsize(2+1*1, 2*(1+1))', mockGetter)).toEqual(5);
+  });
+
+  it('Function on multiple arguments and additional operations', () => {
+    expect(numericEval('1+(1+1)+vecsize(2+1*1, 2*(1+1))+1+(1+1*1)', mockGetter)).toEqual(11);
+  });
+
+  it('Function over array variables', () => {
+    expect(numericEval('length(foo)', mockGetter)).toEqual(3);
   });
 
 });

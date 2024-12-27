@@ -1,3 +1,4 @@
+import { parse } from "path";
 import { VariableGetter } from "./types";
 
 // Helper function to determine if a string is numeric
@@ -7,10 +8,10 @@ function isNumeric(str: string): boolean {
 
 const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|', '!'];
 
-const builtinFunctions : {[key: string]: {params: number, function: (a:number[]) => number}} = {
-  "vecsize": {params: 2, function: (a:number[]) => Math.sqrt(a[0]*a[0] + a[1]*a[1])},
-  'abs': {params: 1, function: (a: number[]) => Math.abs(a[0])},
-  'length': {params: 1, function: (a: number[]) => JSON.parse("{}").length},
+const builtinFunctions : {[key: string]: {params: number, function: (a:string[]) => number}} = {
+  "vecsize": {params: 2, function: (a:string[]) => Math.sqrt(Math.pow(parseFloat(a[0]), 2) + Math.pow(parseFloat(a[1]), 2))},
+  'abs': {params: 1, function: (a: string[]) => Math.abs(parseFloat(a[0]))},
+  'length': {params: 1, function: (a: string[]) => JSON.parse(a[0]).length},
 }
 
 function isOperator(c: string): boolean {
@@ -171,12 +172,13 @@ export function numericEval(expression: string, memory: VariableGetter): number 
   const polishNotation = toPolishNotation(expression);
 
   function evaluate(tokens: string[]): number {
-    const stack: number[] = [];
+    const stack: (number | string)[] = [];
 
     for (let i = tokens.length - 1; i >= 0; i--) {
       const token = tokens[i];
       if (isOperator(token)) {
-        const a = stack.pop();
+        let a = stack.pop();
+        if (typeof a !== "number") throw new Error(`${token} needs numeric input but received ${a}`);
         if (stack.length === 0) {
           if (a==undefined) throw new Error(`Invalid expression. Polish form stack: ${tokens}`);
           switch (token) {
@@ -187,6 +189,7 @@ export function numericEval(expression: string, memory: VariableGetter): number 
           }
         } else {
           const b = stack.pop();
+          if (typeof b !== "number") throw new Error(`${token} needs numeric input but received ${a} and ${b}`);
           if (a === undefined || b === undefined) throw new Error(`This exception is impossible, check the core logic itself. Polish form stack: ${tokens}`);
           switch (token) {
             case "+": stack.push(a + b); break;
@@ -204,11 +207,11 @@ export function numericEval(expression: string, memory: VariableGetter): number 
         }
       } else if (token in builtinFunctions) {
         const func = builtinFunctions[token];
-        const params : number[] = [];
+        const params : string[] = [];
         for (let i=0; i<func.params; ++i) {
           const param = stack.pop();
           if (param === undefined) throw new Error("Invalid expression at builtin function");
-          params.push(param);
+          params.push(String(param));
         }
         stack.push(func.function(params));
       } else if (isNumeric(token)) {
@@ -218,8 +221,10 @@ export function numericEval(expression: string, memory: VariableGetter): number 
         const variableValue = memory.getVariable(variableName);
         if (typeof variableValue === "number") {
           stack.push(variableValue);
-        } else if (typeof variableValue === "string" && isNumeric(variableValue)) {
+        } else if (typeof variableValue === "string" && isNumeric(variableValue)) { // TODO : The numeric and non-numeric variables should have different metatype. This is errorprone
           stack.push(parseFloat(variableValue));
+        } else if (typeof variableValue === "string") {
+          stack.push(variableValue);
         } else {
           throw new Error(`Variable ${token} is not a number. Its value: "${variableValue}"`);
         }
@@ -227,6 +232,7 @@ export function numericEval(expression: string, memory: VariableGetter): number 
       }
     }
     if (stack.length !== 1) throw new Error("Invalid expression");
+    if (typeof stack[0] !== "number") throw new Error(`The expression is not numeric`);
     return stack[0];
   }
 
