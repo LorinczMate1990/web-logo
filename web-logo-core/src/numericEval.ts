@@ -219,20 +219,17 @@ export function numericEval(expression: string, memory: VariableGetter): number 
       } else {
         const variableName = evaluateVariableName(token, memory);
         const variableValue = memory.getVariable(variableName);
-        if (typeof variableValue === "number") {
-          stack.push(variableValue);
-        } else if (typeof variableValue === "string" && isNumeric(variableValue)) { // TODO : The numeric and non-numeric variables should have different metatype. This is errorprone
-          stack.push(parseFloat(variableValue));
-        } else if (typeof variableValue === "string") {
+        if (typeof variableValue === "number" || typeof variableValue === "string") {
           stack.push(variableValue);
         } else {
-          throw new Error(`Variable ${token} is not a number. Its value: "${variableValue}"`);
+          throw new Error(`Variable ${token} is not a number or string. Its value: "${variableValue}"`);
         }
         
       }
     }
     if (stack.length !== 1) throw new Error("Invalid expression");
-    if (typeof stack[0] !== "number") throw new Error(`The expression is not numeric`);
+    if (typeof stack[0] !== "number" && !isNumeric(stack[0])) throw new Error(`The expression is not numeric`);
+    if (typeof stack[0] !== "number") stack[0] = parseFloat(stack[0]);
     return stack[0];
   }
 

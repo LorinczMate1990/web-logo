@@ -95,9 +95,9 @@ describe('numericEval', () => {
       }),
       getVariable: jest.fn((key: string) => {
         const variables: { [key: string]: ParamType } = {
-          'x': "5",
-          'y': "10",
-          'z': "15", // Example of string that is a valid number
+          'x': 5,
+          'y': 10,
+          'z': 15, // Example of string that is a valid number
           'invalid': "not a number" // Example of invalid variable value
         };
         return variables[key];
@@ -198,12 +198,12 @@ describe('evaluateVariableName', () => {
     hasVariable: (name : string): boolean => {
       return name in ["foo", "num", "str", "foo.arr[0]"];
     },
-    getVariable: (name: string): string => {
-      const variables: { [key: string]: string } = {
+    getVariable: (name: string): ParamType => {
+      const variables: { [key: string]: ParamType } = {
         'foo': JSON.stringify({ bar: { spam: "42" }, arr: ["1", "2", "3"] }),
-        'num': '5',
+        'num': 5,
         'str': 'hello',
-        'foo.arr[0]': '1'
+        'foo.arr[0]': 1
       };
       return variables[name] || "";
     }

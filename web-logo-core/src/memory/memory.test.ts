@@ -1,5 +1,5 @@
 import { Memory } from './memory'; // Adjust the import path accordingly
-import { ExecutableWithContext, ParamType, StructuredMemoryData } from '../types'; // Adjust the import path based on your project structure
+import { StructuredMemoryData } from '../types'; // Adjust the import path based on your project structure
 
 describe('Memory', () => {
   it('sets and retrieves a simple string variable', () => {

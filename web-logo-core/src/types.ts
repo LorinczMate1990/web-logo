@@ -13,11 +13,11 @@ export type WrongfulExecuteResponse = {
 
 export type ExecuteResponse = WrongfulExecuteResponse | SuccesfulExecuteResponse;
 
-export type ParamType = string | ExecutableFactory | StructuredMemoryData;
+export type ParamType = number | string | ExecutableFactory | StructuredMemoryData;
 export type ArgType = ParamType[];
 
 export function isParamType(v : any) : v is ParamType {
-  return (typeof v === "string" || isExecutableWithContext(v) || isStructuredMemoryData(v));
+  return (typeof v === "number" || typeof v === "string" || isExecutableWithContext(v) || isStructuredMemoryData(v));
 }
 
 export function isExecutableWithContext(v : any) : v is ExecutableWithContext {

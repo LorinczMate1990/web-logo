@@ -1,5 +1,5 @@
 import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from './structuredVariableHandler'; // Adjust the import path based on your project structure
-import { VariableGetter } from '../types';
+import { ParamType, VariableGetter } from '../types';
 
 describe('Structured Variable Evaluation', () => {
   // Mock the VariableGetter
@@ -7,10 +7,10 @@ describe('Structured Variable Evaluation', () => {
     hasVariable: (name : string): boolean => {
       return name in ["foo", "num", "str"];
     },
-    getVariable: (name: string): string => {
-      const variables: { [key: string]: string } = {
+    getVariable: (name: string): ParamType => {
+      const variables: { [key: string]: ParamType } = {
         'foo': JSON.stringify({ bar: { spam: "42" }, arr: ["1", "2", "3"] }),
-        'num': '5',
+        'num': 5,
         'str': 'hello'
       };
       return variables[name] || "";
