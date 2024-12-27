@@ -259,3 +259,35 @@ describe('Handle structured variables', () => {
     expect(numericEval('foo.arr[foo.arr[0]][1]', mockGetter)).toEqual(100);
   });
 });
+
+describe.only('Handle builtin functions', () => {
+  const mockGetter: VariableGetter = {
+    hasVariable: (name : string): boolean => {
+      return false;
+    },
+    getVariable: (name: string): string => {
+      return "0";
+    }
+  };
+
+  it('Function on simple number', () => {
+    expect(numericEval('abs(-3)', mockGetter)).toEqual(3);
+  });
+  
+  it('Function on multiple arguments', () => {
+    expect(numericEval('vecsize(3,4)', mockGetter)).toEqual(5);
+  });
+
+  it('Function on multiple arguments and spaces', () => {
+    expect(numericEval('vecsize(  3  , 4  )', mockGetter)).toEqual(5);
+  });
+
+  it('Function on multiple arguments (with expressions)', () => {
+    expect(numericEval('vecsize(2+1, 2*2)', mockGetter)).toEqual(5);
+  });
+
+  it.only('Function on multiple arguments (with complex expressions)', () => {
+    expect(numericEval('vecsize(2+1*1, 2*(1+1))', mockGetter)).toEqual(5);
+  });
+
+});

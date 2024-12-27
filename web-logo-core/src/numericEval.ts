@@ -1,4 +1,3 @@
-import { isStructuredVariableName } from "./memory/structuredVariableHandler";
 import { VariableGetter } from "./types";
 
 // Helper function to determine if a string is numeric
@@ -7,6 +6,12 @@ function isNumeric(str: string): boolean {
 }
 
 const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|', '!'];
+
+const builtinFunctions : {[key: string]: {params: number, function: (a:number[]) => number}} = {
+  "vecsize": {params: 2, function: (a:number[]) => Math.sqrt(a[0]*a[0] + a[1]*a[1])},
+  'abs': {params: 1, function: (a: number[]) => Math.abs(a[0])},
+  'length': {params: 1, function: (a: number[]) => JSON.parse("{}").length},
+}
 
 function isOperator(c: string): boolean {
   return operators.includes(c);
@@ -68,8 +73,6 @@ function pretokenize(expression: string): string[] {
       tokens.push(currentToken);
   }
 
-  console.log({tokens})
-
   // Check for unclosed brackets
   if (bracketDepth !== 0) {
       throw new Error(`Unclosed opening bracket '['. Remaining depth: ${bracketDepth}`);
@@ -79,7 +82,7 @@ function pretokenize(expression: string): string[] {
 }
 
 export function tokenize(expression: string): string[] {
-  const atomicTokens = new Set([...operators, '(', ')']);
+  const atomicTokens = new Set([...operators, '(', ')', ',']);
   const isAtomicToken = (char: string) => atomicTokens.has(char);
 
   // Pretokenization: Split at whitespaces
@@ -131,16 +134,18 @@ function toPolishNotation(infix: string): string[] {
         outputQueue.push(operatorStack.pop()!);
       }
       operatorStack.push(token);
-    } else if (token === ')') {
+    }else if (token === ')') {
       operatorStack.push(token);
-    } else if (token === '(') {
+    } else if (token === '(' || token === ',') {
       while (operatorStack[operatorStack.length - 1] !== ')') {
         outputQueue.push(operatorStack.pop()!);
         if (operatorStack.length === 0) {
           throw new Error('Mismatched parentheses');
         }
       }
-      operatorStack.pop(); // Remove the ')'
+      if (token === '(') {
+        operatorStack.pop(); // Remove the ')'
+      }
     } else {
       // Assuming the token is a number or variable
       outputQueue.push(token);
@@ -197,6 +202,15 @@ export function numericEval(expression: string, memory: VariableGetter): number 
             
           }
         }
+      } else if (token in builtinFunctions) {
+        const func = builtinFunctions[token];
+        const params : number[] = [];
+        for (let i=0; i<func.params; ++i) {
+          const param = stack.pop();
+          if (param === undefined) throw new Error("Invalid expression at builtin function");
+          params.push(param);
+        }
+        stack.push(func.function(params));
       } else if (isNumeric(token)) {
         stack.push(parseFloat(token));
       } else {
