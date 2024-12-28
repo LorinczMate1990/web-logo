@@ -17,7 +17,12 @@ type CodeMemoryCell = {
   value: ExecutableFactory,
 }
 
-type MemoryCell = StringMemoryCell | StructMemoryCell | CodeMemoryCell;
+type NumericMemoryCell = {
+  type: "numeric",
+  value: number,
+}
+
+type MemoryCell = NumericMemoryCell | StringMemoryCell | StructMemoryCell | CodeMemoryCell;
 
 export class Memory implements AbstractMemory {
   parent?: AbstractMemory;
@@ -50,6 +55,11 @@ export class Memory implements AbstractMemory {
           type: "string",
           value,
         }
+      } else if (typeof value === "number") {
+          this.variables[key] = {
+            type: "numeric",
+            value,
+          }
       } else if (isExecutableFactory(value)) {
         this.variables[key] = {
           type: "code",
@@ -102,7 +112,7 @@ export class Memory implements AbstractMemory {
         const memoryCell = this.variables[key];
         if (memoryCell.type === "struct") {
           return new StructuredMemoryData(memoryCell.value);
-        } else if (memoryCell.type === "string") {
+        } else if (memoryCell.type === "string" || memoryCell.type === "numeric") {
           return memoryCell.value;
         } else if (memoryCell.type === "code") {
           return memoryCell.value;
