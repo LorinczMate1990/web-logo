@@ -17,10 +17,25 @@ export class UnclosedBracketError extends LogoSyntaxError {
     }
 }
 
+export class UnclosedSquareBracketError extends LogoSyntaxError {
+    constructor(lineNumber : number) {
+        super(`Unclosed square bracket in line ${lineNumber}`);
+        this.lineNumber = lineNumber;
+    }
+}
+
 export class UnclosedBraceletError extends LogoSyntaxError {
     constructor(lineNumber : number) {
         super(`Unclosed bracelet in line ${lineNumber}`);
         this.lineNumber = lineNumber;
+    }
+}
+
+export class TooManyClosingSquareBracketError extends LogoSyntaxError {
+    constructor(lineNumber : number, charNumber : number) {
+        super(`Too many closing square bracket at ${lineNumber} at ${charNumber}`);
+        this.lineNumber = lineNumber;
+        this.charNumber = charNumber;
     }
 }
 

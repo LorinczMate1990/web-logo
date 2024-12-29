@@ -1,4 +1,4 @@
-import { TooManyClosingBraceletError, TooManyClosingBracketError, UnclosedBraceletError, UnclosedBracketError } from "./errors";
+import { TooManyClosingBraceletError, TooManyClosingBracketError, TooManyClosingSquareBracketError, UnclosedBraceletError, UnclosedBracketError, UnclosedSquareBracketError } from "./errors";
 
 export class Token {
   lineNumber : number;
@@ -37,6 +37,9 @@ export function tokenizer(command: string): Token[] {
   let currentToken: Token = new Token("", lineCounter, charCounter);
   let braketCounter = 0;
   let braceletCounter = 0;
+  let squareBraketCounter = 0;
+  let previousEnvironment : "string" | "braket" | "squareBraket" | "none" = "none"; 
+  let currentEnvironment : "string" | "braket" | "squareBraket" | "none" = "none";
 
   function startNewToken() {
     tokens.push(currentToken);
@@ -46,12 +49,25 @@ export function tokenizer(command: string): Token[] {
   for (let i = 0; i < command.length; ++i) {
     charCounter++;
     const c = command[i];
-    if (c == " " && braketCounter == 0) {
+    if (currentEnvironment == "string") {
+      currentToken.push(c);
+      if (c=="\"" && i>0 && command[i-1] != "\\") {
+        currentEnvironment = previousEnvironment;
+        if (currentEnvironment == "none") {
+          startNewToken();
+        }
+      }
+    } else if (c=="\"") {
+      previousEnvironment = currentEnvironment;
+      currentEnvironment = "string";
+      currentToken.push(c);
+    } else if (c == " " && braketCounter == 0 && squareBraketCounter==0) {
       startNewToken();
     } else if (c == "\n") {
       charCounter = 0;
       lineCounter += 1;
       if (braketCounter > 0) throw new UnclosedBracketError(lineCounter);
+      if (squareBraketCounter > 0) throw new UnclosedSquareBracketError(lineCounter);
       startNewToken();
       currentToken = new Token("\n", lineCounter, charCounter);;
       startNewToken();
@@ -59,18 +75,34 @@ export function tokenizer(command: string): Token[] {
       startNewToken();
       currentToken = new Token("\n", lineCounter, charCounter);;
       startNewToken();
+    } else if (c == "[") {
+      if (currentEnvironment == "none") currentEnvironment = "squareBraket";
+      squareBraketCounter++;
+      currentToken.push(c);
+    } else if (c == "]") {
+      squareBraketCounter--;
+      if (squareBraketCounter < 0) throw new TooManyClosingSquareBracketError(lineCounter, charCounter);
+      currentToken.push(c);
+      if (squareBraketCounter == 0 && currentEnvironment == "squareBraket") {
+        currentEnvironment = "none";
+        startNewToken();
+      }
     } else if (c == "(") {
+      if (currentEnvironment == "none") currentEnvironment = "braket";
       braketCounter++;
-      if (braketCounter > 1) {
+      if (braketCounter > 1 || currentEnvironment != "braket") {
         currentToken.push(c);
       }
     } else if (c == ")") {
       braketCounter--;
       if (braketCounter < 0) throw new TooManyClosingBracketError(lineCounter, charCounter);
-      if (braketCounter > 0) currentToken.push(c);
-      if (braketCounter == 0) startNewToken();
+      if (braketCounter > 0 || currentEnvironment != "braket") currentToken.push(c);
+      if (braketCounter == 0 && currentEnvironment == "braket") {
+        currentEnvironment = "none";
+        startNewToken();
+      }
     } else if (c == "{" || c == "}") {
-      if (braketCounter == 0) {
+      if (braketCounter == 0 && squareBraketCounter == 0) {
         if (c == "{") {
           braceletCounter++;
         } else {
@@ -89,7 +121,8 @@ export function tokenizer(command: string): Token[] {
   }
   startNewToken();
   if (braketCounter > 0) throw new UnclosedBracketError(lineCounter);
-  if (braketCounter > 0) throw new UnclosedBraceletError(lineCounter);
+  if (squareBraketCounter > 0) throw new UnclosedSquareBracketError(lineCounter);
+  if (braceletCounter > 0) throw new UnclosedBraceletError(lineCounter);
   return filterTokens(tokens);
 }
 

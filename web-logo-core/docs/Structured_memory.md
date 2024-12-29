@@ -18,6 +18,7 @@ Strings are arrays containing numbers. The `'<chr>` form must be also handled, b
 So the following two arrays are the same: `[65, 66, 67]` and `"abc"`.
 
 The elements of arrays can be any expressions, they can hold other arrays or anything.
+The array form can not be used in an expression, it can be used only as a parameter.
 
 ### Supporting structs
 
@@ -28,6 +29,12 @@ Named structs are important, but WebLogo won't support struct literals. Structs 
 ### Strong types
 
 The memory must be strongly typed: It must have numeric cell type.
+Was done @ bde85efdafadbe0226adf019020c27649265277e
+
+### Tokenization
+
+The content between " " or [ ] must be handled as a single token, like the content between ( and )
+Except the outer [ and ] must be kept. Maybe it is a design flaw that the Tokeinzer removes the outer ( and ).
 
 ### numericEval -> genericEval
 

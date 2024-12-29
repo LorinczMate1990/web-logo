@@ -76,6 +76,34 @@ describe('tokenizer', () => {
     expect(tokenizer('command3 (nested (brackets))').map(t => t.val)).toEqual(['command3', 'nested (brackets)']);
   });
 
+  // Test for handling spaces within square brackets
+  it('should include spaces in tokens within square brackets', () => {
+    expect(tokenizer('command2 [arg with spaces]').map(t => t.val)).toEqual(['command2', '[arg with spaces]']);
+  });
+
+  // Test for handling nested square brackets
+  it('should handle nested square brackets correctly', () => {
+    expect(tokenizer('command3 [nested (brackets)]').map(t => t.val)).toEqual(['command3', '[nested (brackets)]']);
+  });
+
+  describe('double quotes', () => {
+    it('should ignore escaped double quotes', () => {
+      expect(tokenizer('command3 "ddd\\"ddd"').map(t => t.val)).toEqual(['command3', '"ddd\\"ddd"']);
+    });
+
+    it('should handle double quotes with any content', () => {
+      expect(tokenizer('command3 "[nested (brackets)] [ddd]"').map(t => t.val)).toEqual(['command3', '"[nested (brackets)] [ddd]"']);
+    });
+
+    it('should handle double quotes inside of a braket', () => {
+      expect(tokenizer('command3 (dd, wdw, "okodk")').map(t => t.val)).toEqual(['command3', 'dd, wdw, "okodk"']);
+    });
+
+    it('should handle double quotes inside of a square braket', () => {
+      expect(tokenizer('command3 [dd, wdw, "okodk"]').map(t => t.val)).toEqual(['command3', '[dd, wdw, "okodk"]']);
+    });
+  });
+
   // Test for handling curly braces
   it('should tokenize curly braces as separate tokens when not in brackets', () => {
     expect(tokenizer('command4 { arg1 arg2 }').map(t => t.val)).toEqual(['command4', '{', 'arg1', 'arg2', '}']);
