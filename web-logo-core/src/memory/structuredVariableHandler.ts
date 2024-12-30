@@ -1,6 +1,3 @@
-import { numericEval } from "../numericEval";
-import { AbstractMemory, ParamType, VariableGetter, VariableSetter } from "../types";
-
 export function isStructuredVariableName(name: string): boolean {
   return name.includes('.') || name.includes('[') || name.includes(']');
 }

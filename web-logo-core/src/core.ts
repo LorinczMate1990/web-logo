@@ -2,8 +2,7 @@ import { Commands } from "./CommandList";
 import { getProcessedArgumentList, PossibleArgumentParsingMethods } from "./ArgumentParser";
 import BuiltinDictionary from "./builtinDicts/english";
 import { Memory } from "./memory/memory";
-import { numericEval, stringEval } from "./numericEval";
-import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType } from "./types";
+import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData } from "./types";
 
 export class CommandsWithContext extends ExecutableWithContext {
   commands : Commands;

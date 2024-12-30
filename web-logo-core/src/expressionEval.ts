@@ -1,21 +1,53 @@
 import { parse } from "path";
-import { VariableGetter } from "./types";
+import { ArgType, isStructuredMemoryData, ParamType, StructuredMemoryData, VariableGetter } from "./types";
+import exp from "constants";
 
 // Helper function to determine if a string is numeric
 function isNumeric(str: string): boolean {
   return !isNaN(str as any) && !isNaN(parseFloat(str));
 }
 
+function assertMustBeNumber(op : string, input : ParamType): asserts input is number {
+  if (typeof input !== 'number') throw new Error(`Invalid expression. ${op} needs number but got ${input} (${typeof input})`);
+}
+
+function assertMustBeStructuredMemoryDataWithArrayContent(op : string, input : ParamType): asserts input is StructuredMemoryData & { data: ParamType[] }{
+  if (!isStructuredMemoryData(input) || !Array.isArray(input.data) )  throw new Error(`Invalid expression. ${op} needs array but got ${input} (${typeof input})`);
+}
+
 const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|', '!'];
 
-const builtinFunctions : {[key: string]: {params: number, function: (a:string[]) => number}} = {
-  "vecsize": {params: 2, function: (a:string[]) => Math.sqrt(Math.pow(parseFloat(a[0]), 2) + Math.pow(parseFloat(a[1]), 2))},
-  'abs': {params: 1, function: (a: string[]) => Math.abs(parseFloat(a[0]))},
-  'length': {params: 1, function: (a: string[]) => JSON.parse(a[0]).length},
+const builtinFunctions : {[key: string]: {params: number, function: (a:ParamType[]) => ParamType}} = {
+  "vecsize": {
+    params: 2, 
+    function: (a:ParamType[]) => {
+      assertMustBeNumber("vecsize", a[0]);
+      assertMustBeNumber("vecsize", a[1]);
+      return Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2))
+    }
+  },
+  'abs': {
+    params: 1, 
+    function: (a: ParamType[]) => {
+      assertMustBeNumber("abs", a[0]); 
+      return Math.abs(a[0]);
+    }
+  },
+  'length': {
+    params: 1, 
+    function: (a: ParamType[]) => {
+      assertMustBeStructuredMemoryDataWithArrayContent("length", a[0]);
+      return a[0].data.length;
+    }
+  },
 }
 
 function isOperator(c: string): boolean {
   return operators.includes(c);
+}
+
+function isStrictlyUnaryOperator(c: string): boolean {
+  return c == '!';
 }
 
 // Returns the precedence of an operator
@@ -38,6 +70,70 @@ function precedence(op: string): number {
       return 10;
     default:
       return 0;
+  }
+}
+
+function executeUnaryOperator(op : string, input? : ParamType) : ParamType {
+  if (input === undefined) throw new Error(`Invalid expression. Polish form is empty.`);
+  assertMustBeNumber(op, input);
+  switch(op) {
+    case "+": return input;
+    case "-": return -input;
+    case "!": return (input == 0)?1:0;
+    default: throw new Error(`Invalid expression. Unhandled prefix operator: ${op}`);
+  }
+}
+
+function executeBinaryOperator(op : string, a? : ParamType, b? : ParamType) : ParamType {
+  if (a == undefined || b == undefined) throw new Error(`Invalid expression. Polish form is empty.`);
+  switch (op) {
+    case "+": {
+      assertMustBeNumber(op, a);
+      assertMustBeNumber(op, b);
+      return a+b;
+    }
+    case "-":{
+      assertMustBeNumber(op, a);
+      assertMustBeNumber(op, b);
+      return a-b;
+    }
+    case "*": {
+      assertMustBeNumber(op, a);
+      assertMustBeNumber(op, b);
+      return a*b;
+    }
+    case "/": {
+      assertMustBeNumber(op, a);
+      assertMustBeNumber(op, b);
+      return a/b;
+    }
+    case "=": {
+      assertMustBeNumber(op, a);
+      assertMustBeNumber(op, b);
+      return Number(a==b);
+    }
+    case ">":{
+      assertMustBeNumber(op, a);
+      assertMustBeNumber(op, b);
+      return Number(a>b);
+    }
+    case "<": {
+      assertMustBeNumber(op, a);
+      assertMustBeNumber(op, b);
+      return Number(a<b);
+    }
+    case "&": {
+      assertMustBeNumber(op, a);
+      assertMustBeNumber(op, b);
+      return Number(a != 0 && b != 0)
+    };
+    case "|": {
+      assertMustBeNumber(op, a);
+      assertMustBeNumber(op, b);
+      return Number(a != 0 || b != 0);
+    }
+    default: throw new Error(`Invalid expression. Unhandled infix operator: ${op}`);
+    
   }
 }
 
@@ -163,55 +259,86 @@ function toPolishNotation(infix: string): string[] {
   return outputQueue.reverse();
 }
 
-export function stringEval(expression : string, memory : VariableGetter) : string {
+
+export function expressionEval(expression: string, memory: VariableGetter): ParamType {
+  expression = expression.trim();
+  if (expression[0] == '[') {
+    // Have to split on , when they are not inside of a ( ) or nested [ ] or " "
+    const elements = splitArrayToElements(expression.slice(1, expression.length-1));
+    console.log("elements: ", elements, expression, expression.slice(1, expression.length-1))
+    let resultArray = new StructuredMemoryData([]);
+    for (const element of elements) {
+      const evaluatedElement = expressionEval(element, memory);
+      (resultArray.data as ParamType[]).push(evaluatedElement);
+      console.log(`value of ${element}: ${evaluatedElement}`)
+    }
+    return resultArray;
+  } else {
+    return genericEval(expression, memory);
+  }
+}
+
+function splitArrayToElements(array : string) : string[] {
+  const elements : string[] = [];
+  const environmentStack : string[] = []; // TODO Similar aproach would be better for tokenizer
+  let inString = false;
+  let currentElement = "";
+  for (let i=0; i<array.length; ++i) {
+    const c = array[i];
+    const pc = (i>0)?array[i-1]:"";
+
+    if (!inString && (c == "(" || c=="[")) {
+      environmentStack.push(c);
+    }
+    if (!inString && (c == ")" || c=="]")) {
+      environmentStack.pop(); // Could be tested if the correct is closed, but the tokenizer already did that
+    }
+    if (!inString && c == "\"") {
+      inString=true;
+    }
+    if (inString && c=="\"" && pc!="\\") {
+      inString=false;
+    }
+    if (!inString && environmentStack.length == 0 && c==",") {
+      elements.push(currentElement);
+      currentElement = "";
+    } else {
+      currentElement += c;
+    }
+    
+  }
+  elements.push(currentElement);
+  return elements;
+}
+
+function stringEval(expression : string, memory : VariableGetter) : string {
   return expression; // TODO
 }
 
-export function numericEval(expression: string, memory: VariableGetter): number {
+function genericEval(expression: string, memory: VariableGetter): ParamType {
   // Convert to Polish notation first (placeholder implementation)
   const polishNotation = toPolishNotation(expression);
 
-  function evaluate(tokens: string[]): number {
-    const stack: (number | string)[] = [];
+  function evaluate(tokens: string[]): ParamType {
+    const stack: ParamType[] = [];
 
     for (let i = tokens.length - 1; i >= 0; i--) {
       const token = tokens[i];
       if (isOperator(token)) {
         let a = stack.pop();
-        if (typeof a !== "number") throw new Error(`${token} needs numeric input but received ${a}`);
-        if (stack.length === 0) {
-          if (a==undefined) throw new Error(`Invalid expression. Polish form stack: ${tokens}`);
-          switch (token) {
-            case "+": stack.push(a); break;
-            case "-": stack.push(-a); break;
-            case "!": stack.push((a == 0)?1:0); break;
-            default: throw new Error(`Invalid expression. Unhandled prefix operator: ${token}`);
-          }
+        if (stack.length === 0 || isStrictlyUnaryOperator(token)) {
+          stack.push(executeUnaryOperator(token, a));
         } else {
           const b = stack.pop();
-          if (typeof b !== "number") throw new Error(`${token} needs numeric input but received ${a} and ${b}`);
-          if (a === undefined || b === undefined) throw new Error(`This exception is impossible, check the core logic itself. Polish form stack: ${tokens}`);
-          switch (token) {
-            case "+": stack.push(a + b); break;
-            case "-": stack.push(a - b); break;
-            case "*": stack.push(a * b); break;
-            case "/": stack.push(a / b); break;
-            case "=": stack.push(Number(a == b)); break;
-            case ">": stack.push(Number(a > b)); break;
-            case "<": stack.push(Number(a < b)); break;
-            case "&": stack.push(Number(a && b)); break;
-            case "|": stack.push(Number(a || b)); break;
-            default: throw new Error(`Invalid expression. Unhandled infix operator: ${token}`);
-            
-          }
+          stack.push(executeBinaryOperator(token, a, b));
         }
       } else if (token in builtinFunctions) {
         const func = builtinFunctions[token];
-        const params : string[] = [];
+        const params : ParamType[] = [];
         for (let i=0; i<func.params; ++i) {
           const param = stack.pop();
           if (param === undefined) throw new Error("Invalid expression at builtin function");
-          params.push(String(param));
+          params.push(param);
         }
         stack.push(func.function(params));
       } else if (isNumeric(token)) {
@@ -219,17 +346,11 @@ export function numericEval(expression: string, memory: VariableGetter): number 
       } else {
         const variableName = evaluateVariableName(token, memory);
         const variableValue = memory.getVariable(variableName);
-        if (typeof variableValue === "number" || typeof variableValue === "string") {
-          stack.push(variableValue);
-        } else {
-          throw new Error(`Variable ${token} is not a number or string. Its value: "${variableValue}"`);
-        }
+        stack.push(variableValue);
         
       }
     }
-    if (stack.length !== 1) throw new Error("Invalid expression");
-    if (typeof stack[0] !== "number" && !isNumeric(stack[0])) throw new Error(`The expression is not numeric`);
-    if (typeof stack[0] !== "number") stack[0] = parseFloat(stack[0]);
+    if (stack.length !== 1) throw new Error(`Invalid expression. The stack is: ${stack.length}`);
     return stack[0];
   }
 
@@ -281,7 +402,7 @@ export function evaluateVariableName(name: string, getter: VariableGetter): stri
   // Every second part is between two upper-level []
   // Also there must be odd number of parts. (The upper level closing bracket is a new part)
   for (let i=1; i<parts.length; i+=2) {
-    result += String(numericEval(parts[i], getter));
+    result += String(expressionEval(parts[i], getter));
     result += parts[i+1];
   }
 

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import TurtleInstance from "../../models/TurtleInstance";
-import { TurtleCommandMessage } from "../../pubsub/types";
 import { useSubscriber } from "../../pubsub/pubsubs";
-import { turtleCommandPubSub } from 'web-logo-core'
+import { turtleCommandPubSub, TurtleCommandMessage } from 'web-logo-core'
 
 type GraphTurtle = {
   x : number;

@@ -1,8 +1,8 @@
 import BuiltinDictionary from "./builtinDicts/english";
-import { numericEval, stringEval } from "./numericEval";
+import { expressionEval } from "./expressionEval";
 import { AbstractMemory, ArgType, isExecutableFactory } from "./types";
 
-export type PossibleArgumentParsingMethods = 'word' | 'string' | 'numeric' | 'code' | 'variable';
+export type PossibleArgumentParsingMethods = 'word' | 'string' | 'numeric' | 'code' | 'variable' | 'array';
 
 type ArgumentListConstraint = {
   front?: (PossibleArgumentParsingMethods | Set<PossibleArgumentParsingMethods>)[],
@@ -34,21 +34,19 @@ export function getProcessedArgumentList(args : ArgType, enabledTypes : Set<Poss
       //  - A numeric expression containing numbers and variables
       //  - A string expression containing a template string
       //  - A single variable containing a number/string or an Executable
-      //
+      //  - An array
       if (enabledType.has('word') && isValidWord(arg)) {
         validatedArgs.push(arg);
       } else if (context.hasVariable(arg) && (enabledType.has('variable') || enabledType.has('code'))) {
         // TODO I should check the variable type
         validatedArgs.push(context.getVariable(arg));
-      } else if (arg[0] == "\"" && enabledType.has('string')) {
-        validatedArgs.push(stringEval(arg, context));
       } else if (arg in BuiltinDictionary && enabledType.has('code')) {
         throw new Error(`Arg ${i} seems like a built-in command, but it cannot be used as argument. Use a wrapper function`);
-      } else if (enabledType.has('numeric')) {
+      } else if (enabledType.has('numeric') || enabledType.has('string') || enabledType.has('array')) {
         try {
-          validatedArgs.push(""+numericEval(arg, context));
+          validatedArgs.push(expressionEval(arg, context)); // TODO : Must be checked if the resulted type is enabled or not (string and array is the same)
         } catch (e) {
-          throw new Error(`Arg ${i} is not a valid numeric expression: ${e}`);
+          throw new Error(`Arg ${i} is not a valid expression: ${e}`);
         }
       } else {
         throw new Error(`Arg ${i} is not valid. Enabled variables: ${Array.from(enabledTypes).join(", ")}`);

@@ -1,5 +1,5 @@
-import { ParamType, VariableGetter } from './types';
-import { evaluateVariableName, numericEval, tokenize } from './numericEval';
+import { ArgType, ParamType, StructuredMemoryData, VariableGetter } from './types';
+import { evaluateVariableName, expressionEval, tokenize } from './expressionEval';
 
 describe('tokenize', () => {
   it('handles negative numbers', () => {
@@ -106,55 +106,55 @@ describe('numericEval', () => {
   });
 
   it('evaluates constant expression', () => {
-    expect(numericEval('4', memoryMock)).toEqual(4);
+    expect(expressionEval('4', memoryMock)).toEqual(4);
   }); 
 
   it('evaluates constant positive expression', () => {
-    expect(numericEval('+4', memoryMock)).toEqual(4);
+    expect(expressionEval('+4', memoryMock)).toEqual(4);
   }); 
 
   it('evaluates constant negative expression', () => {
-    expect(numericEval('-4', memoryMock)).toEqual(-4);
+    expect(expressionEval('-4', memoryMock)).toEqual(-4);
   }); 
 
   it('evaluates positive and negative signs', () => {
-    expect(numericEval('--++--++--++--++4', memoryMock)).toEqual(4);
+    expect(expressionEval('--++--++--++--++4', memoryMock)).toEqual(4);
   }); 
 
   it('evaluates positive and negative signs - 2', () => {
-    expect(numericEval('--+-+--++--++--++4', memoryMock)).toEqual(-4);
+    expect(expressionEval('--+-+--++--++--++4', memoryMock)).toEqual(-4);
   }); 
 
   it('evaluates constant real number', () => {
-    expect(numericEval('3.4', memoryMock)).toEqual(3.4);
+    expect(expressionEval('3.4', memoryMock)).toEqual(3.4);
   }); 
 
   it('evaluates constant negative real number', () => {
-    expect(numericEval('-3.4', memoryMock)).toEqual(-3.4);
+    expect(expressionEval('-3.4', memoryMock)).toEqual(-3.4);
   }); 
 
   it('evaluates constant expression with space', () => {
-    expect(numericEval('   4  ', memoryMock)).toEqual(4);
+    expect(expressionEval('   4  ', memoryMock)).toEqual(4);
   });
 
   it('evaluates logical negation', () => {
-    expect(numericEval('!4', memoryMock)).toEqual(0);
+    expect(expressionEval('!4', memoryMock)).toEqual(0);
   }); 
 
   it('evaluates double logical negation', () => {
-    expect(numericEval('!!4', memoryMock)).toEqual(1);
+    expect(expressionEval('!!4', memoryMock)).toEqual(1);
   }); 
 
   // Test case for simple arithmetic without variables
   it('evaluates simple arithmetic expressions', () => {
-    expect(numericEval('3 + 4', memoryMock)).toEqual(7);
-    expect(numericEval('10 / 2', memoryMock)).toEqual(5);
+    expect(expressionEval('3 + 4', memoryMock)).toEqual(7);
+    expect(expressionEval('10 / 2', memoryMock)).toEqual(5);
   });
 
   // Test case for expressions with variables
   it('evaluates expressions with variables', () => {
-    expect(numericEval('x + y', memoryMock)).toEqual(15);
-    expect(numericEval('x * 2', memoryMock)).toEqual(10);
+    expect(expressionEval('x + y', memoryMock)).toEqual(15);
+    expect(expressionEval('x * 2', memoryMock)).toEqual(10);
     // Verifying that getVariable was called with the correct keys
     expect(memoryMock.getVariable).toHaveBeenCalledWith('x');
     expect(memoryMock.getVariable).toHaveBeenCalledWith('y');
@@ -162,34 +162,34 @@ describe('numericEval', () => {
 
   // Test case for expressions with mixed variables and numbers
   it('evaluates expressions with mixed variables and numbers', () => {
-    expect(numericEval('x + 10', memoryMock)).toEqual(15);
-    expect(numericEval('z / 3', memoryMock)).toEqual(5);
+    expect(expressionEval('x + 10', memoryMock)).toEqual(15);
+    expect(expressionEval('z / 3', memoryMock)).toEqual(5);
   });
 
   // Test case for handling invalid variable values
   it('throws an error for invalid variable values', () => {
-    expect(() => numericEval('invalid + 5', memoryMock)).toThrow('+ needs numeric input but received not a number');
+    expect(() => expressionEval('invalid + 5', memoryMock)).toThrow('Invalid expression. + needs number but got not a number (string)');
   });
 
   // Test case for nested expressions
   it('evaluates nested expressions', () => {
-    expect(numericEval('( 1 + 1 ) * 2', memoryMock)).toEqual(4);
-    expect(numericEval('3 + ( 2 * ( 1 + 0 ) )', memoryMock)).toEqual(5);
+    expect(expressionEval('( 1 + 1 ) * 2', memoryMock)).toEqual(4);
+    expect(expressionEval('3 + ( 2 * ( 1 + 0 ) )', memoryMock)).toEqual(5);
   });
   
   it('evaluates nested expressions with variables', () => {
-    expect(numericEval('( x + y ) * 2', memoryMock)).toEqual(30);
-    expect(numericEval('3 + ( x * ( 2 + y ) )', memoryMock)).toEqual(63);
+    expect(expressionEval('( x + y ) * 2', memoryMock)).toEqual(30);
+    expect(expressionEval('3 + ( x * ( 2 + y ) )', memoryMock)).toEqual(63);
   });
 
   it('evaluates nested expressions without spaces', () => {
-    expect(numericEval('(1+1)*2', memoryMock)).toEqual(4);
-    expect(numericEval('3+(2*(1+0))', memoryMock)).toEqual(5);
+    expect(expressionEval('(1+1)*2', memoryMock)).toEqual(4);
+    expect(expressionEval('3+(2*(1+0))', memoryMock)).toEqual(5);
   });
   
   it('evaluates nested expressions with variables without spaces', () => {
-    expect(numericEval('(x+y)*2', memoryMock)).toEqual(30);
-    expect(numericEval('3+(x*(2+y))', memoryMock)).toEqual(63);
+    expect(expressionEval('(x+y)*2', memoryMock)).toEqual(30);
+    expect(expressionEval('3+(x*(2+y))', memoryMock)).toEqual(63);
   });
 });
 
@@ -233,30 +233,30 @@ describe('Handle structured variables', () => {
     hasVariable: (name : string): boolean => {
       return true;
     },
-    getVariable: (name: string): string => {
-      const variables: { [key: string]: string } = {
-        'foo.bar.spam': "42",
-        'foo.arr[0]': "1",
-        'foo.arr[1][1]': "100"
+    getVariable: (name: string): ParamType => {
+      const variables: { [key: string]: ParamType } = {
+        'foo.bar.spam': 42,
+        'foo.arr[0]': 1,
+        'foo.arr[1][1]': 100
       };
       return variables[name] || `Received: ${name}`;
     }
   };
 
   it('Reach simple fields - 1', () => {
-    expect(numericEval('foo.bar.spam', mockGetter)).toEqual(42);
+    expect(expressionEval('foo.bar.spam', mockGetter)).toEqual(42);
   });
   it('Reach simple fields - 2', () => {
-    expect(numericEval('foo.arr[0]', mockGetter)).toEqual(1);
+    expect(expressionEval('foo.arr[0]', mockGetter)).toEqual(1);
   });
   it('Reach simple fields - 3', () => {
-    expect(numericEval('foo.arr[1][1]', mockGetter)).toEqual(100);
+    expect(expressionEval('foo.arr[1][1]', mockGetter)).toEqual(100);
   });
   it('Reach fields based on expression - 1', () => {
-    expect(numericEval('foo.arr[32-31][1]', mockGetter)).toEqual(100);
+    expect(expressionEval('foo.arr[32-31][1]', mockGetter)).toEqual(100);
   });
   it('Reach fields based on nested indexing', () => {
-    expect(numericEval('foo.arr[foo.arr[0]][1]', mockGetter)).toEqual(100);
+    expect(expressionEval('foo.arr[foo.arr[0]][1]', mockGetter)).toEqual(100);
   });
 });
 
@@ -265,40 +265,75 @@ describe('Handle builtin functions', () => {
     hasVariable: (name : string): boolean => {
       return name in ['foo'];
     },
-    getVariable: (name: string): string => {
+    getVariable: (name: string): ParamType => {
       if (name == "foo") {
-        return "[1,2,3]";
+        return new StructuredMemoryData([1,2,3]);
       }
       return "";
     }
   };
 
   it('Function on simple number', () => {
-    expect(numericEval('abs(-3)', mockGetter)).toEqual(3);
+    expect(expressionEval('abs(-3)', mockGetter)).toEqual(3);
   });
   
   it('Function on multiple arguments', () => {
-    expect(numericEval('vecsize(3,4)', mockGetter)).toEqual(5);
+    expect(expressionEval('vecsize(3,4)', mockGetter)).toEqual(5);
   });
 
   it('Function on multiple arguments and spaces', () => {
-    expect(numericEval('vecsize(  3  , 4  )', mockGetter)).toEqual(5);
+    expect(expressionEval('vecsize(  3  , 4  )', mockGetter)).toEqual(5);
   });
 
   it('Function on multiple arguments (with expressions)', () => {
-    expect(numericEval('vecsize(2+1, 2*2)', mockGetter)).toEqual(5);
+    expect(expressionEval('vecsize(2+1, 2*2)', mockGetter)).toEqual(5);
   });
 
   it('Function on multiple arguments (with complex expressions)', () => {
-    expect(numericEval('vecsize(2+1*1, 2*(1+1))', mockGetter)).toEqual(5);
+    expect(expressionEval('vecsize(2+1*1, 2*(1+1))', mockGetter)).toEqual(5);
   });
 
   it('Function on multiple arguments and additional operations', () => {
-    expect(numericEval('1+(1+1)+vecsize(2+1*1, 2*(1+1))+1+(1+1*1)', mockGetter)).toEqual(11);
+    expect(expressionEval('1+(1+1)+vecsize(2+1*1, 2*(1+1))+1+(1+1*1)', mockGetter)).toEqual(11);
   });
 
   it('Function over array variables', () => {
-    expect(numericEval('length(foo)', mockGetter)).toEqual(3);
+    expect(expressionEval('length(foo)', mockGetter)).toEqual(3);
   });
 
+});
+
+describe("Handling arrays as input variables", () => {
+  const mockGetter: VariableGetter = {
+    hasVariable: (name : string): boolean => {
+      return name in ['foo'];
+    },
+    getVariable: (name: string): ParamType => {
+      return {
+        "a": 1,
+        "b": 2,
+      }[name] ?? 0;
+    }
+  };
+
+
+  it('Simple array expression', () => {
+    expect(expressionEval('[1,2,3]', mockGetter)).toEqual(new StructuredMemoryData([1,2,3]));
+  });
+  it('Simple array expression with spaces', () => {
+    expect(expressionEval('[ 1   , 2    ,  3   ]', mockGetter)).toEqual(new StructuredMemoryData([1,2,3]));
+  });
+  it('Complex, but constant array expressions', () => {
+    expect(expressionEval('[ 1+1   , 2 *3    ,  3 + (3+1+abs(-1)   )   ]', mockGetter)).toEqual(new StructuredMemoryData([2,6,8]));
+  });
+  it('Complex, non-constant array expressions', () => {
+    expect(expressionEval('[ a+b   , 2*a]', mockGetter)).toEqual(new StructuredMemoryData([3,2]));
+  });
+  it('Complex array expressions with comas', () => {
+    expect(expressionEval('[ vecsize(3,4)   , 2]', mockGetter)).toEqual(new StructuredMemoryData([5,2]));
+  });
+  it.only('Nested arrays', () => {
+    expect(expressionEval('[ [2, 3] , 4]', mockGetter)).toEqual(new StructuredMemoryData([new StructuredMemoryData([2,3]),4]));
+  });
+  
 });

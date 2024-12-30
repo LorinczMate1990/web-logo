@@ -35,7 +35,18 @@ Was done @ bde85efdafadbe0226adf019020c27649265277e
 
 The content between " " or [ ] must be handled as a single token, like the content between ( and )
 Except the outer [ and ] must be kept. Maybe it is a design flaw that the Tokeinzer removes the outer ( and ).
+Was done @ b738c3966a62539deb182ca24fe7764d18815b23
 
 ### numericEval -> genericEval
 
 The numericEval must support any kind of expression. Currently it supports non-numeric values as intermediate results.
+
+### Some array handling functions should be supported. 
+
+Like a foreach.
+This code would be nice:
+each [20, 30, 40] { f i; l 90 }
+
+### Structured data must contain only ParamType-s
+
+When a structured data in the memory contains an array, its elements must be ParamType. This means however that a nested array is an array containing structured data and a nested object is also a structured data.

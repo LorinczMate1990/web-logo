@@ -1,8 +1,5 @@
 import { turtleCommandPubSub } from "./pubsub/pubsubs";
-import { AbstractMemory, ArgType, ExecutableFactory, ExecutableWithContext, isExecutableFactory, ParamType } from "./types";
-import { numericEval, stringEval } from "./numericEval";
-import BuiltinDictionary from "./builtinDicts/english";
-import { CommandsWithContextFactory } from "./core";
+import { AbstractMemory, ArgType, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "./types";
 import { Arguments } from "./ArgumentParser";
 
 export default class CoreCommands {
@@ -107,6 +104,18 @@ export default class CoreCommands {
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
     for (let i=0; i<repeatNumber; ++i) {
       cycleCore.context.setVariable("i", String(i));
+      await cycleCore.execute();
+    }
+  }
+
+  @Arguments(['array', 'code'])
+  static async each(args: ArgType, memory : AbstractMemory) {
+    if (!(isStructuredMemoryData(args[0]) && Array.isArray(args[0].data))) throw new Error("TODO To decorator"); // TODO
+    const collection = args[0].data as ParamType[];
+    const cycleCoreFactory = args[1] as ExecutableFactory;
+    const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
+    for (const i of collection) {
+      cycleCore.context.setVariable("i", i);
       await cycleCore.execute();
     }
   }

@@ -21,6 +21,7 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory
   "penwidth": CoreCommands.setPenWidth,
   "home": CoreCommands.goHome,
   "sethome": CoreCommands.setHome,
+  "each": CoreCommands.each,
 };
 
 export default BuiltinDictionary;
