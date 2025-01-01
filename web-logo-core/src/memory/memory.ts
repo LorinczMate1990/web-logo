@@ -2,14 +2,9 @@ import { evaluateVariableName } from "../expressionEval";
 import { AbstractMemory, ExecutableFactory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, isExecutableFactory, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types";
 import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from "./structuredVariableHandler";
 
-type StringMemoryCell = {
-  type: "string",
-  value : string,
-}
-
 type StructMemoryCell = {
   type: "struct",
-  value: object, // TODO : This should be StructuredMemoryData
+  value: StructuredMemoryData,
 }
 
 type CodeMemoryCell = {
@@ -22,7 +17,7 @@ type NumericMemoryCell = {
   value: number,
 }
 
-type MemoryCell = NumericMemoryCell | StringMemoryCell | StructMemoryCell | CodeMemoryCell;
+type MemoryCell = NumericMemoryCell | StructMemoryCell | CodeMemoryCell;
 
 export class Memory implements AbstractMemory {
   parent?: AbstractMemory;
@@ -36,26 +31,21 @@ export class Memory implements AbstractMemory {
     if (isStructuredVariableName(key)){
       const base = getBaseVariableName(key);
       if (!(base in this.variables)) {
-        this.variables[base] = {type: "struct", value: {}};  
+        this.variables[base] = {type: "struct", value: new StructuredMemoryData({})};  
       }
       let memoryCell = this.variables[base];
       if (memoryCell.type !== "struct") {
         this.variables[base] = {
           type: "struct",
-          value: {}
+          value: new StructuredMemoryData({})
         }
         memoryCell = this.variables[base];
       }
       if (memoryCell.type !== "struct") throw new Error("This is impossible. Only throw it to make the compiler know its type");
       const evaluatedPath = evaluateVariableName(key, this);
-      setDataMember(evaluatedPath, isStructuredMemoryData(value)?value.data:value, memoryCell.value);
+      setDataMember(evaluatedPath, value, memoryCell.value);
     } else {
-      if (typeof value === "string") {
-        this.variables[key] = {
-          type: "string",
-          value,
-        }
-      } else if (typeof value === "number") {
+      if (typeof value === "number") {
           this.variables[key] = {
             type: "numeric",
             value,
@@ -68,7 +58,7 @@ export class Memory implements AbstractMemory {
       } else if (isStructuredMemoryData(value)) {
         this.variables[key] = {
           type: "struct",
-          value: value.data,
+          value,
         }
       }
     }
@@ -96,8 +86,6 @@ export class Memory implements AbstractMemory {
         const memoryCell = this.variables[baseName];
         if (memoryCell.type === "struct") {
           retRoot = memoryCell.value;
-        } else if (memoryCell.type === "string") {
-          retRoot = JSON.parse(memoryCell.value);
         } else {
           throw new Error("Memory cell wasn't string or struct");
         }
@@ -106,13 +94,13 @@ export class Memory implements AbstractMemory {
         if (typeof result === "object") {
           return new StructuredMemoryData(result);
         } else {
-          return String(result);
+          return result;
         }
       } else {
         const memoryCell = this.variables[key];
         if (memoryCell.type === "struct") {
           return new StructuredMemoryData(memoryCell.value);
-        } else if (memoryCell.type === "string" || memoryCell.type === "numeric") {
+        } else if (memoryCell.type === "numeric") {
           return memoryCell.value;
         } else if (memoryCell.type === "code") {
           return memoryCell.value;

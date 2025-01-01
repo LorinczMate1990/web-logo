@@ -2,7 +2,7 @@ import BuiltinDictionary from "./builtinDicts/english";
 import { expressionEval } from "./expressionEval";
 import { AbstractMemory, ArgType, isExecutableFactory } from "./types";
 
-export type PossibleArgumentParsingMethods = 'word' | 'string' | 'numeric' | 'code' | 'variable' | 'array';
+export type PossibleArgumentParsingMethods = 'word' | 'numeric' | 'code' | 'variable' | 'array';
 
 type ArgumentListConstraint = {
   front?: (PossibleArgumentParsingMethods | Set<PossibleArgumentParsingMethods>)[],
@@ -42,7 +42,7 @@ export function getProcessedArgumentList(args : ArgType, enabledTypes : Set<Poss
         validatedArgs.push(context.getVariable(arg));
       } else if (arg in BuiltinDictionary && enabledType.has('code')) {
         throw new Error(`Arg ${i} seems like a built-in command, but it cannot be used as argument. Use a wrapper function`);
-      } else if (enabledType.has('numeric') || enabledType.has('string') || enabledType.has('array')) {
+      } else if (enabledType.has('numeric') || enabledType.has('array')) {
         try {
           validatedArgs.push(expressionEval(arg, context)); // TODO : Must be checked if the resulted type is enabled or not (string and array is the same)
         } catch (e) {

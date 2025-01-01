@@ -40,6 +40,7 @@ Was done @ b738c3966a62539deb182ca24fe7764d18815b23
 ### numericEval -> genericEval
 
 The numericEval must support any kind of expression. Currently it supports non-numeric values as intermediate results.
+Was done @ e85d752ede5052d738e4c266635c3a2877d5d588
 
 ### Some array handling functions should be supported. 
 
@@ -47,6 +48,9 @@ Like a foreach.
 This code would be nice:
 each [20, 30, 40] { f i; l 90 }
 
+Was done @ e85d752ede5052d738e4c266635c3a2877d5d588
+
 ### Structured data must contain only ParamType-s
 
 When a structured data in the memory contains an array, its elements must be ParamType. This means however that a nested array is an array containing structured data and a nested object is also a structured data.
+Also string type must be removed, array must be used isntead of that.

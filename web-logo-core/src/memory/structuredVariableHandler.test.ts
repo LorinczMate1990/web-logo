@@ -1,5 +1,9 @@
 import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from './structuredVariableHandler'; // Adjust the import path based on your project structure
-import { ParamType, VariableGetter } from '../types';
+import { ParamType, StructuredMemoryData, VariableGetter } from '../types';
+
+function toAsciiStructMemData(str : string) {
+  return new StructuredMemoryData(Array.from(str, char => char.charCodeAt(0)))
+}
 
 describe('Structured Variable Evaluation', () => {
   // Mock the VariableGetter
@@ -9,11 +13,16 @@ describe('Structured Variable Evaluation', () => {
     },
     getVariable: (name: string): ParamType => {
       const variables: { [key: string]: ParamType } = {
-        'foo': JSON.stringify({ bar: { spam: "42" }, arr: ["1", "2", "3"] }),
+        'foo': new StructuredMemoryData({
+          "bar": new StructuredMemoryData({
+            "spam": 42,
+          }),
+        'arr': new StructuredMemoryData([1,2,3])
+        }),//JSON.stringify({ bar: { spam: "42" }, arr: ["1", "2", "3"] }),
         'num': 5,
-        'str': 'hello'
+        'str': StructuredMemoryData.build_from_string("Hello")
       };
-      return variables[name] || "";
+      return variables[name] || 0;
     }
   };
 
@@ -59,17 +68,17 @@ describe('Structured Variable Evaluation', () => {
 
   describe('getDataMember', () => {
     // Example object to use in tests
-    const data = {
-      foo: {
-        bar: {
-          spam: "eggs",
-          array: [1, 2, { nested: "value" }]
-        }
-      }
-    };
+    const data = new StructuredMemoryData({
+      foo: new StructuredMemoryData({
+        bar: new StructuredMemoryData({
+          spam: StructuredMemoryData.build_from_string("eggs"),
+          array: new StructuredMemoryData([1, 2, new StructuredMemoryData({nested: StructuredMemoryData.build_from_string("value")})])
+        })
+      })
+    });
 
     it('retrieves a simple nested property', () => {
-      expect(getDataMember('foo.bar.spam', data)).toBe('eggs');
+      expect(getDataMember('foo.bar.spam', data)).toEqual(toAsciiStructMemData('eggs'));
     });
 
     it('retrieves an element from an array', () => {
@@ -77,83 +86,103 @@ describe('Structured Variable Evaluation', () => {
     });
 
     it('retrieves a nested object as a JSON string', () => {
-      expect(getDataMember('foo.bar', data)).toBe(data.foo.bar);
+      expect(getDataMember('foo.bar', data)).toBe((data.getDataMember("foo") as StructuredMemoryData).getDataMember("bar"));
     });
 
     it('retrieves a deeply nested property', () => {
-      expect(getDataMember('foo.bar.array[2].nested', data)).toBe('value');
+      expect((getDataMember('foo.bar.array[2].nested', data))).toEqual(StructuredMemoryData.build_from_string("value"));
     });
 
     it('throws an error for an undefined path', () => {
       expect(() => {
         getDataMember('foo.unknown.path', data);
-      }).toThrow('Path foo.unknown.path could not be fully resolved.');
+      }).toThrow("Can't get this data, wrong path: unknown, [object Object], isArray: false");
     });
 
     it('retrives objects', () => {
-      expect(getDataMember('foo.bar', data)).toBe(data.foo.bar);
-      expect(getDataMember('foo.bar.array', data)).toBe(data.foo.bar.array);
+      expect(getDataMember('foo.bar', data)).toBe((data as any).data.foo.data.bar);
+      expect(getDataMember('foo.bar.array', data)).toBe((data as any).data.foo.data.bar.data.array);
     });
 
     it('retrives an array', () => {
-      expect(getDataMember('variableName[0]', {variableName: [10, 12, 13]})).toBe(10);
-      expect(getDataMember('variableName', {variableName: [10, 12, 13]})).toEqual([10, 12, 13]);
+      const data = new StructuredMemoryData({variableName: new StructuredMemoryData([10, 12, 13])});
+      expect(getDataMember('variableName', data)).toEqual(new StructuredMemoryData([10, 12, 13]));
     });
 
-    // Add more tests as necessary...
+    it('retrives an element of a pure array', () => {
+      const data = new StructuredMemoryData({variableName: new StructuredMemoryData([10, 12, 13])});
+      expect(getDataMember('variableName[0]', data)).toBe(10);
+    });
+
   });
 
   describe('setDataMember', () => {
     it('sets a top-level property', () => {
-      const obj = {};
-      setDataMember('topLevel', 'value', obj);
-      expect(obj).toEqual({ topLevel: 'value' });
+      const obj = new StructuredMemoryData({});
+      setDataMember('topLevel', toAsciiStructMemData('value'), obj);
+      expect(obj).toEqual(new StructuredMemoryData({ topLevel: toAsciiStructMemData('value') }));
     });
 
     it('sets a deeply nested property, creating objects as needed', () => {
-      const obj = { existing: { nested: {} } };
-      setDataMember('existing.nested.deep.property', 'deepValue', obj);
-      expect(obj).toEqual({
-        existing: {
-          nested: {
-            deep: {
-              property: 'deepValue'
-            }
-          }
-        }
-      });
+      const obj = new StructuredMemoryData({ existing: new StructuredMemoryData({ nested: new StructuredMemoryData({}) }) });
+      setDataMember('existing.nested.deep.property', toAsciiStructMemData('deepValue'), obj);
+      expect(obj).toEqual(new StructuredMemoryData({
+        existing: new StructuredMemoryData({
+          nested: new StructuredMemoryData({
+            deep: new StructuredMemoryData({
+              property: toAsciiStructMemData('deepValue')
+            })
+          })
+        })
+      }));
     });
 
     it('overrides an existing property', () => {
-      const obj = { existing: 'oldValue' };
-      setDataMember('existing', 'newValue', obj);
-      expect(obj).toEqual({ existing: 'newValue' });
+      const obj = new StructuredMemoryData({ existing: toAsciiStructMemData('oldValue') });
+      setDataMember('existing', toAsciiStructMemData("newValue"), obj);
+      expect(obj).toEqual(new StructuredMemoryData({ existing: toAsciiStructMemData('newValue') }));
     });
 
     it('handles array indices within the path', () => {
-      const obj = { array: [{}, {}, {}] };
-      setDataMember('array[1].property', 'valueInArray', obj);
-      expect(obj).toEqual({
-        array: [{}, { property: 'valueInArray'}, {}]
+      const obj = new StructuredMemoryData({ 
+        array: new StructuredMemoryData([new StructuredMemoryData({}), new StructuredMemoryData({}), new StructuredMemoryData({})]) 
       });
+      const expected = new StructuredMemoryData({ 
+        array: new StructuredMemoryData([new StructuredMemoryData({}), new StructuredMemoryData({property: toAsciiStructMemData('valueInArray')}), new StructuredMemoryData({})]) 
+      });
+      setDataMember('array[1].property', toAsciiStructMemData('valueInArray'), obj);
+      expect(obj).toEqual(expected);
     });
 
     it('creates nested structures within arrays', () => {
-      const obj = { array: [{}] };
-      setDataMember('array[0].nested.deep', 'deepArrayValue', obj);
-      expect(obj).toEqual({
-        array: [{
-          nested: {
-            deep: 'deepArrayValue'
-          }
-        }]
+      const obj = new StructuredMemoryData({ array: new StructuredMemoryData([new StructuredMemoryData({})]) });
+      const expected = new StructuredMemoryData({ 
+        array: new StructuredMemoryData([
+          new StructuredMemoryData({
+            nested: new StructuredMemoryData({
+              deep: toAsciiStructMemData('deepArrayValue')
+            })
+          })
+        ]) 
       });
+      
+      setDataMember('array[0].nested.deep', toAsciiStructMemData('deepArrayValue'), obj);
+      expect(obj).toEqual(expected);
     });
 
     it('replaces an entire nested object', () => {
-      const obj = { toReplace: { existing: 'value' } };
-      setDataMember('toReplace', { replaced: 'newValue' }, obj);
-      expect(obj).toEqual({ toReplace: { replaced: 'newValue' } });
+      const obj = new StructuredMemoryData({ 
+        toReplace: new StructuredMemoryData({
+          existing: toAsciiStructMemData('value') 
+        }) 
+      });
+      const expected = new StructuredMemoryData({ 
+        toReplace: new StructuredMemoryData({
+          replaced: toAsciiStructMemData('newValue') 
+        }) 
+      });
+      setDataMember('toReplace', new StructuredMemoryData({ replaced: toAsciiStructMemData('newValue') }), obj);
+      expect(obj).toEqual(expected);
     });
 
     // Additional edge cases and scenarios...

@@ -13,11 +13,11 @@ export type WrongfulExecuteResponse = {
 
 export type ExecuteResponse = WrongfulExecuteResponse | SuccesfulExecuteResponse;
 
-export type ParamType = number | string | ExecutableFactory | StructuredMemoryData;
-export type ArgType = ParamType[];
+export type ParamType = number | ExecutableFactory | StructuredMemoryData;
+export type ArgType = (ParamType | string)[];
 
 export function isParamType(v : any) : v is ParamType {
-  return (typeof v === "number" || typeof v === "string" || isExecutableWithContext(v) || isStructuredMemoryData(v));
+  return (typeof v === "number" || isExecutableWithContext(v) || isStructuredMemoryData(v));
 }
 
 export function isExecutableWithContext(v : any) : v is ExecutableWithContext {
@@ -41,11 +41,51 @@ export class StructuredMemoryData {
   static StaticStructuredMemoryData = Symbol('StructuredMemoryData');
   StructuredMemoryDataSymbol = StructuredMemoryData.StaticStructuredMemoryData;
 
-  data : object = {};
+  data : ParamType[] | { [key: string]: ParamType } = {};
 
-  constructor(data : object) {
+  static build_from_string(str: string): StructuredMemoryData {
+    // Convert each character of the string to its ASCII value
+    const asciiArray: number[] = Array.from(str, char => char.charCodeAt(0));
+
+    // Create a new instance of StructuredMemoryData using the ASCII array
+    return new StructuredMemoryData(asciiArray);
+  }
+
+  constructor(data : ParamType[] | { [key: string]: ParamType }) {
     this.data = data;
   }
+
+  static isArrayIndexer(input: string): boolean {
+    const parsed = parseFloat(input);
+    return !isNaN(parsed) && parsed.toString() === input.trim();
+  }
+
+  getDataMember(index : string | number) {
+    if (typeof index === "string" && StructuredMemoryData.isArrayIndexer(index)) {
+      index = parseFloat(index);
+    }
+    if (typeof index == "string" && !Array.isArray(this.data)) {
+      return this.data[index];
+    }
+    if (typeof index == "number" && Array.isArray(this.data)) {
+      return this.data[index];
+    }
+  }
+
+  setDataMember(index : string | number, data : ParamType) {
+    if (typeof index === "string" && StructuredMemoryData.isArrayIndexer(index)) {
+      index = parseFloat(index);
+    }
+    if (typeof index == "string" && !Array.isArray(this.data)) {
+      this.data[index] = data;
+    } else if (typeof index == "number" && Array.isArray(this.data)) {
+      this.data[index] = data;
+    } else {
+      throw new Error(`setDataMember can't use this index for this object. Index: ${index}, type of it: ${typeof index}, data: ${data}`)
+    }
+  }
+
+  
 
 }
 

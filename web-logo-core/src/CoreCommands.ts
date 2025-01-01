@@ -103,7 +103,7 @@ export default class CoreCommands {
     const cycleCoreFactory = args[1] as ExecutableFactory;
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
     for (let i=0; i<repeatNumber; ++i) {
-      cycleCore.context.setVariable("i", String(i));
+      cycleCore.context.setVariable("i", i);
       await cycleCore.execute();
     }
   }
@@ -120,11 +120,11 @@ export default class CoreCommands {
     }
   }
 
-  @Arguments({exact: 2, front: ['numeric', new Set(['code', 'numeric', 'string'])]})
+  /*@Arguments({exact: 2, front: ['numeric', new Set(['code', 'numeric', 'string'])]})
   static async createVar(args: ArgType, memory : AbstractMemory) {
     // TODO: args[1] can be too many things and I can't make proper difference between them,
     // I need typed createVar-s
-  }
+  }*/
 
   @Arguments({min: 2, back: ['code'], default: 'word'})
   static async learn(args: ArgType, memory : AbstractMemory) {
@@ -143,7 +143,7 @@ export default class CoreCommands {
     /**
      * usage: if condition { code block if true} { code block if false }
      */
-    const condition = parseFloat(String(args[0]));
+    const condition = args[0] as number;
     const trueBranchFactory = args[1] as ExecutableFactory;
     const falseBranchFactory = (args.length == 3)? args[2] as ExecutableFactory : undefined; 
 
