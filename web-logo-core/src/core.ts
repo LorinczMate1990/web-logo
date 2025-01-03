@@ -40,12 +40,14 @@ export class CommandsWithContext extends ExecutableWithContext {
           const possibleCommand = possibleCommandFactory.getNewExecutableWithContext();
           if (possibleCommand.meta != undefined) { // If it has no meta, it can't accept any argument, it's just an inline codeblock
             const numOfArguments = packedArguments.length;
-            const argTypes = Array.from({ length: packedArguments.length }, () => new Set<PossibleArgumentParsingMethods>(['numeric', 'string', 'code']));
+            const argTypes = Array.from({ length: packedArguments.length }, () => new Set<PossibleArgumentParsingMethods>(['numeric', 'array', 'code']));
             const processedArguments = getProcessedArgumentList(packedArguments, argTypes, this.context);
             
             for (let i = 0; i < numOfArguments; ++i) {
+              const processedArgument = processedArguments[i];
               const commandArgumentName = possibleCommand.meta.arguments[i];
-              possibleCommand.context.setVariable(commandArgumentName, processedArguments[i]);
+              if (typeof processedArgument == "string") throw new Error("This shouldn't be possible");
+              possibleCommand.context.setVariable(commandArgumentName, processedArgument);
             }
           }
           await possibleCommand.execute();
