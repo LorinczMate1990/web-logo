@@ -38,6 +38,21 @@ const builtinFunctions : {[key: string]: {params: number, function: (a:ParamType
     function: (a: ParamType[]) => {
       assertMustBeStructuredMemoryDataWithArrayContent("length", a[0]);
       return a[0].data.length;
+    },
+  },
+  'pow': {
+    params: 2, 
+    function: (a: ParamType[]) => {
+      assertMustBeNumber("vecsize", a[0]);
+      assertMustBeNumber("vecsize", a[1]);
+      return Math.pow(a[0], a[1])
+    }
+  },
+  'sqrt': {
+    params: 1, 
+    function: (a: ParamType[]) => {
+      assertMustBeNumber("vecsize", a[0]);
+      return Math.sqrt(a[0])
     }
   },
 }

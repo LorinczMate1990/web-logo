@@ -1,0 +1,30 @@
+learn tile a {
+    repeat 2 {
+        l 45
+        f a 
+        l 135
+        f a*2
+    }
+}
+
+learn row a n {
+    repeat n {
+        tile a
+        b 2*a
+    }
+    f 2*a*n
+}
+
+learn whole a n m {
+    repeat m {
+        row a n
+        l 90
+        penup
+        f ( sqrt(a*a/2) )
+        pendown
+        r 90
+    }
+}
+
+f 20*50
+whole 50 10 10

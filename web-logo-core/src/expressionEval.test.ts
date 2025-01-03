@@ -176,6 +176,11 @@ describe('numericEval', () => {
     expect(expressionEval('( 1 + 1 ) * 2', memoryMock)).toEqual(4);
     expect(expressionEval('3 + ( 2 * ( 1 + 0 ) )', memoryMock)).toEqual(5);
   });
+
+  it('evaluates double nested expressions', () => {
+    expect(expressionEval('(6/3)*(10/2)', memoryMock)).toEqual(10);
+    expect(expressionEval('(6 / 3) * (10 / 2)', memoryMock)).toEqual(10);
+  });
   
   it('evaluates nested expressions with variables', () => {
     expect(expressionEval('( x + y ) * 2', memoryMock)).toEqual(30);

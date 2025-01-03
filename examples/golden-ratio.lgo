@@ -1,0 +1,22 @@
+learn base ratio {
+    f 30*ratio;
+    l 30;
+    f 75*ratio;
+    l 100;
+    f 50*ratio;
+    l 100;
+    f 98*ratio;
+    l 130;
+
+    f 30*ratio;
+    l 30;
+    f 75*ratio;
+    l 100;
+    f 50*ratio;
+    l 180;
+
+}
+
+repeat 17 {
+    base ( pow(50/30, i)*0.001 )
+}
