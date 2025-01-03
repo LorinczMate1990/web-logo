@@ -8,6 +8,38 @@ describe('Memory', () => {
     expect(mem.getVariable('simpleKey')).toEqual(StructuredMemoryData.build_from_string('simpleValue'));
   });
 
+  it('sets a structured variable', () => {
+    const mem = new Memory(undefined);
+    mem.setVariable('my.structured.variable', 5); // Assuming this is how you intended structured data to be set
+    expect(mem.variables).toEqual({
+      my: {
+        type: 'struct',
+        value: new StructuredMemoryData({
+          structured: new StructuredMemoryData({
+            variable: 5
+          })
+        })
+      }
+    });
+    
+  });
+
+  it('gets a structured variable', () => {
+    const mem = new Memory(undefined);
+    mem.variables = {
+      my: {
+        type: 'struct',
+        value: new StructuredMemoryData({
+          structured: new StructuredMemoryData({
+            variable: 5
+          })
+        })
+      }
+    };
+    const value = mem.getVariable('my.structured.variable'); // Assuming this is how you intended structured data to be set
+    expect(value).toEqual(5);
+  });
+
   it('sets and retrieves a structured variable', () => {
     const mem = new Memory(undefined);
     mem.setVariable('structured', new StructuredMemoryData({ some: StructuredMemoryData.build_from_string('data') })); // Assuming this is how you intended structured data to be set

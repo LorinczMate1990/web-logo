@@ -118,6 +118,34 @@ repeat 360 {
 }
 ```
 
+## Repeating over an array
+
+This is the classical forach cycle.
+
+### Simple rectangular spiral using array
+
+each [10, 20, 30, 40, 50, 60] {
+    f i
+    l 90
+}
+
+### Using nested arrays
+
+each [[10, 30], [20, 45], [30, 60], [40, 45], [50, 30], [60, 45]] {
+    f i[0]
+    l i[1]
+}
+
+### Nested each cycles
+
+each [[5, 10], [10, 20], [15, 30], [20, 40], [25, 50], [30, 60]] {
+    each i {
+        f i
+        l 30
+    }
+    l 45
+}
+
 ## Branching
 
 The `if` instruction needs three input parameters: A condition, a true branch and an optional false branch. If the expression is non-zero, the true-branch will be executed, otherwise the false branch.

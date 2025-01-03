@@ -36,31 +36,31 @@ describe('Structured Variable Evaluation', () => {
 
   describe('getBaseVariableName', () => {
     it('extracts the base name from a simple variable', () => {
-      expect(getBaseVariableName('variable')).toBe('variable');
+      expect(getBaseVariableName('variable')).toEqual({baseName: 'variable', rest: ""});
     });
 
     it('extracts the base name from a dot notation path', () => {
-      expect(getBaseVariableName('object.property')).toBe('object');
+      expect(getBaseVariableName('object.property')).toEqual({baseName: 'object', rest: "property"});
     });
 
     it('extracts the base name from a bracket notation path', () => {
-      expect(getBaseVariableName('array[0]')).toBe('array');
+      expect(getBaseVariableName('array[0]')).toEqual({baseName: 'array', rest: "[0]"});
     });
 
     it('handles variables with mixed notations', () => {
-      expect(getBaseVariableName('object.array[0].property')).toBe('object');
+      expect(getBaseVariableName('object.array[0].property')).toEqual({baseName: 'object', rest: "array[0].property"});
     });
 
     it('returns the original string if it starts with a dot', () => {
-      expect(getBaseVariableName('.startsWithDot')).toBe('.startsWithDot');
+      expect(getBaseVariableName('.startsWithDot')).toEqual({baseName: '.startsWithDot', rest: ""});
     });
 
     it('returns the original string if it starts with a bracket', () => {
-      expect(getBaseVariableName('[0]startsWithBracket')).toBe('[0]startsWithBracket');
+      expect(getBaseVariableName('[0]startsWithBracket')).toEqual({baseName: '[0]startsWithBracket', rest: ""});
     });
 
     it('works with nested properties and indices', () => {
-      expect(getBaseVariableName('object.property[0].nestedProperty')).toBe('object');
+      expect(getBaseVariableName('object.property[0].nestedProperty')).toEqual({baseName: 'object', rest: "property[0].nestedProperty"});
     });
 
     // Add more tests as necessary...

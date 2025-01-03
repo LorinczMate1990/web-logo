@@ -265,12 +265,10 @@ export function expressionEval(expression: string, memory: VariableGetter): Para
   if (expression[0] == '[') {
     // Have to split on , when they are not inside of a ( ) or nested [ ] or " "
     const elements = splitArrayToElements(expression.slice(1, expression.length-1));
-    console.log("elements: ", elements, expression, expression.slice(1, expression.length-1))
     let resultArray = new StructuredMemoryData([]);
     for (const element of elements) {
       const evaluatedElement = expressionEval(element, memory);
       (resultArray.data as ParamType[]).push(evaluatedElement);
-      console.log(`value of ${element}: ${evaluatedElement}`)
     }
     return resultArray;
   } else {

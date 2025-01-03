@@ -29,20 +29,20 @@ export class Memory implements AbstractMemory {
 
   setVariable(key: string, value: ParamType) { // TODO maybe it exists in parent. I should create a separate declarator
     if (isStructuredVariableName(key)){
-      const base = getBaseVariableName(key);
-      if (!(base in this.variables)) {
-        this.variables[base] = {type: "struct", value: new StructuredMemoryData({})};  
+      const {baseName, rest: variablePath} = getBaseVariableName(key);
+      if (!(baseName in this.variables)) {
+        this.variables[baseName] = {type: "struct", value: new StructuredMemoryData({})};  
       }
-      let memoryCell = this.variables[base];
+      let memoryCell = this.variables[baseName];
       if (memoryCell.type !== "struct") {
-        this.variables[base] = {
+        this.variables[baseName] = {
           type: "struct",
           value: new StructuredMemoryData({})
         }
-        memoryCell = this.variables[base];
+        memoryCell = this.variables[baseName];
       }
       if (memoryCell.type !== "struct") throw new Error("This is impossible. Only throw it to make the compiler know its type");
-      const evaluatedPath = evaluateVariableName(key, this);
+      const evaluatedPath = evaluateVariableName(variablePath, this);
       setDataMember(evaluatedPath, value, memoryCell.value);
     } else {
       if (typeof value === "number") {
@@ -65,11 +65,7 @@ export class Memory implements AbstractMemory {
   }
 
   hasVariable(key: string): boolean {
-    const structured = isStructuredVariableName(key);
-    let baseName = key;
-    if (structured) {
-      baseName = getBaseVariableName(key);
-    }
+    let {baseName} = getBaseVariableName(key);
     return baseName in this.variables || (this.parent != undefined && this.parent.hasVariable(baseName));
   }
 
@@ -77,8 +73,11 @@ export class Memory implements AbstractMemory {
     // First of all I have to know if it's structured or not
     const structured = isStructuredVariableName(key);
     let baseName = key;
+    let variablePath = "";
     if (structured) {
-      baseName = getBaseVariableName(key);
+      const variableParts = getBaseVariableName(key);
+      baseName = variableParts.baseName;
+      variablePath = variableParts.rest;
     }
     if (baseName in this.variables) {
       if (structured) {
@@ -89,7 +88,7 @@ export class Memory implements AbstractMemory {
         } else {
           throw new Error("Memory cell wasn't string or struct");
         }
-        const processedKey = evaluateVariableName(key, this);
+        const processedKey = evaluateVariableName(variablePath, this);
         const result = getDataMember(processedKey, retRoot);
         return result;
       } else {

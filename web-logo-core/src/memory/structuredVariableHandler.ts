@@ -5,10 +5,12 @@ export function isStructuredVariableName(name: string): boolean {
   return name.includes('.') || name.includes('[') || name.includes(']');
 }
 
-export function getBaseVariableName(variablePath: string): string {
-  // Match the beginning of the string up to the first dot or opening square bracket
-  const match = variablePath.match(/^[^.[]+/);
-  return match ? match[0] : variablePath;
+export function getBaseVariableName(variablePath: string): { baseName: string, rest: string } {
+  const match = variablePath.match(/^([^.[]+)(.*)$/);
+  return {
+    baseName: match?.[1] ?? variablePath,
+    rest: match?.[2]?.replace(/^\./, '') ?? ''
+  };
 }
 
 export function getDataMember(variablePath: string, variable: StructuredMemoryData): ParamType {
