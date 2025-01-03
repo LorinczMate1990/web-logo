@@ -23,17 +23,9 @@ Here is a command with two parameters:
 command 1+4+5 12/34*a;
 ```
 
-And here is a command with 8 (invalid parameters):
+And here is a command with 8 (invalid) parameters:
 ```
 command 1 + 4 + 5   12/34 * a;
-```
-
-The parameter list can go to multiple lines, the linebreak has the same effect as space. So the following command is called also with two parameters:
-
-```
-command
-1+4+5
-12/34*a;
 ```
 
 The number of spaces or enters doesn't matter. 
@@ -44,13 +36,16 @@ In case of complicated expressions, using spaces can be important for readabilit
 command (1 + 3) (3 + 4)
 ```
 
+### Types
+
+Weblogo supports 3 types: number, structured variable and code. The structured variable can be an array or a dict-like structure.
+Strings are not supported natively, but the "abc" format is translated to a three-element numeric array. 
+
+Numbers, arrays and codes can be declared inline, but structured variables must be built by elements.
+
 ## Comments
 
 The programmer can comment out a line, everything after `//` will be ignored. Logo has no block comments.
-
-## Variables
-
-
 
 
 # Basic language examples

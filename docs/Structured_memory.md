@@ -53,4 +53,10 @@ Was done @ e85d752ede5052d738e4c266635c3a2877d5d588
 ### Structured data must contain only ParamType-s
 
 When a structured data in the memory contains an array, its elements must be ParamType. This means however that a nested array is an array containing structured data and a nested object is also a structured data.
-Also string type must be removed, array must be used isntead of that.
+Also string type must be removed, array must be used instead of that.
+
+Was done @ ff7dda088119a6392390825a8b313890fc06fbd7
+
+### Using strings must be translated as arrays, using 'k format must be translated as number
+
+The internal representation of string in web-logo must be an ascii number array.
