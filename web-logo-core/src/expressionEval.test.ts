@@ -98,7 +98,7 @@ describe('numericEval', () => {
           'x': 5,
           'y': 10,
           'z': 15, // Example of string that is a valid number
-          'invalid': "not a number" // Example of invalid variable value
+          'invalid': StructuredMemoryData.build_from_string("not a number") // Example of invalid variable value
         };
         return variables[key];
       })
@@ -168,7 +168,7 @@ describe('numericEval', () => {
 
   // Test case for handling invalid variable values
   it('throws an error for invalid variable values', () => {
-    expect(() => expressionEval('invalid + 5', memoryMock)).toThrow('Invalid expression. + needs number but got not a number (string)');
+    expect(() => expressionEval('invalid + 5', memoryMock)).toThrow('Invalid expression. + needs number but got [object Object] (object)');
   });
 
   // Test case for nested expressions
@@ -200,12 +200,12 @@ describe('evaluateVariableName', () => {
     },
     getVariable: (name: string): ParamType => {
       const variables: { [key: string]: ParamType } = {
-        'foo': JSON.stringify({ bar: { spam: "42" }, arr: ["1", "2", "3"] }),
+        'foo': new StructuredMemoryData({ bar: new StructuredMemoryData({ spam: 42 }), arr: new StructuredMemoryData([1,2,3]) }),
         'num': 5,
-        'str': 'hello',
+        'str': StructuredMemoryData.build_from_string('hello'),
         'foo.arr[0]': 1
       };
-      return variables[name] || "";
+      return variables[name] || 0;
     }
   };
 
@@ -239,7 +239,7 @@ describe('Handle structured variables', () => {
         'foo.arr[0]': 1,
         'foo.arr[1][1]': 100
       };
-      return variables[name] || `Received: ${name}`;
+      return variables[name] || 0;
     }
   };
 
@@ -269,7 +269,7 @@ describe('Handle builtin functions', () => {
       if (name == "foo") {
         return new StructuredMemoryData([1,2,3]);
       }
-      return "";
+      return 0;
     }
   };
 
@@ -332,7 +332,7 @@ describe("Handling arrays as input variables", () => {
   it('Complex array expressions with comas', () => {
     expect(expressionEval('[ vecsize(3,4)   , 2]', mockGetter)).toEqual(new StructuredMemoryData([5,2]));
   });
-  it.only('Nested arrays', () => {
+  it('Nested arrays', () => {
     expect(expressionEval('[ [2, 3] , 4]', mockGetter)).toEqual(new StructuredMemoryData([new StructuredMemoryData([2,3]),4]));
   });
   

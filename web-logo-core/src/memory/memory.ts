@@ -82,7 +82,7 @@ export class Memory implements AbstractMemory {
     }
     if (baseName in this.variables) {
       if (structured) {
-        let retRoot : object;
+        let retRoot : StructuredMemoryData = new StructuredMemoryData({});
         const memoryCell = this.variables[baseName];
         if (memoryCell.type === "struct") {
           retRoot = memoryCell.value;
@@ -91,23 +91,13 @@ export class Memory implements AbstractMemory {
         }
         const processedKey = evaluateVariableName(key, this);
         const result = getDataMember(processedKey, retRoot);
-        if (typeof result === "object") {
-          return new StructuredMemoryData(result);
-        } else {
-          return result;
-        }
+        return result;
       } else {
         const memoryCell = this.variables[key];
-        if (memoryCell.type === "struct") {
-          return new StructuredMemoryData(memoryCell.value);
-        } else if (memoryCell.type === "numeric") {
-          return memoryCell.value;
-        } else if (memoryCell.type === "code") {
-          return memoryCell.value;
-        }
+        return memoryCell.value;
       }
     }
-    if (this.parent === undefined) return "";
+    if (this.parent === undefined) return 0;
     return this.parent.getVariable(key);
   }
 }

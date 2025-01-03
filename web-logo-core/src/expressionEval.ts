@@ -367,10 +367,24 @@ export function evaluateVariableName(name: string, getter: VariableGetter): stri
       // Handle simple variable substitution
       const varName = match.slice(1, -1); // Remove the angle brackets
       const varValue = getter.getVariable(varName);
-      if (typeof varValue !== 'string') {
-        throw new Error(`Variable ${varName} is not a string.`);
+      if (!isStructuredMemoryData(varValue)) {
+        throw new Error(`Variable ${varName} is not a structured memory data.`);
       }
-      return varValue;
+      const possibleStringData = varValue.data;
+      if (!Array.isArray(possibleStringData)) {
+        throw new Error(`Variable ${varName} doesn't contain an array, can't convert it to string`);
+      }
+      if (!Array.isArray(possibleStringData)) {
+        throw new Error(`Variable ${varName} doesn't contain an array, can't convert it to string`);
+      }
+      const numericArray = possibleStringData.map(e => {
+        if (typeof(e) !== "number") {
+          throw new Error(`Variable ${varName} has non-numeric elements, it can not be a string`);
+        } else {
+          return e;
+        }
+      })
+      return String.fromCharCode(...numericArray);
     }
     return ''; // Default case, should not be reached
   });
