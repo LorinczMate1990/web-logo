@@ -125,7 +125,8 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
 
   const lineHeight = 20; // Example line height in pixels
   const maxHeight = `${lineHeight * maxLines}px`;
-
+  const commandPromptHeight = Math.min(input.split('\n').length * lineHeight, lineHeight * maxLines);
+  
   const formatResponse = (response: string) => {
     return response.split('\n').map((line, index) => (
       <React.Fragment key={index}>
@@ -136,8 +137,8 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
   };
 
   return (
-    <div className="commandLineContainer">
-      <div className="responseContainer" style={{ maxHeight: maxHeight }}>
+    <div className="commandLineContainer" style={{ height: "100%" }}>
+      <div className="responseContainer" style={{ height: `calc(100% - ${commandPromptHeight*2}px)`, backgroundColor: "white" }}>
         {responses.map((res, index) => (
           <p
             key={index}
@@ -157,7 +158,7 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
           onKeyUp={handleKeyUp}
           autoFocus
           className="commandInput"
-          style={{ height: `${Math.min(input.split('\n').length * lineHeight, lineHeight * maxLines)}px` }}
+          style={{ height: `${commandPromptHeight}px` }}
         />
       </form>
     </div>
