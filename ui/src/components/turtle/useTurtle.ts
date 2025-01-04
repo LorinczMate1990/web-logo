@@ -30,10 +30,10 @@ export default function useTurtle(context : CanvasRenderingContext2D | null) {
         instance.go(-message.distance);
         break;
       case "left":
-        instance.rotate(message.radian);
+        instance.rotate(-message.radian);
         break;
       case "right":
-        instance.rotate(-message.radian);
+        instance.rotate(message.radian);
         break;
       case "setPenState":
         instance.setPenState(message.penState);
