@@ -1,0 +1,22 @@
+learn koch n a {
+    if n {
+        koch n-1 a/3
+        l 60
+        koch n-1 a/3
+        r 120
+        koch n-1 a/3
+        l 60
+        koch n-1 a/3
+    } {
+        f a
+    }
+}
+
+learn snow n a {
+    repeat 3 {
+        koch n a
+        r 120
+    }
+}
+
+snow 5 400
