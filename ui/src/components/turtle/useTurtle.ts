@@ -1,28 +1,27 @@
 import { useEffect, useRef, useState } from "react";
-import TurtleInstance from "../../models/TurtleInstance";
+import TurtleInstance, { GraphTurtleProperties } from "../../models/TurtleInstance";
 import { useSubscriber } from "../../pubsub/pubsubs";
 import { turtleCommandPubSub, TurtleCommandMessage } from 'web-logo-core'
-
-type GraphTurtle = {
-  x : number;
-  y : number;
-  orientation : number;
-  picture: any; // TODO What shoud this be?
-};
+import simpleTurtle from '../../assets/simple-turtle.png'
 
 export default function useTurtle(context : CanvasRenderingContext2D | null) {
-  const [graphTurtle, setGraphTurtle] = useState<GraphTurtle | null>(null);
+  const [graphTurtle, setGraphTurtle] = useState<GraphTurtleProperties | null>(null);
   const turtleInstance = useRef<TurtleInstance>();
   useEffect(() => {
     if (turtleInstance.current === null || turtleInstance.current === undefined) {
-      turtleInstance.current = new TurtleInstance("turtle0", "turtles", {x: 400, y: 400}, 0, context, "down", "black", 1);
-    } else {
-      turtleInstance.current.setCanvasContext(context);
+      const instance = new TurtleInstance("turtle0", "turtles", {x: 400, y: 400}, 0, context, "down", "black", 1);
+      turtleInstance.current = instance;
+      setGraphTurtle({
+        ...instance
+      });
     }
-  }, [context]);
+    turtleInstance.current.setCanvasContext(context);
+  }, [context, turtleInstance.current]);
   useSubscriber<TurtleCommandMessage>(turtleCommandPubSub, (message) => {
     const instance = turtleInstance.current;
-    if (instance === undefined) return;
+    if (instance === undefined) {
+      return;
+    }
     switch (message.command) {
       case "forward":
         instance.go(message.distance);
@@ -53,10 +52,7 @@ export default function useTurtle(context : CanvasRenderingContext2D | null) {
         break;
     }
     setGraphTurtle({
-      x : instance.position.x,
-      y : instance.position.y,
-      orientation: instance.orientation,
-      picture: "",
+      ...instance
     });
   }, [turtleInstance.current]);
  

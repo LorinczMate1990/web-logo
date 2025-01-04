@@ -1,6 +1,19 @@
 import { PenState, Orientation, Position } from "web-logo-core";
+import simpleTurtle from '../assets/simple-turtle.png'
 
-class TurtleInstance {
+type TurtlePicture = {
+  path: string,
+  offsetX : number,
+  offsetY : number
+};
+
+export interface GraphTurtleProperties {
+  position: Position;
+  orientation: Orientation;
+  picture: TurtlePicture;
+};
+
+class TurtleInstance implements GraphTurtleProperties {
   name: string;
   group: string;
   position: Position;
@@ -13,6 +26,7 @@ class TurtleInstance {
   canvasContext: CanvasRenderingContext2D | null;
   private homePosition: Position = { x: 0, y: 0 };
   private homeOrientation: Orientation = 0; // Default to 0 radians
+  picture: TurtlePicture;
 
   constructor(
     name: string,
@@ -22,7 +36,8 @@ class TurtleInstance {
     canvasContext: CanvasRenderingContext2D | null,
     penState: PenState = 'down',
     penColor: string = 'black',
-    penWidth: number = 1
+    penWidth: number = 1,
+
   ) {
     this.name = name;
     this.group = group;
@@ -34,6 +49,11 @@ class TurtleInstance {
       penColor,
       penWidth,
     };
+    this.picture = {
+      offsetX: 18,
+      offsetY: 23,
+      path: simpleTurtle,
+    }
   }
 
   setCanvasContext(canvasContext: CanvasRenderingContext2D | null) {
