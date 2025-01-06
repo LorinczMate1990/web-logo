@@ -4,6 +4,7 @@ import Turtle from './components/turtle/Turtle';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 import CommandLine from './components/CommandLine/CommandLine';
+import ProjecrExplorer from './components/ProjectExplorer/ProjectExplorer';
 
 function App() {
   return (
@@ -11,10 +12,7 @@ function App() {
       <PanelGroup direction="horizontal">
         {/* Resizable Side Panel */}
         <Panel defaultSize={20} style={{ backgroundColor: "#f0f0f0" }}>
-          <div style={{ padding: "10px" }}>
-            <h3>Side Panel</h3>
-            <p>Resizable content here...</p>
-          </div>
+          <ProjecrExplorer/>
         </Panel>
         {/* Resize Handle */}
         <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", width: "5px" }} />

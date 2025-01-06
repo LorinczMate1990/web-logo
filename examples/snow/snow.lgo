@@ -1,0 +1,8 @@
+learn snow n a {
+    repeat 3 {
+        koch n a
+        r 120
+    }
+}
+
+snow 5 400
