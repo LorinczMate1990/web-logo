@@ -12,7 +12,9 @@ function App() {
       <PanelGroup direction="horizontal">
         {/* Resizable Side Panel */}
         <Panel defaultSize={20} style={{ backgroundColor: "#f0f0f0" }}>
-          <ProjecrExplorer/>
+          <ProjecrExplorer
+            onFileDoubleClick={(e) => window.alert(`e: ${e}`)}
+          />
         </Panel>
         {/* Resize Handle */}
         <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", width: "5px" }} />

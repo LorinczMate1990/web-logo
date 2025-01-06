@@ -1,0 +1,51 @@
+/* ProjectExplorer.css */
+
+/* General Styles */
+.container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .button {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+  
+  .project-explorer {
+    margin-top: 20px;
+  }
+  
+  .folder,
+  .file {
+    cursor: pointer;
+  }
+  
+  .folder {
+    font-weight: normal;
+  }
+  
+  .folder.open {
+    font-weight: bold;
+  }
+  
+  .folder-content {
+    margin-left: 20px;
+  }
+  
+  .context-menu {
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2);
+    padding: 8px;
+  }
+  
+  .context-menu-item {
+    padding: 4px 8px;
+    cursor: pointer;
+  }
+  
+  .context-menu-separator {
+    height: 1px;
+    background-color: #ccc;
+  }
+  
