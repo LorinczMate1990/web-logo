@@ -2,6 +2,12 @@ import { turtleCommandPubSub } from "./pubsub/pubsubs";
 import { AbstractMemory, ArgType, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "./types";
 import { Arguments } from "./ArgumentParser";
 
+function sleep(ms: number) {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 export default class CoreCommands {
   @Arguments(['numeric'])
   static async forward(args: ArgType, memory : AbstractMemory) {
@@ -118,6 +124,15 @@ export default class CoreCommands {
       cycleCore.context.setVariable("i", i);
       await cycleCore.execute();
     }
+  }
+
+  @Arguments({max: 1, front: ['numeric']})
+  static async coWait(args: ArgType, memory : AbstractMemory) {
+    if (args.length == 1) { 
+      await sleep(args[0] as number);
+    } else {
+      await sleep(0);
+    } 
   }
 
   /*@Arguments({exact: 2, front: ['numeric', new Set(['code', 'numeric', 'string'])]})
