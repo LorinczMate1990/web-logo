@@ -24,3 +24,4 @@ The result is as I expected, I saw the whole path of the turtle, yet the drawing
 # Implementation
 
 The wait command with or without parameter suspends the execution for an async cycle or for a given time. Using this, the programmer can give the CPU time for other tasks.
+Finished @ 320e58fbcb2d3f2ece337f4057390d82bcebed43
