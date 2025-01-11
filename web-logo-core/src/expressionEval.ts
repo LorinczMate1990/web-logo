@@ -20,7 +20,7 @@ function assertMustBeStructuredMemoryDataWithArrayContent(op : string, input : P
   if (!isStructuredMemoryData(input) || !Array.isArray(input.data) )  throw new Error(`Invalid expression. ${op} needs array but got ${input} (${typeof input})`);
 }
 
-const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|', '!'];
+const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|', '!', ':'];
 
 const builtinFunctions : {[key: string]: {params: number, function: (a:ParamType[]) => ParamType}} = {
   "vecsize": {
@@ -151,6 +151,13 @@ function executeBinaryOperator(op : string, a? : ParamType, b? : ParamType) : Pa
       assertMustBeNumber(op, a);
       assertMustBeNumber(op, b);
       return Number(a != 0 || b != 0);
+    };
+    case ':': {
+      assertMustBeStructuredMemoryDataWithArrayContent(op, a);
+      assertMustBeStructuredMemoryDataWithArrayContent(op, b);
+      a;
+      return new StructuredMemoryData([...a.data, ...b.data]);
+      
     }
     default: throw new Error(`Invalid expression. Unhandled infix operator: ${op}`);
     
@@ -340,20 +347,7 @@ function stringToArrayConverter(expression : string) {
 export function expressionEval(expression: string, memory: VariableGetter): ParamType {
   expression = expression.trim();
   expression = stringToArrayConverter(expression);
-
-  // TODO : This assumes that there is no infix operation between arrays
-  if (expression[0] == '[') {
-    // Have to split on , when they are not inside of a ( ) or nested [ ] or " "
-    const elements = splitArrayToElements(expression.slice(1, expression.length-1));
-    let resultArray = new StructuredMemoryData([]);
-    for (const element of elements) {
-      const evaluatedElement = expressionEval(element, memory);
-      (resultArray.data as ParamType[]).push(evaluatedElement);
-    }
-    return resultArray;
-  } else {
-    return genericEval(expression, memory);
-  }
+  return genericEval(expression, memory);
 }
 
 function splitArrayToElements(array : string) : string[] {
@@ -399,7 +393,6 @@ function genericEval(expression: string, memory: VariableGetter): ParamType {
 
   function evaluate(tokens: string[]): ParamType {
     const stack: ParamType[] = [];
-
     for (let i = tokens.length - 1; i >= 0; i--) {
       const token = tokens[i];
       if (isOperator(token)) {
@@ -422,7 +415,14 @@ function genericEval(expression: string, memory: VariableGetter): ParamType {
       } else if (isNumeric(token)) {
         stack.push(parseFloat(token));
       } else if (isArrayToken(token)) {
-        const evaluatedArray = expressionEval(token, memory);
+        // Have to split on , when they are not inside of a ( ) or nested [ ] or " "
+        const elements = splitArrayToElements(token.slice(1, token.length-1));
+        let evaluatedArray = new StructuredMemoryData([]);
+        for (const element of elements) {
+          const evaluatedElement = expressionEval(element, memory);
+          (evaluatedArray.data as ParamType[]).push(evaluatedElement);
+        }
+
         stack.push(evaluatedArray);
       } else {
         const variableName = evaluateVariableName(token, memory);

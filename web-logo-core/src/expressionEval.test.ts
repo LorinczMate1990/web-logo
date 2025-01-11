@@ -347,7 +347,7 @@ describe("Handling arrays as input variables", () => {
   
 });
 
-describe("Handle strings and chars", () => {
+describe("Handle strings", () => {
   const mockGetter: VariableGetter = {
     hasVariable: (name : string): boolean => {
       return name in ['foo'];
@@ -377,6 +377,7 @@ describe("Handle strings and chars", () => {
     expect(expressionEval('length("asd")', mockGetter)).toEqual(3);
   });
 
-  
-  
+  it('Concatenating two strings', () => {
+    expect(expressionEval('"abc":"123"', mockGetter)).toEqual(StructuredMemoryData.build_from_string("abc123"));
+  });
 });
