@@ -7,6 +7,11 @@ function isNumeric(str: string): boolean {
   return !isNaN(str as any) && !isNaN(parseFloat(str));
 }
 
+function isArrayToken(str : string) : boolean {
+  const trimmed = str.trim();
+  return trimmed[0] == "[" && trimmed[trimmed.length-1] == "]";
+}
+
 function assertMustBeNumber(op : string, input : ParamType): asserts input is number {
   if (typeof input !== 'number') throw new Error(`Invalid expression. ${op} needs number but got ${input} (${typeof input})`);
 }
@@ -152,6 +157,22 @@ function executeBinaryOperator(op : string, a? : ParamType, b? : ParamType) : Pa
   }
 }
 
+function convertToAsciiList(currentToken: string): string {
+  if (!currentToken) return '';
+
+  const asciiValues = Array.from(currentToken).map(char => char.charCodeAt(0));
+  return asciiValues.join(',');
+}
+
+// TODO: Escaped { and } should be escaped as {ascii({)} and {ascii(})}
+const tableOfEscapedChars : {[key : string] : string} = {
+  '"': '"',
+  "n": "\n",
+  "t": "\t",
+  "r": "\r",
+  "\\": "\\",
+}
+
 function pretokenize(expression: string): string[] {
   const tokens: string[] = [];
   let currentToken: string = '';
@@ -274,9 +295,53 @@ function toPolishNotation(infix: string): string[] {
   return outputQueue.reverse();
 }
 
+function stringToArrayConverter(expression : string) {
+  let currentToken = "";
+  let insideString = false;
+  let prevChar : string = "";
+  let prevPrevChar : string = "";
+
+  let result = "";
+
+  for (const char of expression) {
+    if (insideString) {
+      if (char == '"' && (prevChar != "\\" || prevPrevChar == "\\"))  {
+        const arrayForm = "[" + convertToAsciiList(currentToken) + "]";
+        currentToken = "";
+        result+=arrayForm;
+        insideString = false;
+      } else {
+        if (char == "\\" && prevPrevChar !== "\\") {
+          // Do nothing, the next char will be escaped
+        } else if (prevChar == "\\" && prevPrevChar != "\\") {
+          // Escaped chars
+          if (!(char in tableOfEscapedChars)) {
+            currentToken += tableOfEscapedChars[char];
+          } else {
+            throw new Error(`Unknown escape sequence: ${char}`)
+          }
+        } else {
+          currentToken += char;
+        }
+      }
+    } else {
+      if (char == '"') {
+        insideString = true;
+      } else {
+        result += char;
+      }
+    }
+    prevPrevChar = prevChar;
+    prevChar = char;
+  }
+  return result;
+}
 
 export function expressionEval(expression: string, memory: VariableGetter): ParamType {
   expression = expression.trim();
+  expression = stringToArrayConverter(expression);
+
+  // TODO : This assumes that there is no infix operation between arrays
   if (expression[0] == '[') {
     // Have to split on , when they are not inside of a ( ) or nested [ ] or " "
     const elements = splitArrayToElements(expression.slice(1, expression.length-1));
@@ -356,6 +421,9 @@ function genericEval(expression: string, memory: VariableGetter): ParamType {
         stack.push(func.function(params));
       } else if (isNumeric(token)) {
         stack.push(parseFloat(token));
+      } else if (isArrayToken(token)) {
+        const evaluatedArray = expressionEval(token, memory);
+        stack.push(evaluatedArray);
       } else {
         const variableName = evaluateVariableName(token, memory);
         const variableValue = memory.getVariable(variableName);

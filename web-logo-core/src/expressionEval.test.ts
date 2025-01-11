@@ -306,6 +306,10 @@ describe('Handle builtin functions', () => {
     expect(expressionEval('length(foo)', mockGetter)).toEqual(3);
   });
 
+  it('Function over array expression', () => {
+    expect(expressionEval('length([1,2,3])', mockGetter)).toEqual(3);
+  });
+
 });
 
 describe("Handling arrays as input variables", () => {
@@ -340,5 +344,39 @@ describe("Handling arrays as input variables", () => {
   it('Nested arrays', () => {
     expect(expressionEval('[ [2, 3] , 4]', mockGetter)).toEqual(new StructuredMemoryData([new StructuredMemoryData([2,3]),4]));
   });
+  
+});
+
+describe("Handle strings and chars", () => {
+  const mockGetter: VariableGetter = {
+    hasVariable: (name : string): boolean => {
+      return name in ['foo'];
+    },
+    getVariable: (name: string): ParamType => {
+      return {
+        "a": 1,
+        "b": 2,
+      }[name] ?? 0;
+    }
+  };
+
+  it('Simple string expression must be a structured memory data', () => {
+    expect(expressionEval('"asd"', mockGetter)).toEqual(StructuredMemoryData.build_from_string("asd"));
+  });
+
+  it('String inside an array', () => {
+    expect(expressionEval('["asd", "jkl"]', mockGetter)).toEqual(
+      new StructuredMemoryData([
+        StructuredMemoryData.build_from_string("asd"), 
+        StructuredMemoryData.build_from_string("jkl")
+      ])
+    );
+  });
+
+  it('String inside a function', () => {
+    expect(expressionEval('length("asd")', mockGetter)).toEqual(3);
+  });
+
+  
   
 });
