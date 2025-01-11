@@ -1,5 +1,5 @@
 import BuiltinDictionary from "./builtinDicts/english";
-import { expressionEval } from "./expressionEval";
+import { expressionEval } from "./expressionEval/expressionEval";
 import { AbstractMemory, ArgType, isExecutableFactory } from "./types";
 
 export type PossibleArgumentParsingMethods = 'word' | 'numeric' | 'code' | 'variable' | 'array';

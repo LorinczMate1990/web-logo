@@ -1,4 +1,4 @@
-import { evaluateVariableName } from "../expressionEval";
+import { evaluateVariableName } from "../expressionEval/expressionEval";
 import { AbstractMemory, ExecutableFactory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, isExecutableFactory, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types";
 import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from "./structuredVariableHandler";
 

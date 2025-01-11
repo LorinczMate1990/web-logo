@@ -1,4 +1,4 @@
-import { ArgType, ParamType, StructuredMemoryData, VariableGetter } from './types';
+import { ArgType, ParamType, StructuredMemoryData, VariableGetter } from '../types';
 import { evaluateVariableName, expressionEval, tokenize } from './expressionEval';
 
 describe('tokenize', () => {
