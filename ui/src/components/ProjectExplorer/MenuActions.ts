@@ -1,3 +1,6 @@
+import { Interpreter } from "web-logo-core";
+import { commandLinePubSub } from "../../pubsub/pubsubs";
+
 // Function to create a new file
 export const createNewFile = async (parentHandle: FileSystemDirectoryHandle) => {
   const fileName = window.prompt("Enter the name of the new file:");
@@ -27,6 +30,38 @@ export const createNewDirectory = async (parentHandle: FileSystemDirectoryHandle
 const renameFileOrFolder = async (handle: FileSystemHandle) => {
   // TODO This seems impossible.
   // Maybe by recreating and removing the file, but I won't do that.
+};
+
+export const executeFile = async (handle: FileSystemFileHandle, interpreter : Interpreter) => {
+  try {
+    // Get a file object from the handle
+    const file = await handle.getFile();
+
+    // Read the content of the file
+    const content = await file.text();
+    let success = false;
+
+    try {
+      await interpreter.execute(content);
+      success = true;
+    } catch (e) {
+      commandLinePubSub.publish({
+        topic: "commandLine",
+        error: true,
+        content: `Error during executing ${handle.name}: ${e}`
+      })
+    }
+    if (success) {
+      commandLinePubSub.publish({
+        topic: "commandLine",
+        error: false,
+        content: `${handle.name} executed successfully`
+      })
+    }
+  } catch (error) {
+    console.error("Error reading the file:", error);
+    throw error; // Optionally rethrow the error
+  }
 };
 
 // Function to delete a file or folder

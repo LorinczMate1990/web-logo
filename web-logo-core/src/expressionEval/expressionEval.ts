@@ -11,6 +11,13 @@ export function expressionEval(expression: string, memory: VariableGetter): Para
   return evaluatePolishForm(polishNotation, memory);
 }
 
+// TODO: Most of the files should be moved in other files
+// but expressionEval is referenced from them
+// Solution: Add expressionEval as a parameter to functions using it
+// It could be a generic expressionEval at their level
+// Other approach: OOP
+// Lots of variables are common (memory for example is needed from many places)
+// So a nice class hierarchy with DI could be also nice
 function evaluatePolishForm(tokens: string[], memory: VariableGetter): ParamType {
   const stack: ParamType[] = [];
   for (let i = tokens.length - 1; i >= 0; i--) {

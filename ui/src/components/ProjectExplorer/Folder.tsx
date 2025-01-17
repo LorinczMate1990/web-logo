@@ -3,6 +3,7 @@ import * as ContextMenu from "@radix-ui/react-context-menu";
 import './ProjectExplorer.css';
 import File from "./File"
 import { createNewDirectory, createNewFile, deleteFileOrFolder } from "./MenuActions";
+import { Interpreter } from "web-logo-core";
 
 export type FileOrFolder = {
   name: string;
@@ -16,9 +17,10 @@ type FolderProps = {
   onFileDoubleClick: (file: FileSystemFileHandle) => void;
   parentDir: FileSystemDirectoryHandle;
   refreshParent: () => Promise<unknown>;
+  interpreter : Interpreter;
 };
 
-const Folder: React.FC<FolderProps> = ({ name, handle, onFileDoubleClick, parentDir, refreshParent }) => {
+const Folder: React.FC<FolderProps> = ({ name, handle, onFileDoubleClick, parentDir, refreshParent, interpreter }) => {
   const [items, setItems] = useState<FileOrFolder[] | null>(null);
   const [handles, setHandles] = useState<Record<string, FileSystemHandle>>({});
   const [isOpen, setIsOpen] = useState(false);
@@ -121,6 +123,7 @@ const Folder: React.FC<FolderProps> = ({ name, handle, onFileDoubleClick, parent
               <Folder
                 parentDir={handle}
                 refreshParent={refresh}
+                interpreter={interpreter}
                 key={index}
                 name={item.name}
                 handle={handles[item.name] as FileSystemDirectoryHandle}
@@ -132,6 +135,7 @@ const Folder: React.FC<FolderProps> = ({ name, handle, onFileDoubleClick, parent
                 parentDir={handle}
                 name={item.name}
                 handle={handles[item.name] as FileSystemFileHandle}
+                interpreter={interpreter}
                 onDoubleClick={(file: FileSystemFileHandle) => {
                   alert("Open file")
                 }}

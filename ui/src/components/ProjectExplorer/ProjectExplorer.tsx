@@ -4,10 +4,12 @@ import * as ContextMenu from "@radix-ui/react-context-menu";
 import Folder, { FileOrFolder } from "./Folder";
 import File from "./File";
 import { createNewDirectory, createNewFile } from "./MenuActions";
+import { Interpreter } from "web-logo-core";
 
 const ProjectExplorer: React.FC<{
   onFileDoubleClick: (file: FileSystemFileHandle) => void;
-}> = ({ onFileDoubleClick }) => {
+  interpreter : Interpreter,
+}> = ({ onFileDoubleClick, interpreter }) => {
   const rootHandle = useRef<FileSystemDirectoryHandle | null>(null);
   const [items, setItems] = useState<FileOrFolder[] | null>(null);
   const [handles, setHandles] = useState<Record<string, FileSystemHandle>>({});
@@ -94,6 +96,7 @@ const ProjectExplorer: React.FC<{
                 item.isFolder ? (
                   <Folder
                     refreshParent={refresh}
+                    interpreter={interpreter}
                     key={index}
                     name={item.name}
                     handle={handles[item.name] as FileSystemDirectoryHandle}
@@ -103,6 +106,7 @@ const ProjectExplorer: React.FC<{
                 ) : (
                   <File
                     refreshParent={refresh}
+                    interpreter={interpreter}
                     name={item.name}
                     parentDir={rootHandle.current!}
                     handle={handles[item.name] as FileSystemFileHandle}

@@ -1,7 +1,8 @@
 import React from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import './ProjectExplorer.css';
-import { createNewDirectory, createNewFile, deleteFileOrFolder } from "./MenuActions";
+import { createNewDirectory, createNewFile, deleteFileOrFolder, executeFile } from "./MenuActions";
+import { Interpreter } from "web-logo-core";
 
 type FileProps = {
   name: string;
@@ -9,9 +10,10 @@ type FileProps = {
   onDoubleClick: (file: FileSystemFileHandle) => void;
   parentDir: FileSystemDirectoryHandle;
   refreshParent: () => Promise<unknown>;
+  interpreter : Interpreter;
 };
 
-const File: React.FC<FileProps> = ({ name, handle, onDoubleClick, parentDir, refreshParent }) => {
+const File: React.FC<FileProps> = ({ name, handle, onDoubleClick, parentDir, refreshParent, interpreter }) => {
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger>
@@ -23,6 +25,12 @@ const File: React.FC<FileProps> = ({ name, handle, onDoubleClick, parentDir, ref
         </div>
       </ContextMenu.Trigger>
       <ContextMenu.Content className="context-menu">
+        <ContextMenu.Item
+          className="context-menu-item"
+          onSelect={() => executeFile(handle, interpreter)}
+        >
+          Run code
+        </ContextMenu.Item>
         <ContextMenu.Item
           className="context-menu-item"
           onSelect={() => console.log(`Can't rename it currently...`)}

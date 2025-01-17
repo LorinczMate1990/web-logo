@@ -1,6 +1,7 @@
 import React, { useState, KeyboardEvent, useRef } from 'react';
 import './CommandLine.css'; // Import the CSS file
 import { Interpreter } from 'web-logo-core';
+import { commandLinePubSub, useSubscriber } from '../../pubsub/pubsubs';
 
 interface CommandResponse {
   accepted: boolean;
@@ -12,13 +13,22 @@ const DEFAULT_INDENT_LEVEL = 3;
 
 type CommandHistory = string[];
 
-const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: number }) => {
+const CommandLine: React.FC<{ maxLines: number, interpreter : Interpreter }> = ({ maxLines, interpreter }) => {
   const [input, setInput] = useState<string>('');
   const [history, setHistory] = useState<CommandHistory>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
   const [lastEditedCommand, setLastEditedCommand] = useState<string>(''); // State for storing last edited command
   const [responses, setResponses] = useState<CommandResponse[]>([]);
-  const interpreter = useRef<Interpreter>(new Interpreter());
+
+  const outerResponses = useSubscriber(commandLinePubSub, (message) => {
+    const newResponse : CommandResponse = {
+      accepted : true,
+      error: message.error,
+      response: message.content,
+    };
+    setResponses([...responses, newResponse]);
+
+  }, [responses, setResponses]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
@@ -29,7 +39,7 @@ const CommandLine: React.FC<{ maxLines: number }> = ({ maxLines }: { maxLines: n
 
   const executeCommand = async (command: string): Promise<CommandResponse> => {
     try {
-    await interpreter.current.execute(command);
+      await interpreter.execute(command);
     } catch (e) {
       const error = e as Error;
       return {

@@ -1,4 +1,4 @@
-import { Subscribe } from "typesafe-bus";
+import PubSub, { Subscribe } from "typesafe-bus";
 import { useEffect } from "react";
 
 // TODO Should be exported from pubsub
@@ -9,6 +9,14 @@ type MessageMustHaveTopic = {
   topic: string;
   // Additional properties can be added here if needed
 };
+
+export type CommandLineMessage = {
+  topic: "commandLine";
+  content : string;
+  error : boolean;
+}
+
+export const commandLinePubSub = new PubSub<CommandLineMessage>();
 
 // This is a react-hook. Should be part of an auxiliary lib
 export function useSubscriber<Message extends MessageMustHaveTopic>(subscribe: Subscribe<Message>, callback: Callback<Message>, deps?: React.DependencyList | undefined) {
