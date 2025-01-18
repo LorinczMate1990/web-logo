@@ -3,7 +3,7 @@ import './ProjectExplorer.css';
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import Folder, { FileOrFolder } from "./Folder";
 import File from "./File";
-import { createNewDirectory, createNewFile } from "./MenuActions";
+import { createNewDirectory, createNewFile } from "../../utils/FileHandling";
 import { Interpreter } from "web-logo-core";
 
 const ProjectExplorer: React.FC<{
