@@ -110,9 +110,6 @@ const ProjectExplorer: React.FC<{
                     name={item.name}
                     parentDir={rootHandle.current!}
                     handle={handles[item.name] as FileSystemFileHandle}
-                    onDoubleClick={(file: FileSystemFileHandle) => {
-                      alert("Open file")
-                    }}
                   />
                 )
               )}

@@ -1,24 +1,23 @@
 import React from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import './ProjectExplorer.css';
-import { createNewDirectory, createNewFile, deleteFileOrFolder, executeFile } from "./MenuActions";
+import { createNewDirectory, createNewFile, deleteFileOrFolder, executeFile, openCodeEditor } from "./MenuActions";
 import { Interpreter } from "web-logo-core";
 
 type FileProps = {
   name: string;
   handle: FileSystemFileHandle;
-  onDoubleClick: (file: FileSystemFileHandle) => void;
   parentDir: FileSystemDirectoryHandle;
   refreshParent: () => Promise<unknown>;
   interpreter : Interpreter;
 };
 
-const File: React.FC<FileProps> = ({ name, handle, onDoubleClick, parentDir, refreshParent, interpreter }) => {
+const File: React.FC<FileProps> = ({ name, handle, parentDir, refreshParent, interpreter }) => {
   return (
     <ContextMenu.Root>
       <ContextMenu.Trigger>
         <div
-          onDoubleClick={() => onDoubleClick(handle)}
+          onDoubleClick={() => openCodeEditor(handle)}
           className="file"
         >
           📄 {name}

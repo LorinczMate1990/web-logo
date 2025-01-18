@@ -136,9 +136,6 @@ const Folder: React.FC<FolderProps> = ({ name, handle, onFileDoubleClick, parent
                 name={item.name}
                 handle={handles[item.name] as FileSystemFileHandle}
                 interpreter={interpreter}
-                onDoubleClick={(file: FileSystemFileHandle) => {
-                  alert("Open file")
-                }}
               />
             )
           )}
