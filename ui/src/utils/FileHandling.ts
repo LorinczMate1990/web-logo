@@ -1,5 +1,6 @@
 import { Interpreter } from "web-logo-core";
-import { commandLinePubSub } from "../pubsub/pubsubs";
+import { CommandLineMessage, commandLinePubSub } from "../pubsub/pubsubs";
+import PubSub from "typesafe-bus";
 
 export const readFile = async (handle: FileSystemFileHandle) => {
   // Get a file object from the handle
@@ -20,6 +21,33 @@ export const writeFile = async (writableHandle: FileSystemWritableFileStream, co
   await writableHandle.close();
 };
 
+export const executeCode = async (code: string, interpreter: Interpreter, commandLinePubSub : PubSub<CommandLineMessage>) => {
+  try {
+    let success = false;
+
+    try {
+      await interpreter.execute(code);
+      success = true;
+    } catch (e) {
+      commandLinePubSub.publish({
+        topic: "commandLine",
+        error: true,
+        content: `Error during executing: ${e}`
+      })
+    }
+    if (success) {
+      console.log("Success")
+      commandLinePubSub.publish({
+        topic: "commandLine",
+        error: false,
+        content: `Commands executed successfully`
+      })
+    }
+  } catch (error) {
+    console.error("Error reading the file:", error);
+    throw error; // Optionally rethrow the error
+  }
+}
 
 export const executeFile = async (handle: FileSystemFileHandle, interpreter: Interpreter) => {
   try {

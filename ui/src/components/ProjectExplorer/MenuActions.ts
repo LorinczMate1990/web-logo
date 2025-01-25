@@ -1,10 +1,12 @@
 import { Writable } from "stream";
-import { getWritableStream } from "../../utils/FileHandling";
+import { executeCode, getWritableStream } from "../../utils/FileHandling";
+import { Interpreter } from "web-logo-core";
+import { commandLinePubSub } from "../../pubsub/pubsubs";
 
-function openCodeEditorPopup() {
+function openCodeEditorPopup(popupName : string) {
   return window.open(
-    "/code-editor", // Your desired React route
-    "popupWindow",
+    "/code-editor",
+    popupName,
     `
     width=600,
     height=400,
@@ -21,13 +23,19 @@ function openCodeEditorPopup() {
   );
 }
 
-export function openCodeEditor(handle : FileSystemFileHandle) {
+export function openCodeEditor(handle : FileSystemFileHandle, interpreter : Interpreter) {
   getWritableStream(handle).then((writableHandle) => {
     // After I aquired the writableHandle from the main page, I can aquire it from the popup, too
-    const popup = openCodeEditorPopup();
+    const popup = openCodeEditorPopup(handle.name+"-editor");
     if (popup) {
-      (popup as (Window & {sharedData: {fileHandle: FileSystemFileHandle}})).sharedData = {
+      (popup as (Window & {sharedData: {
+        fileHandle: FileSystemFileHandle,
+        interpreter: Interpreter,
+        executeCode : (str : string)=> Promise<void>,
+      }})).sharedData = {
         fileHandle: handle,
+        interpreter,
+        executeCode: (code) => executeCode(code, interpreter, commandLinePubSub),
       }
     } else {
       alert("Popup blocked! Please allow popups for this website.");

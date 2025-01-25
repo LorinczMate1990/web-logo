@@ -1,11 +1,12 @@
 import { Interpreter } from "web-logo-core";
-import { getWritableStream, readFile, writeFile } from '../utils/FileHandling'
+import { executeCode, getWritableStream, readFile, writeFile } from '../utils/FileHandling'
 import { useEffect, useRef, useState } from "react";
 import Editor from "react-simple-code-editor";
 import { highlight, languages } from 'prismjs';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css'; //Example style, you can use another
+import { commandLinePubSub } from "../pubsub/pubsubs";
 
 
 function getLogoLanguagePrismModel(interpreter : Interpreter) {
@@ -19,10 +20,17 @@ function getLogoLanguagePrismModel(interpreter : Interpreter) {
     },
   });
 }
-export default function CodeEditor({ interpreter }: { interpreter: Interpreter }) {
-  const logoModel = getLogoLanguagePrismModel(interpreter);
-  const sharedData = (window as unknown as (Window & { sharedData: { fileHandle: FileSystemFileHandle} })).sharedData;
+export default function CodeEditor() {
+  const sharedData = (window as unknown as (Window & { sharedData: {
+    fileHandle: FileSystemFileHandle,
+    executeCode: (code : string) => Promise<void>,
+    interpreter : Interpreter,
+  } })).sharedData;
   const openedFile = sharedData.fileHandle;
+  const preparedExecuteCode = sharedData.executeCode;
+  const interpreter = sharedData.interpreter;
+
+  const logoModel = getLogoLanguagePrismModel(interpreter);
 
   const [saved, setSaved] = useState(true);
   const [fileContent, setFileContent] = useState<string | null>(null);
@@ -36,6 +44,12 @@ export default function CodeEditor({ interpreter }: { interpreter: Interpreter }
     }
   }
   
+  const run = async () => {
+    if (fileContent) {
+      await preparedExecuteCode(fileContent);
+    }
+  }
+
   useEffect(() => {
     let isMounted = true;
 
@@ -72,6 +86,7 @@ export default function CodeEditor({ interpreter }: { interpreter: Interpreter }
 
   return (
     <div>
+      <button onClick={run}>Run</button>
       <button onClick={save}>Save</button>
       {fileContent === null ? <h1>Loading...</h1> :
         <Editor

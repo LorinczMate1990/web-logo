@@ -18,7 +18,7 @@ const File: React.FC<FileProps> = ({ name, handle, parentDir, refreshParent, int
     <ContextMenu.Root>
       <ContextMenu.Trigger>
         <div
-          onDoubleClick={() => openCodeEditor(handle)}
+          onDoubleClick={() => openCodeEditor(handle, interpreter)}
           className="file"
         >
           📄 {name}

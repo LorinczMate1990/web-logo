@@ -1,0 +1,18 @@
+learn tree len level {
+  
+  if level>0 {
+    penwidth level
+    f len
+    l 45
+    repeat level {
+      tree len/2 level-1
+      r 90/level
+    }
+    tree len/2 level-1
+    l 45
+    penwidth level
+    b len
+  }
+}
+
+tree 100 3

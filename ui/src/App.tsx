@@ -17,7 +17,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Workspace interpreter={interpreter.current}/>} />
-        <Route path="/code-editor" element={<CodeEditor interpreter={interpreter.current}/>} />
+        <Route path="/code-editor" element={<CodeEditor/>} />
       </Routes>
     </BrowserRouter>    
   );
