@@ -13,3 +13,4 @@ learn simplelogo instructions {
 }
 
 simplelogo [82, 82, 70, 70, 82, 70, 82, 82, 70, 82, 70, 70, 82, 82, 70, 70]
+simplelogo "FFLFLLFLFFLLFF"

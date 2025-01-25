@@ -28,10 +28,10 @@ Finished @ db3e215b5c1f67733eca291916e6448e999e75a2
 
 A proper text editor must support the following functions:
 * Auto formatter
-* Syntax highlight
+* Syntax highlight ( 45ac4c6bce28e5eac610915d9341970ce05e290c )
 * Show errors
 * Execute code
-* Save
+* Save ( 6970f5b2b23b285093f9d92e1ae386654a782dd8 )
 * Show line numbers
 
 The text editor must be opened by double click on a file.
