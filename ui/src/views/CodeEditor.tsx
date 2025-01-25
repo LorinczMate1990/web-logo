@@ -8,7 +8,19 @@ import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css'; //Example style, you can use another
 
 
+function getLogoLanguagePrismModel(interpreter : Interpreter) {
+  const keywords = interpreter.getKeywordList();
+  return languages.extend('clike', {
+    keyword: new RegExp(`\\b(?:${keywords.join('|')})\\b`),
+    number: /\b(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)\b/i,
+    operator: {
+        pattern: /(^|[^.])(?:\+\+|--|&&|\|\||->|=>|<<|>>>?|==|!=|[<>]=?|[+\-*/%&|^=!<>])(?!=)/,
+        lookbehind: true
+    },
+  });
+}
 export default function CodeEditor({ interpreter }: { interpreter: Interpreter }) {
+  const logoModel = getLogoLanguagePrismModel(interpreter);
   const sharedData = (window as unknown as (Window & { sharedData: { fileHandle: FileSystemFileHandle} })).sharedData;
   const openedFile = sharedData.fileHandle;
 
@@ -69,7 +81,7 @@ export default function CodeEditor({ interpreter }: { interpreter: Interpreter }
             setSaved(false);
             setFileContent(code);
           }}
-          highlight={code => highlight(code, languages.js, "javascript")}
+          highlight={code => highlight(code, logoModel, "javascript")}
           padding={10}
           style={{
             fontFamily: '"Fira code", "Fira Mono", monospace',
