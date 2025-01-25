@@ -1,6 +1,6 @@
 import { Interpreter } from "web-logo-core";
-import { readFile } from '../utils/FileHandling'
-import { useEffect, useState } from "react";
+import { getWritableStream, readFile, writeFile } from '../utils/FileHandling'
+import { useEffect, useRef, useState } from "react";
 import Editor from "react-simple-code-editor";
 import { highlight, languages } from 'prismjs';
 import 'prismjs/components/prism-clike';
@@ -9,16 +9,21 @@ import 'prismjs/themes/prism.css'; //Example style, you can use another
 
 
 export default function CodeEditor({ interpreter }: { interpreter: Interpreter }) {
-  const sharedData = (window as unknown as (Window & { sharedData: { fileHandle: FileSystemFileHandle } })).sharedData;
+  const sharedData = (window as unknown as (Window & { sharedData: { fileHandle: FileSystemFileHandle} })).sharedData;
   const openedFile = sharedData.fileHandle;
+
   const [saved, setSaved] = useState(true);
   const [fileContent, setFileContent] = useState<string | null>(null);
 
-  const save = () => {
-    setSaved(true);
+  const save = async () => {
+    console.log("navigator.userActivation: ", (window.navigator as any).userActivation)
+    if (fileContent) {
+      const writableOpenedFile = await getWritableStream(openedFile);
+      await writeFile(writableOpenedFile, fileContent);
+      setSaved(true);
+    }
   }
   
-
   useEffect(() => {
     let isMounted = true;
 
@@ -32,7 +37,7 @@ export default function CodeEditor({ interpreter }: { interpreter: Interpreter }
     return () => {
       isMounted = false; // Cleanup in case the component unmounts before the promise resolves
     };
-  }, [openedFile]);
+  }, []);
 
   useEffect(() => {
     let handleBeforeUnload = (event: BeforeUnloadEvent) => {

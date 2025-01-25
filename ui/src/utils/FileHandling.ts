@@ -10,6 +10,17 @@ export const readFile = async (handle: FileSystemFileHandle) => {
   return content;
 }
 
+export const getWritableStream = async (handle: FileSystemFileHandle) => {
+  return (handle as any).createWritable() as FileSystemWritableFileStream;
+};
+
+export const writeFile = async (writableHandle: FileSystemWritableFileStream, content: string) => {
+  console.log("navigator.userActivation before createWritable: ", (window.navigator as any).userActivation)
+  await writableHandle.write(content);
+  await writableHandle.close();
+};
+
+
 export const executeFile = async (handle: FileSystemFileHandle, interpreter: Interpreter) => {
   try {
     // Get a file object from the handle

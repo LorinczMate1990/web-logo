@@ -10,3 +10,8 @@ interface FileSystemHandle {
 interface FileSystemDirectoryHandle {
   entries(): AsyncIterableIterator<[string, FileSystemHandle]>;
 }
+
+interface FileSystemWritableFileStream {
+  write(str: string): Promise<void>;
+  close() : Promise<void>;
+}

@@ -1,5 +1,8 @@
-export function openCodeEditor(handle : FileSystemFileHandle) {
-  const popup = window.open(
+import { Writable } from "stream";
+import { getWritableStream } from "../../utils/FileHandling";
+
+function openCodeEditorPopup() {
+  return window.open(
     "/code-editor", // Your desired React route
     "popupWindow",
     `
@@ -16,14 +19,20 @@ export function openCodeEditor(handle : FileSystemFileHandle) {
     resizable=yes
     `
   );
+}
 
-  if (popup) {
-    (popup as (Window & {sharedData: {fileHandle: FileSystemFileHandle}})).sharedData = {
-      fileHandle: handle,
+export function openCodeEditor(handle : FileSystemFileHandle) {
+  getWritableStream(handle).then((writableHandle) => {
+    // After I aquired the writableHandle from the main page, I can aquire it from the popup, too
+    const popup = openCodeEditorPopup();
+    if (popup) {
+      (popup as (Window & {sharedData: {fileHandle: FileSystemFileHandle}})).sharedData = {
+        fileHandle: handle,
+      }
+    } else {
+      alert("Popup blocked! Please allow popups for this website.");
     }
-  } else {
-    alert("Popup blocked! Please allow popups for this website.");
-  }
+  });
 }
 
 
