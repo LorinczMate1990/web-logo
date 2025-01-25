@@ -52,6 +52,12 @@ type SetPenWidthMessage = {
   width: number;
 };
 
+type FillMessage = {
+  topic: "turtleCommand";
+  command: "fill";
+  tolerance: number;
+};
+
 type SetHomehMessage = {
   topic: "turtleCommand";
   command: "setHome";
@@ -70,4 +76,5 @@ export type TurtleCommandMessage =
   | SetPenStateMessage
   | SetPenColorMessage
   | SetPenWidthMessage
-  | SetHomehMessage;
+  | SetHomehMessage
+  | FillMessage;

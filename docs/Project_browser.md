@@ -30,7 +30,7 @@ A proper text editor must support the following functions:
 * Auto formatter
 * Syntax highlight ( 45ac4c6bce28e5eac610915d9341970ce05e290c )
 * Show errors
-* Execute code
+* Execute code ( c161f7243a354a8cefed3a49cb359d3b21599c99 )
 * Save ( 6970f5b2b23b285093f9d92e1ae386654a782dd8 )
 * Show line numbers
 

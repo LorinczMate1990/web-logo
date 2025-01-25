@@ -11,7 +11,7 @@ function sleep(ms: number) {
 export default class CoreCommands {
   @Arguments(['numeric'])
   static async forward(args: ArgType, memory : AbstractMemory) {
-    const distance = parseFloat(String(args[0]))
+    const distance = args[0] as number;
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "forward",
@@ -21,7 +21,7 @@ export default class CoreCommands {
 
   @Arguments(['numeric'])
   static async backward(args: ArgType, memory : AbstractMemory) {
-    const distance = parseFloat(String(args[0]));
+    const distance = args[0] as number;
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "backward",
@@ -78,8 +78,7 @@ export default class CoreCommands {
 
   @Arguments(['numeric'])
   static async setPenWidth(args: ArgType, memory : AbstractMemory) {
-    const width = parseFloat(String(args[0]));
-    if (isNaN(width)) throw new Error("The width has invalid format");
+    const width = args[0] as number;
     
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
@@ -133,6 +132,16 @@ export default class CoreCommands {
     } else {
       await sleep(0);
     } 
+  }
+
+  @Arguments({max: 1, front: ['numeric']}) 
+  static async fill(args: ArgType, memory: AbstractMemory) {
+    const tolerance = (args.length == 0)?0:args[0] as number;
+    turtleCommandPubSub.publish({
+      topic: "turtleCommand",
+      command: "fill",
+      tolerance,
+    });
   }
 
   /*@Arguments({exact: 2, front: ['numeric', new Set(['code', 'numeric', 'string'])]})

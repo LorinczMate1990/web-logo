@@ -23,6 +23,7 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory
   "sethome": CoreCommands.setHome,
   "each": CoreCommands.each,
   "wait": CoreCommands.coWait,
+  "fill": CoreCommands.fill,
 };
 
 export default BuiltinDictionary;
