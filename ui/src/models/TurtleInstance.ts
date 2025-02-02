@@ -1,5 +1,6 @@
 import { PenState, Orientation, Position } from "web-logo-core";
 import simpleTurtle from '../assets/simple-turtle.png'
+import CoordSet from "../utils/CoordSet";
 
 type TurtlePicture = {
   path: string,
@@ -150,8 +151,11 @@ class TurtleInstance implements GraphTurtleProperties {
     const queue: [number, number][] = [[x, y]];
     let pixelsFilled = 0;
 
+    const coordSet = new CoordSet();
+
     while (queue.length) {
       const [currentX, currentY] = queue.shift()!;
+      coordSet.addCoord(currentX, currentY);
 
       // Check if current pixel matches target color
       if (!isSameColor(data, currentX, currentY, targetColor)) {
@@ -163,15 +167,10 @@ class TurtleInstance implements GraphTurtleProperties {
       pixelsFilled++;
 
       // Push neighbors
-      if (currentX > 0 && isSameColor(data, currentX-1, currentY, targetColor)) queue.push([currentX - 1, currentY]); // Left
-      if (currentX < width - 1  && isSameColor(data, currentX+1, currentY, targetColor)) queue.push([currentX + 1, currentY]); // Right
-      if (currentY > 0  && isSameColor(data, currentX, currentY-1, targetColor)) queue.push([currentX, currentY - 1]); // Top
-      if (currentY < height - 1  && isSameColor(data, currentX, currentY+1, targetColor)) queue.push([currentX, currentY + 1]); // Bottom
-
-      // Update canvas every 5000 pixels for better performance
-      if (pixelsFilled % 5000 === 0) {
-        ctx.putImageData(imageData, 0, 0);
-      }
+      if (currentX > 0 && !coordSet.hasCoord(currentX-1, currentY)) queue.push([currentX - 1, currentY]); // Left
+      if (currentX < width - 1  && !coordSet.hasCoord(currentX+1, currentY)) queue.push([currentX + 1, currentY]); // Right
+      if (currentY > 0  && !coordSet.hasCoord(currentX, currentY-1)) queue.push([currentX, currentY - 1]); // Top
+      if (currentY < height - 1  && !coordSet.hasCoord(currentX, currentY+1)) queue.push([currentX, currentY + 1]); // Bottom
     }
 
     // Apply final changes to canvas
