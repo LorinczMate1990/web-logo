@@ -3,8 +3,8 @@ import simpleTurtle from '../assets/simple-turtle.png'
 
 type TurtlePicture = {
   path: string,
-  offsetX : number,
-  offsetY : number
+  offsetX: number,
+  offsetY: number
 };
 
 export interface GraphTurtleProperties {
@@ -24,6 +24,8 @@ class TurtleInstance implements GraphTurtleProperties {
     penWidth: number;
   };
   canvasContext: CanvasRenderingContext2D | null;
+  canvasWidth: number;
+  canvasHeight: number;
   private homePosition: Position = { x: 0, y: 0 };
   private homeOrientation: Orientation = 0; // Default to 0 radians
   picture: TurtlePicture;
@@ -34,6 +36,8 @@ class TurtleInstance implements GraphTurtleProperties {
     position: Position,
     orientation: Orientation,
     canvasContext: CanvasRenderingContext2D | null,
+    canvasWidth: number,
+    canvasHeight: number,
     penState: PenState = 'down',
     penColor: string = 'black',
     penWidth: number = 1,
@@ -53,11 +57,15 @@ class TurtleInstance implements GraphTurtleProperties {
       offsetX: 18,
       offsetY: 23,
       path: simpleTurtle,
-    }
+    };
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
   }
 
-  setCanvasContext(canvasContext: CanvasRenderingContext2D | null) {
+  setCanvasContext(canvasContext: CanvasRenderingContext2D | null, canvasWidth : number, canvasHeight : number) {
     this.canvasContext = canvasContext;
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
   }
 
   go(distance: number) {
@@ -95,6 +103,81 @@ class TurtleInstance implements GraphTurtleProperties {
   setPenWidth(width: number) {
     this.drawingProperties.penWidth = width;
   }
+
+  fill(tolerance: number) {
+    const width = this.canvasWidth;
+    const height = this.canvasHeight;
+
+    function isSameColor(data: Uint8ClampedArray, x : number, y : number, color2: [number, number, number, number]) {
+      const idx = (y * width + x) * 4;
+      return (
+        data[idx] === color2[0] &&
+        data[idx + 1] === color2[1] &&
+        data[idx + 2] === color2[2] &&
+        data[idx + 3] === color2[3]
+      );
+    }
+
+    function setPixelColor(data: Uint8ClampedArray, x : number, y : number, color: [number, number, number, number]) {
+      const idx = (y * width + x) * 4;
+      data[idx] = color[0];     // Red
+      data[idx + 1] = color[1]; // Green
+      data[idx + 2] = color[2]; // Blue
+      data[idx + 3] = color[3]; // Alpha
+    }
+
+    const ctx = this.canvasContext;
+    if (!ctx) return;
+
+    const { x, y } = this.position;
+    const fillColor: [number, number, number, number] = [128, 128, 128, 255]; // Ensure correct RGBA format
+    const imageData = ctx.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
+    console.log(this);
+    const data = imageData.data;
+    console.log({data});
+
+    const startIdx = (y * width + x) * 4;
+    const targetColor: [number, number, number, number] = [
+      data[startIdx],
+      data[startIdx + 1],
+      data[startIdx + 2],
+      data[startIdx + 3]
+    ];
+
+    // If the target color is already the fill color, return
+    if (isSameColor(data, x, y, fillColor)) return;
+
+    const queue: [number, number][] = [[x, y]];
+    let pixelsFilled = 0;
+
+    while (queue.length) {
+      const [currentX, currentY] = queue.shift()!;
+
+      // Check if current pixel matches target color
+      if (!isSameColor(data, currentX, currentY, targetColor)) {
+        continue;
+      }
+
+      // Fill the current pixel
+      setPixelColor(data, currentX, currentY, fillColor);
+      pixelsFilled++;
+
+      // Push neighbors
+      if (currentX > 0 && isSameColor(data, currentX-1, currentY, targetColor)) queue.push([currentX - 1, currentY]); // Left
+      if (currentX < width - 1  && isSameColor(data, currentX+1, currentY, targetColor)) queue.push([currentX + 1, currentY]); // Right
+      if (currentY > 0  && isSameColor(data, currentX, currentY-1, targetColor)) queue.push([currentX, currentY - 1]); // Top
+      if (currentY < height - 1  && isSameColor(data, currentX, currentY+1, targetColor)) queue.push([currentX, currentY + 1]); // Bottom
+
+      // Update canvas every 5000 pixels for better performance
+      if (pixelsFilled % 5000 === 0) {
+        ctx.putImageData(imageData, 0, 0);
+      }
+    }
+
+    // Apply final changes to canvas
+    ctx.putImageData(imageData, 0, 0);
+  }
+
 
   private drawLine(newX: number, newY: number, forceDraw: boolean = false) {
     const { x, y } = this.position;

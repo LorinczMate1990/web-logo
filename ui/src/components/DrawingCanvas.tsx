@@ -9,6 +9,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ children }) => {
   const canvasContainerRef = useRef(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
+  const [canvasSize, setCanvasSize] = useState<{width: number, height: number}>({width: 0, height: 0})
 
   // Set up canvas context and resize the canvas based on its container
   useEffect(() => {
@@ -21,6 +22,8 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ children }) => {
         const tempCanvas = document.createElement("canvas");
         tempCanvas.width = canvas.width;
         tempCanvas.height = canvas.height;
+        setCanvasSize({width: canvas.width, height: canvas.height});
+
         const tempContext = tempCanvas.getContext("2d");
         if (tempContext) {
           tempContext.drawImage(canvas, 0, 0);
@@ -51,8 +54,9 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ children }) => {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [canvasContainerRef.current]);
+  }, [canvasContainerRef.current, canvasRef.current]);
 
+  console.log(canvasSize);
   return (
     <div 
       ref={canvasContainerRef}
@@ -66,7 +70,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ children }) => {
         height: "100%",
         display: 'block',
       }} />
-      <CanvasContext.Provider value={context}>
+      <CanvasContext.Provider value={(context == null || canvasRef.current==null)?null:{context, ...canvasSize}}>
         {context ? children : null}
       </CanvasContext.Provider>
     </div>
