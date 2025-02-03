@@ -87,7 +87,7 @@ describe('Memory', () => {
     expect(mem.getVariable('nested.structure.key.nestedKey')).toEqual(StructuredMemoryData.build_from_string('nestedValue'));
   });
 
-  it.only('tries to read an index with variable where the index is in a lower level memory', () => {
+  it('tries to read an index with variable where the index is in a lower level memory', () => {
     const mem = new Memory(undefined);
     mem.variables = {
       arr: {

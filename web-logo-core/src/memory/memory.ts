@@ -70,33 +70,21 @@ export class Memory implements AbstractMemory {
   }
 
   getVariable(key: string): ParamType {
-    // First of all I have to know if it's structured or not
-    const structured = isStructuredVariableName(key);
-    let baseName = key;
-    let variablePath = "";
-    if (structured) {
-      const variableParts = getBaseVariableName(key);
-      baseName = variableParts.baseName;
-      variablePath = variableParts.rest;
-    }
-    if (baseName in this.variables) {
-      if (structured) {
-        let retRoot : StructuredMemoryData = new StructuredMemoryData({});
-        const memoryCell = this.variables[baseName];
-        if (memoryCell.type === "struct") {
-          retRoot = memoryCell.value;
-        } else {
-          throw new Error("Memory cell wasn't string or struct");
-        }
-        const processedKey = evaluateVariableName(variablePath, this);
-        const result = getDataMember(processedKey, retRoot);
-        return result;
-      } else {
-        const memoryCell = this.variables[key];
-        return memoryCell.value;
+    if (isStructuredVariableName(key)) {
+      const {baseName, rest: variablePath} = getBaseVariableName(key);
+      if (!this.hasVariable(baseName)) return 0; // TODO This should be an error
+      const memoryCellValue = this.getVariable(baseName);
+      if (!isStructuredMemoryData(memoryCellValue)) {
+        throw new Error("Memory cell wasn't string or struct");
       }
+      const processedKey = evaluateVariableName(variablePath, this);
+      const result = getDataMember(processedKey, memoryCellValue);
+      return result;
+    } else if (key in this.variables) {
+      const memoryCell = this.variables[key];
+      return memoryCell.value;
     }
-    if (this.parent === undefined) return 0;
+    if (this.parent === undefined) return 0; // TODO This should be an error
     return this.parent.getVariable(key);
   }
 }
