@@ -1,4 +1,4 @@
-import { PenState } from "../turtle-types/PenState";
+import { PenColor, PenState } from "../turtle-types/DrawingTypes";
 
 type MoveMessage = {
   topic: "turtleCommand";
@@ -43,7 +43,7 @@ type SetPenStateMessage = {
 type SetPenColorMessage = {
   topic: "turtleCommand";
   command: "setPenColor";
-  color: string;
+  color: PenColor;
 };
 
 type SetPenWidthMessage = {

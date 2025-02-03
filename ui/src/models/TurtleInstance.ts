@@ -1,6 +1,7 @@
-import { PenState, Orientation, Position } from "web-logo-core";
+import { PenState, Orientation, Position, PenColor } from "web-logo-core";
 import simpleTurtle from '../assets/simple-turtle.png'
 import CoordSet from "../utils/CoordSet";
+import { rgbToHex } from "../utils/ColorManipulation";
 
 type TurtlePicture = {
   path: string,
@@ -21,7 +22,7 @@ class TurtleInstance implements GraphTurtleProperties {
   orientation: Orientation;
   drawingProperties: {
     penState: PenState;
-    penColor: string;
+    penColor: PenColor;
     penWidth: number;
   };
   canvasContext: CanvasRenderingContext2D | null;
@@ -40,7 +41,7 @@ class TurtleInstance implements GraphTurtleProperties {
     canvasWidth: number,
     canvasHeight: number,
     penState: PenState = 'down',
-    penColor: string = 'black',
+    penColor: PenColor = [0,0,0],
     penWidth: number = 1,
 
   ) {
@@ -97,7 +98,7 @@ class TurtleInstance implements GraphTurtleProperties {
     this.drawingProperties.penState = penState;
   }
 
-  setPenColor(color: string) {
+  setPenColor(color: PenColor) {
     this.drawingProperties.penColor = color;
   }
 
@@ -109,40 +110,36 @@ class TurtleInstance implements GraphTurtleProperties {
     const width = this.canvasWidth;
     const height = this.canvasHeight;
 
-    function isSameColor(data: Uint8ClampedArray, x : number, y : number, color2: [number, number, number, number]) {
+    function isSameColor(data: Uint8ClampedArray, x : number, y : number, color2: [number, number, number]) {
       const idx = (y * width + x) * 4;
       return (
-        data[idx] === color2[0] &&
-        data[idx + 1] === color2[1] &&
-        data[idx + 2] === color2[2] &&
-        data[idx + 3] === color2[3]
+        data[idx] >= color2[0]-tolerance && data[idx] <= color2[0]+tolerance &&
+        data[idx+1] >= color2[1]-tolerance && data[idx+1] <= color2[1]+tolerance &&
+        data[idx+2] >= color2[2]-tolerance && data[idx+2] <= color2[2]+tolerance
       );
     }
 
-    function setPixelColor(data: Uint8ClampedArray, x : number, y : number, color: [number, number, number, number]) {
+    function setPixelColor(data: Uint8ClampedArray, x : number, y : number, color: [number, number, number]) {
       const idx = (y * width + x) * 4;
       data[idx] = color[0];     // Red
       data[idx + 1] = color[1]; // Green
       data[idx + 2] = color[2]; // Blue
-      data[idx + 3] = color[3]; // Alpha
+      data[idx + 3] = 255; // Alpha
     }
 
     const ctx = this.canvasContext;
     if (!ctx) return;
 
     const { x, y } = this.position;
-    const fillColor: [number, number, number, number] = [128, 128, 128, 255]; // Ensure correct RGBA format
+    const fillColor: [number, number, number] = this.drawingProperties.penColor; // Ensure correct RGBA format
     const imageData = ctx.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
-    console.log(this);
     const data = imageData.data;
-    console.log({data});
 
     const startIdx = (y * width + x) * 4;
-    const targetColor: [number, number, number, number] = [
+    const targetColor: [number, number, number] = [
       data[startIdx],
       data[startIdx + 1],
-      data[startIdx + 2],
-      data[startIdx + 3]
+      data[startIdx + 2]
     ];
 
     // If the target color is already the fill color, return
@@ -184,7 +181,7 @@ class TurtleInstance implements GraphTurtleProperties {
       this.canvasContext.beginPath();
       this.canvasContext.moveTo(x, y);
       this.canvasContext.lineTo(newX, newY);
-      this.canvasContext.strokeStyle = this.drawingProperties.penColor;
+      this.canvasContext.strokeStyle = rgbToHex(this.drawingProperties.penColor);
       this.canvasContext.lineWidth = this.drawingProperties.penWidth;
       this.canvasContext.stroke();
     }

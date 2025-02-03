@@ -1,6 +1,7 @@
 import { turtleCommandPubSub } from "./pubsub/pubsubs";
 import { AbstractMemory, ArgType, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "./types";
 import { Arguments } from "./ArgumentParser";
+import ColorMap from "./utils/ColorMap";
 
 function sleep(ms: number) {
   return new Promise((resolve, reject) => {
@@ -69,10 +70,21 @@ export default class CoreCommands {
 
   @Arguments(['word'])
   static async setPenColor(args: ArgType, memory : AbstractMemory) {
+    // The color can be any of the following formats: "colorname" or "#RRGGBB"
+    // This function must convert them to RGB
+    const inputColor = args[0] as string;
+    const colorCode = (inputColor[0] == "#")?inputColor:ColorMap[inputColor];
+    if (colorCode == undefined || colorCode.length != 7) {
+      throw new Error(`The ${inputColor} color is not recognized`);
+    }
+    const RR = parseInt(colorCode.slice(1,3), 16);
+    const GG = parseInt(colorCode.slice(3,5), 16);
+    const BB = parseInt(colorCode.slice(5,7), 16);
+
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
       command: "setPenColor",
-      color: String(args[0]),
+      color: [RR, GG, BB],
     });
   }
 

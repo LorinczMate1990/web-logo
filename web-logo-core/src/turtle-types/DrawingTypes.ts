@@ -1,5 +1,7 @@
 type PenState = 'up' | 'down';
 
+type PenColor = [number, number, number];
+
 type Position = {
   x: number;
   y: number;
@@ -7,4 +9,4 @@ type Position = {
   
 type Orientation = number; // Orientation is now just a number (radians)
 
-export { PenState, Position, Orientation };
+export { PenState, PenColor, Position, Orientation };
