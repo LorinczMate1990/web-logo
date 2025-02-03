@@ -85,5 +85,23 @@ describe('Memory', () => {
     const mem = new Memory(undefined);
     mem.setVariable('nested.structure', new StructuredMemoryData({ key: new StructuredMemoryData({ nestedKey: StructuredMemoryData.build_from_string('nestedValue') })}));
     expect(mem.getVariable('nested.structure.key.nestedKey')).toEqual(StructuredMemoryData.build_from_string('nestedValue'));
-  })
+  });
+
+  it.only('tries to read an index with variable where the index is in a lower level memory', () => {
+    const mem = new Memory(undefined);
+    mem.variables = {
+      arr: {
+        type: 'struct',
+        value: new StructuredMemoryData([10, 20, 30])
+      },
+    };
+    const mem2 = new Memory(mem);
+    mem2.variables = {
+      i: {
+        type: 'numeric',
+        value: 1
+      }
+    };
+    expect(mem2.getVariable("arr[i]")).toEqual(20);
+  });
 });
