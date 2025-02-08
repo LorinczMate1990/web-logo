@@ -89,7 +89,7 @@ class TurtleInstance implements GraphTurtleProperties {
   }
 
   goHome() {
-    this.drawLine(this.homePosition.x, this.homePosition.y, true);
+    this.drawLine(this.homePosition.x, this.homePosition.y);
     this.position = { ...this.homePosition };
     this.orientation = this.homeOrientation;
   }
