@@ -11,7 +11,7 @@ type ArgumentListConstraint = {
   min?: number,
   max?: number,
   exact?: number,
-} | PossibleArgumentParsingMethods[];
+} | (PossibleArgumentParsingMethods | PossibleArgumentParsingMethods[])[];
 
 function isValidWord(possibleWord : string) {
   return /^\p{L}+\p{N}*$/u.test(possibleWord);
@@ -83,7 +83,7 @@ export function Arguments(constraints : ArgumentListConstraint) {
           exact: simplifiedConstraints.length
         };
         for (const i of simplifiedConstraints) {
-          constraints.front!.push(new Set([i]));
+          constraints.front!.push(Array.isArray(i)?new Set(i):new Set([i]));
         }
       }
       let useFrontUntil = constraints.front?.length ?? 0;
@@ -103,10 +103,9 @@ export function Arguments(constraints : ArgumentListConstraint) {
         } else if (constraints.default) {
           enabledType = toSet(constraints.default);
         }
-        if (enabledType.has('word') && enabledType.size > 1) {
-          // word can't be diferentiated from other things. I could use string here, but currently I won't let it
-          // NOTE: If it is needed, numeric and string can be enabled
-          throw new Error(`Coding error: ${String(propertyKey)} for ${i}. argument lets word and other types`)
+        if (enabledType.has('word') && (enabledType.has('variable') || enabledType.has('numeric') || enabledType.has('code'))) {
+          // These and words can't differentiated in every time
+          throw new Error(`Coding error: ${String(propertyKey)} for ${i}. argument lets word and other types which is not array`)
         } 
         enabledTypes.push(enabledType);
       }
