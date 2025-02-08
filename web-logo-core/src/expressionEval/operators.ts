@@ -136,6 +136,36 @@ export const builtinFunctions: { [key: string]: { params: number, function: (a: 
       return Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2))
     }
   },
+  'interpolate': {
+    params: 3,
+    function: (a: ParamType[]) => {
+      assertMustBeNumber("interpolate", a[0]);
+      assertMustBeNumber("interpolate", a[1]);
+      assertMustBeNumber("interpolate", a[2]);
+      return a[0]*(1-a[2]) + a[1]*a[2];
+    }
+  },
+  'round': {
+    params: 1,
+    function: (a: ParamType[]) => {
+      assertMustBeNumber("round", a[0]);
+      return Math.round(a[0]);
+    }
+  },
+  'floor': {
+    params: 1,
+    function: (a: ParamType[]) => {
+      assertMustBeNumber("floor", a[0]);
+      return Math.floor(a[0]);
+    }
+  },    
+  'ceil': {
+    params: 1,
+    function: (a: ParamType[]) => {
+      assertMustBeNumber("ceil", a[0]);
+      return Math.ceil(a[0]);
+    }
+  },    
   'abs': {
     params: 1,
     function: (a: ParamType[]) => {
