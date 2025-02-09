@@ -38,6 +38,8 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ children }) => {
         setContext(ctx);
 
         if (ctx && tempContext) {
+          ctx.fillStyle = "white";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(tempCanvas, 0, 0);
         }
       }
