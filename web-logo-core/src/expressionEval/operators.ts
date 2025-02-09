@@ -8,6 +8,19 @@ function assertMustBeStructuredMemoryDataWithArrayContent(op: string, input: Par
   if (!isStructuredMemoryData(input) || !Array.isArray(input.data)) throw new Error(`Invalid expression. ${op} needs array but got ${input} (${typeof input})`);
 }
 
+function assertMustBeStructuredMemoryDataWithNumericArrayContent(op: string, input: ParamType): asserts input is StructuredMemoryData & { data: number[] } {
+  if (!isStructuredMemoryData(input) || !Array.isArray(input.data)) throw new Error(`Invalid expression. ${op} needs array but got ${input} (${typeof input})`);
+  for (const v of input.data) {
+    assertMustBeNumber(op, v);
+  }
+}
+
+function assertEverythingIsNumber(op : string, input : ParamType[]) : asserts input is number[] {
+  for (const i of input) {
+    assertMustBeNumber(op, i);
+  }
+}
+
 export const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|', '!', ':', '%'];
 
 export function isOperator(c: string): boolean {
@@ -145,10 +158,21 @@ export const builtinFunctions: { [key: string]: { params: number, function: (a: 
   'interpolate': {
     params: 3,
     function: (a: ParamType[]) => {
-      assertMustBeNumber("interpolate", a[0]);
-      assertMustBeNumber("interpolate", a[1]);
-      assertMustBeNumber("interpolate", a[2]);
-      return a[0]*(1-a[2]) + a[1]*a[2];
+      assertMustBeStructuredMemoryDataWithNumericArrayContent('interpolate', a[0]);
+      assertMustBeStructuredMemoryDataWithNumericArrayContent('interpolate', a[1]);
+      assertMustBeNumber('interpolate', a[2]);
+      const X = a[0].data;
+      const Y = a[1].data;
+      const length = X.length;
+      const x = a[2];
+      if (x<X[0]) return Y[0];
+      if (x>X[length-1]) return Y[length-1];
+      for (let i=0; i<length-1; ++i) {
+        if (X[i] <= x && x <= X[i+1]) {
+          return (x-X[i]) / (X[i+1] - X[i]) * (Y[i+1]-Y[i]) + Y[i];
+        }
+      }
+      return X[0]; // Impossible
     }
   },
   'round': {
