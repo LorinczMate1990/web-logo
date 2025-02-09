@@ -8,7 +8,7 @@ function assertMustBeStructuredMemoryDataWithArrayContent(op: string, input: Par
   if (!isStructuredMemoryData(input) || !Array.isArray(input.data)) throw new Error(`Invalid expression. ${op} needs array but got ${input} (${typeof input})`);
 }
 
-export const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|', '!', ':'];
+export const operators = ['+', '-', '*', '/', '<', '>', '=', '&', '|', '!', ':', '%'];
 
 export function isOperator(c: string): boolean {
   return operators.includes(c);
@@ -50,6 +50,7 @@ export function precedence(op: string): number {
       return 9;
     case '*':
     case '/':
+    case '%':
       return 10;
     default:
       return 0;
@@ -89,6 +90,11 @@ export function executeBinaryOperator(op: string, a?: ParamType, b?: ParamType):
       assertMustBeNumber(op, a);
       assertMustBeNumber(op, b);
       return a / b;
+    }
+    case "%": {
+      assertMustBeNumber(op, a);
+      assertMustBeNumber(op, b);
+      return a % b;
     }
     case "=": {
       assertMustBeNumber(op, a);
