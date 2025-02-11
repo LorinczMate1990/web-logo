@@ -110,8 +110,12 @@ class TurtleInstance implements GraphTurtleProperties {
     const width = this.canvasWidth;
     const height = this.canvasHeight;
 
+    function getIdx(x : number, y : number) {
+      return (Math.round(y) * width + Math.round(x)) * 4;
+    }
+
     function isSameColor(data: Uint8ClampedArray, x : number, y : number, color2: [number, number, number]) {
-      const idx = (y * width + x) * 4;
+      const idx = getIdx(x,y);
       return (
         data[idx] >= color2[0]-tolerance && data[idx] <= color2[0]+tolerance &&
         data[idx+1] >= color2[1]-tolerance && data[idx+1] <= color2[1]+tolerance &&
@@ -120,7 +124,7 @@ class TurtleInstance implements GraphTurtleProperties {
     }
 
     function setPixelColor(data: Uint8ClampedArray, x : number, y : number, color: [number, number, number]) {
-      const idx = (y * width + x) * 4;
+      const idx = getIdx(x,y);
       data[idx] = color[0];     // Red
       data[idx + 1] = color[1]; // Green
       data[idx + 2] = color[2]; // Blue
@@ -135,7 +139,7 @@ class TurtleInstance implements GraphTurtleProperties {
     const imageData = ctx.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
     const data = imageData.data;
 
-    const startIdx = (y * width + x) * 4;
+    const startIdx = getIdx(x,y);
     const targetColor: [number, number, number] = [
       data[startIdx],
       data[startIdx + 1],
