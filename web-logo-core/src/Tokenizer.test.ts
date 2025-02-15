@@ -68,12 +68,12 @@ describe('tokenizer', () => {
 
   // Test for handling spaces within brackets
   it('should include spaces in tokens within brackets', () => {
-    expect(tokenizer('command2 (arg with spaces)').map(t => t.val)).toEqual(['command2', 'arg with spaces']);
+    expect(tokenizer('command2 (arg with spaces)').map(t => t.val)).toEqual(['command2', '(arg with spaces)']);
   });
 
   // Test for handling nested brackets
   it('should handle nested brackets correctly', () => {
-    expect(tokenizer('command3 (nested (brackets))').map(t => t.val)).toEqual(['command3', 'nested (brackets)']);
+    expect(tokenizer('command3 (nested (brackets))').map(t => t.val)).toEqual(['command3', '(nested (brackets))']);
   });
 
   it('should handle brackets with operators at the same level', () => {
@@ -85,7 +85,7 @@ describe('tokenizer', () => {
   });
 
   it('should handle bracketed and non-bracketed arguments', () => {
-    expect(tokenizer('command (bracketed content) +1').map(t => t.val)).toEqual(['command', 'bracketed content', '+1']);
+    expect(tokenizer('command (bracketed content) +1').map(t => t.val)).toEqual(['command', '(bracketed content)', '+1']);
   });
 
   // Test for handling spaces within square brackets
@@ -108,7 +108,7 @@ describe('tokenizer', () => {
     });
 
     it('should handle double quotes inside of a braket', () => {
-      expect(tokenizer('command3 (dd, wdw, "okodk")').map(t => t.val)).toEqual(['command3', 'dd, wdw, "okodk"']);
+      expect(tokenizer('command3 (dd, wdw, "okodk")').map(t => t.val)).toEqual(['command3', '(dd, wdw, "okodk")']);
     });
 
     it('should handle double quotes inside of a square braket', () => {
@@ -143,7 +143,7 @@ describe('tokenizer', () => {
 
   // Test for mixed brackets and curly braces
   it('should correctly tokenize mixed brackets and curly braces', () => {
-    expect(tokenizer('command10 (arg5 {arg6}) {arg7 (arg8)}').map(t => t.val)).toEqual(['command10', 'arg5 {arg6}', '{', 'arg7', 'arg8', '}']);
+    expect(tokenizer('command10 (arg5 {arg6}) {arg7 (arg8)}').map(t => t.val)).toEqual(['command10', '(arg5 {arg6})', '{', 'arg7', '(arg8)', '}']);
   });
 
   // Test for filtering out empty tokens and lines

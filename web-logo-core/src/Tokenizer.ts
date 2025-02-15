@@ -90,16 +90,13 @@ export function tokenizer(command: string): Token[] {
     } else if (c == "(") {
       if (currentEnvironment == "none") currentEnvironment = "braket";
       braketCounter++;
-      if (braketCounter > 1 || currentEnvironment != "braket") {
-        currentToken.push(c);
-      }
+      currentToken.push(c);
     } else if (c == ")") {
       braketCounter--;
       if (braketCounter < 0) throw new TooManyClosingBracketError(lineCounter, charCounter);
-      if (braketCounter > 0 || currentEnvironment != "braket") currentToken.push(c);
+      currentToken.push(c);
       if (braketCounter == 0 && currentEnvironment == "braket") {
         currentEnvironment = "none";
-        startNewToken();
       }
     } else if (c == "{" || c == "}") {
       if (braketCounter == 0 && squareBraketCounter == 0) {
