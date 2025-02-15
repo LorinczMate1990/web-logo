@@ -76,6 +76,18 @@ describe('tokenizer', () => {
     expect(tokenizer('command3 (nested (brackets))').map(t => t.val)).toEqual(['command3', 'nested (brackets)']);
   });
 
+  it('should handle brackets with operators at the same level', () => {
+    expect(tokenizer('command (bracketed content)+1').map(t => t.val)).toEqual(['command', '(bracketed content)+1']);
+  });
+
+  it('should handle brackets with operators at the same level', () => {
+    expect(tokenizer('command 1*(bracketed content)+1').map(t => t.val)).toEqual(['command', '1*(bracketed content)+1']);
+  });
+
+  it('should handle bracketed and non-bracketed arguments', () => {
+    expect(tokenizer('command (bracketed content) +1').map(t => t.val)).toEqual(['command', 'bracketed content', '+1']);
+  });
+
   // Test for handling spaces within square brackets
   it('should include spaces in tokens within square brackets', () => {
     expect(tokenizer('command2 [arg with spaces]').map(t => t.val)).toEqual(['command2', '[arg with spaces]']);
