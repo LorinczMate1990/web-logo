@@ -134,7 +134,7 @@ export default class CoreCommands {
     const cycleCoreFactory = args[1] as ExecutableFactory;
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
     for (let i=0; i<repeatNumber; ++i) {
-      cycleCore.context.setVariable("i", i);
+      cycleCore.context.createVariable("i", i);
       await cycleCore.execute();
     }
   }
@@ -146,7 +146,7 @@ export default class CoreCommands {
     const cycleCoreFactory = args[1] as ExecutableFactory;
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
     for (const i of collection) {
-      cycleCore.context.setVariable("i", i);
+      cycleCore.context.createVariable("i", i);
       await cycleCore.execute();
     }
   }
@@ -185,7 +185,7 @@ export default class CoreCommands {
     const argNames = args.slice(1, args.length-1) as string[];
     const codeFactory = args[args.length - 1] as ExecutableFactory;
     codeFactory.meta = {type: "command", arguments: argNames};
-    memory.setVariable(commandName, codeFactory);
+    memory.createVariable(commandName, codeFactory);
   }
 
   @Arguments({min: 2, max: 3, front: ['numeric', 'code', 'code']})

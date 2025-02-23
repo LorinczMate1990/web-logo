@@ -1,5 +1,6 @@
 import { evaluateVariableName } from "../expressionEval/expressionEval";
 import { AbstractMemory, ExecutableFactory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, isExecutableFactory, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types";
+import { NonExistingVariableMemoryError } from "./errors";
 import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from "./structuredVariableHandler";
 
 type StructMemoryCell = {
@@ -27,7 +28,18 @@ export class Memory implements AbstractMemory {
     this.parent = parent;
   }
 
-  setVariable(key: string, value: ParamType) { // TODO maybe it exists in parent. I should create a separate declarator
+  setVariable(key: string, value: ParamType): void {
+    let {baseName} = getBaseVariableName(key);
+    if (baseName in this.variables) {
+      this.createVariable(key, value);
+    } else if (this.parent) {
+      this.parent.setVariable(key, value);
+    } else {
+      throw new NonExistingVariableMemoryError("create", key);
+    }
+  }
+
+  createVariable(key: string, value: ParamType) { // TODO maybe it exists in parent. I should create a separate declarator
     if (isStructuredVariableName(key)){
       const {baseName, rest: variablePath} = getBaseVariableName(key);
       if (!(baseName in this.variables)) {

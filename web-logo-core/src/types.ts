@@ -114,6 +114,7 @@ export interface VariableGetter {
 
 export interface VariableSetter {
   setVariable(key : string, value : ParamType) : void;
+  createVariable(key : string, value : ParamType) : void;
 }
 
 export type MemoryMetaData = {

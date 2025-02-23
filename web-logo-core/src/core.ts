@@ -47,7 +47,7 @@ export class CommandsWithContext extends ExecutableWithContext {
               const processedArgument = processedArguments[i];
               const commandArgumentName = possibleCommand.meta.arguments[i];
               if (typeof processedArgument == "string") throw new Error("This shouldn't be possible");
-              possibleCommand.context.setVariable(commandArgumentName, processedArgument);
+              possibleCommand.context.createVariable(commandArgumentName, processedArgument);
             }
           }
           await possibleCommand.execute();
