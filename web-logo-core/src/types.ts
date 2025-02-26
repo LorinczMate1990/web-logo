@@ -32,9 +32,13 @@ export function isStructuredMemoryData(v : any) : v is StructuredMemoryData {
   return v.StructuredMemoryDataSymbol === StructuredMemoryData.StaticStructuredMemoryData;
 }
 
+export type CommandControl = {
+  return? : boolean;
+  returnValue? : ParamType;
+};
 
 export interface Executable {
-  execute() : Promise<void>;
+  execute() : Promise<CommandControl>
 }
 
 export class StructuredMemoryData {
@@ -94,7 +98,7 @@ export abstract class ExecutableWithContext implements Executable, HasContextMem
   ExecutableWithContextSymbol = ExecutableWithContext.StaticExecutableWithContextSymbol;
   
   abstract get context(): AbstractMemory;
-  abstract execute(): Promise<void>;
+  abstract execute(): Promise<CommandControl>;
   abstract get meta() : MemoryMetaData | undefined;
 }
 

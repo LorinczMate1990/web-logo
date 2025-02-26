@@ -2,7 +2,7 @@ import { Commands } from "./CommandList";
 import { getProcessedArgumentList, PossibleArgumentParsingMethods } from "./ArgumentParser";
 import BuiltinDictionary from "./builtinDicts/english";
 import { Memory } from "./memory/memory";
-import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData } from "./types";
+import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl } from "./types";
 
 export class CommandsWithContext extends ExecutableWithContext {
   commands : Commands;
@@ -14,7 +14,7 @@ export class CommandsWithContext extends ExecutableWithContext {
     this.context = context;
     this.meta = meta;
   }
-  async execute() {
+  async execute() : Promise<CommandControl> {
     for (let command of this.commands) {
       const label = command.label;
       // TODO This should be done from the ArgumentParser,
@@ -28,7 +28,10 @@ export class CommandsWithContext extends ExecutableWithContext {
       // The label can be a built-in command or a command in memory.
       if (label in BuiltinDictionary) {
         const func = BuiltinDictionary[label];
-        await func(packedArguments, this.context);
+        const receviedCommandControl = await func(packedArguments, this.context);
+        if (receviedCommandControl.return) {
+          return receviedCommandControl;
+        }
       } else {
         if (!this.context.hasVariable(label)) {
           throw new Error(`Command '${label}' not found`);
@@ -38,7 +41,8 @@ export class CommandsWithContext extends ExecutableWithContext {
           // Set variables
           // Check the numbers! This dialect doesn't support variable argument list
           const possibleCommand = possibleCommandFactory.getNewExecutableWithContext();
-          if (possibleCommand.meta != undefined) { // If it has no meta, it can't accept any argument, it's just an inline codeblock
+          const commandIsCalled = possibleCommand.meta != undefined;
+          if (commandIsCalled) { // If it has no meta, it can't accept any argument, it's just an inline codeblock
             const numOfArguments = packedArguments.length;
             const argTypes = Array.from({ length: packedArguments.length }, () => new Set<PossibleArgumentParsingMethods>(['numeric', 'array', 'code']));
             const processedArguments = getProcessedArgumentList(packedArguments, argTypes, this.context);
@@ -50,12 +54,21 @@ export class CommandsWithContext extends ExecutableWithContext {
               possibleCommand.context.createVariable(commandArgumentName, processedArgument);
             }
           }
-          await possibleCommand.execute();
+          const receviedCommandControl = await possibleCommand.execute();
+          if (receviedCommandControl.return) {
+            if (commandIsCalled) {
+              if (receviedCommandControl.returnValue)
+              this.context.createVariable("ans", receviedCommandControl.returnValue); // TODO : ans is const name, just for testing
+            } else {
+              return receviedCommandControl;
+            }
+          }
         } else {
           throw new Error(`'${label}' contains '${this.context.getVariable(label)}', not an executable`);
         }
       }
     }
+    return { }
   }
 }
 

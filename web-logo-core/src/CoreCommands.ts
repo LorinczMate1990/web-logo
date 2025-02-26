@@ -1,5 +1,5 @@
 import { turtleCommandPubSub } from "./pubsub/pubsubs";
-import { AbstractMemory, ArgType, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "./types";
+import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "./types";
 import { Arguments, PossibleArgumentParsingMethods } from "./ArgumentParser";
 import ColorMap from "./utils/ColorMap";
 
@@ -10,6 +10,15 @@ function sleep(ms: number) {
 }
 
 export default class CoreCommands {
+  @Arguments({max: 1, front: [ new Set(["array", "code", "numeric"]) ]})
+  static async returnWithValue(args: ArgType, memory : AbstractMemory) {
+    const value = (args.length == 1)?args[0] as ParamType:undefined;
+    return {
+      return: true,
+      returnValue: value,
+    } as CommandControl;
+  }
+
   @Arguments(['numeric'])
   static async forward(args: ArgType, memory : AbstractMemory) {
     const distance = args[0] as number;
@@ -18,6 +27,7 @@ export default class CoreCommands {
       command: "forward",
       distance
     });
+    return {};
   }
 
   @Arguments(['numeric'])
@@ -28,6 +38,7 @@ export default class CoreCommands {
       command: "backward",
       distance
     });
+    return {};
   }
 
   @Arguments(['numeric'])
@@ -38,6 +49,7 @@ export default class CoreCommands {
       command: "left",
       radian
     });
+    return {};
   }
 
   @Arguments(['numeric'])
@@ -48,6 +60,7 @@ export default class CoreCommands {
       command: "right",
       radian
     });
+    return {};
   }
 
   @Arguments([])
@@ -57,6 +70,7 @@ export default class CoreCommands {
       command: "setPenState",
       penState: 'up'
     });
+    return {};
   }
 
   @Arguments([])
@@ -66,6 +80,7 @@ export default class CoreCommands {
       command: "setPenState",
       penState: 'down'
     });
+    return {};
   }
 
   @Arguments([['word', 'array']])
@@ -100,6 +115,7 @@ export default class CoreCommands {
       command: "setPenColor",
       color: [RR, GG, BB],
     });
+    return {};
   }
 
   @Arguments(['numeric'])
@@ -111,6 +127,7 @@ export default class CoreCommands {
       command: "setPenWidth",
       width,
     });
+    return {};
   }
 
   @Arguments([])
@@ -119,11 +136,13 @@ export default class CoreCommands {
       topic: "turtleCommand",
       command: "goHome",
     });
+    return {};
   }
   
   @Arguments([])
   static async setHome(args: ArgType, memory : AbstractMemory) {
-    // TODO
+    
+    return {};
   }
 
   // Program control
@@ -135,8 +154,10 @@ export default class CoreCommands {
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
     for (let i=0; i<repeatNumber; ++i) {
       cycleCore.context.createVariable("i", i);
-      await cycleCore.execute();
+      const commandControl = await cycleCore.execute();
+      if (commandControl.return) return commandControl;
     }
+    return {};
   }
 
   @Arguments(['array', 'code'])
@@ -147,8 +168,10 @@ export default class CoreCommands {
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
     for (const i of collection) {
       cycleCore.context.createVariable("i", i);
-      await cycleCore.execute();
+      const commandControl = await cycleCore.execute();
+      if (commandControl.return) return commandControl;
     }
+    return {};
   }
 
   @Arguments({max: 1, front: ['numeric']})
@@ -158,6 +181,7 @@ export default class CoreCommands {
     } else {
       await sleep(0);
     } 
+    return {};
   }
 
   @Arguments({max: 1, front: ['numeric']}) 
@@ -168,6 +192,7 @@ export default class CoreCommands {
       command: "fill",
       tolerance,
     });
+    return {};
   }
 
   /*@Arguments({exact: 2, front: ['numeric', new Set(['code', 'numeric', 'string'])]})
@@ -186,6 +211,7 @@ export default class CoreCommands {
     const codeFactory = args[args.length - 1] as ExecutableFactory;
     codeFactory.meta = {type: "command", arguments: argNames};
     memory.createVariable(commandName, codeFactory);
+    return {};
   }
 
   @Arguments({min: 2, max: 3, front: ['numeric', 'code', 'code']})
@@ -200,16 +226,19 @@ export default class CoreCommands {
     const trueBranch = trueBranchFactory.getNewExecutableWithContext();
     const falseBranch = falseBranchFactory?.getNewExecutableWithContext();
 
+    let commandControl = {} as CommandControl;
     if (condition) {
-      await trueBranch.execute();
+      commandControl = await trueBranch.execute();
     } else {
       if (falseBranch) {
-        await falseBranch.execute();
+        commandControl = await falseBranch.execute();
       }
     }
+    if (commandControl.return) return commandControl;
+    return {};
   }
 
-
-  static async setLocalParameter(arg : ArgType, memory : AbstractMemory) {
+  static async setParameter(arg : ArgType, memory : AbstractMemory) {
+    return {};
   }
 }

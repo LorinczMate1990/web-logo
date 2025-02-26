@@ -1,6 +1,6 @@
 import BuiltinDictionary from "./builtinDicts/english";
 import { expressionEval } from "./expressionEval/expressionEval";
-import { AbstractMemory, ArgType, isExecutableFactory } from "./types";
+import { AbstractMemory, ArgType, CommandControl, isExecutableFactory } from "./types";
 
 export type PossibleArgumentParsingMethods = 'word' | 'numeric' | 'code' | 'variable' | 'array';
 
@@ -72,8 +72,8 @@ export function Arguments(constraints : ArgumentListConstraint) {
   return function(
     target: Object,
     propertyKey: string | symbol,
-    descriptor: TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory) => Promise<void>>
-  ) : TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory) => Promise<void>> {
+    descriptor: TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory) => Promise<CommandControl>>
+  ) : TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory) => Promise<CommandControl>> {
     const originalMethod = descriptor.value!;
     descriptor.value = async function(args: ArgType, context: AbstractMemory) {
       if (Array.isArray(constraints)) {
@@ -118,7 +118,7 @@ export function Arguments(constraints : ArgumentListConstraint) {
       }
         
       // Call the original function
-      await originalMethod(validatedArgs, context);
+      return originalMethod(validatedArgs, context);
     };
     return descriptor;
   }
