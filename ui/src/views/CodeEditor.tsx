@@ -85,26 +85,51 @@ export default function CodeEditor() {
   }, [saved]);
 
   return (
-    <div>
-      <button onClick={run}>Run</button>
-      <button onClick={save}>Save</button>
-      {fileContent === null ? <h1>Loading...</h1> :
-        <Editor
-          value={fileContent}
-          onValueChange={code => {
-            console.log("On Value changed")
-            setSaved(false);
-            setFileContent(code);
-          }}
-          highlight={code => highlight(code, logoModel, "javascript")}
-          padding={10}
-          style={{
-            fontFamily: '"Fira code", "Fira Mono", monospace',
-            fontSize: 12,
-          }}
-          
-        />
-      }
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      {/* Floating buttons container */}
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          background: "white",
+          padding: "10px",
+          zIndex: 10,
+          display: "flex",
+          gap: "10px",
+          borderBottom: "1px solid #ccc",
+        }}
+      >
+        <button onClick={run}>Run</button>
+        <button onClick={save}>Save</button>
+      </div>
+  
+      {/* Scrollable editor */}
+      <div
+        style={{
+          flex: 1,
+          overflow: "auto",
+        }}
+      >
+        {fileContent === null ? (
+          <h1>Loading...</h1>
+        ) : (
+          <Editor
+            value={fileContent}
+            onValueChange={(code) => {
+              console.log("On Value changed");
+              setSaved(false);
+              setFileContent(code);
+            }}
+            highlight={(code) => highlight(code, logoModel, "javascript")}
+            padding={10}
+            style={{
+              fontFamily: '"Fira code", "Fira Mono", monospace',
+              fontSize: 12,
+              minHeight: "100%",
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }
