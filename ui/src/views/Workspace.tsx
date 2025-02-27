@@ -11,7 +11,7 @@ export default function Workspace({interpreter } : {interpreter : Interpreter}) 
   return <div className="App" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <PanelGroup direction="horizontal">
       {/* Resizable Side Panel */}
-      <Panel defaultSize={10} style={{ backgroundColor: "#f0f0f0" }}>
+      <Panel defaultSize={15} style={{ backgroundColor: "#f0f0f0" }}>
         <ProjectExplorer
           onFileDoubleClick={(e) => window.alert(`e: ${e}`)}
           interpreter={interpreter}
@@ -20,9 +20,9 @@ export default function Workspace({interpreter } : {interpreter : Interpreter}) 
       {/* Resize Handle */}
       <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", width: "5px" }} />
       {/* Main Content */}
-      <Panel>
+      <Panel minSize={1}>
         <PanelGroup direction="vertical">
-          <Panel defaultSize={90}>
+          <Panel defaultSize={90} minSize={1}>
             <DrawingCanvas>
               <Turtle name="Leo" />
             </DrawingCanvas>
