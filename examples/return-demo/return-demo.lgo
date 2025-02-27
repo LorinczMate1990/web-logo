@@ -1,0 +1,26 @@
+learn foo a {
+  rep 4 { f 100; l 90}
+  if a<6 {
+    return 5
+  } {
+    return 2*5
+  }
+  f 1000
+}
+
+learn bar {
+  foo 10 => num
+  rep num { f 100; l 360/num}
+}
+
+bar
+
+learn rectangleFactory a {
+  learn rectangle {
+    rep 4 {
+      f a
+      l 90
+    }
+  }
+  return rectangle
+}

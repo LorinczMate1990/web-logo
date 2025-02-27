@@ -5,10 +5,13 @@ export type Commands = Command[];
 export class Command {
   label: string;
   arguments: (string | Commands)[];
+  returnVariable : string | undefined;
+  createNewVariableForReturn : boolean;
 
   constructor(label: Token) {
     this.label = label.val;
     this.arguments = [];
+    this.createNewVariableForReturn = false;
   }
 
   addArgument(argument: Token | Commands) {
@@ -17,6 +20,11 @@ export class Command {
     } else {
       this.arguments.push(argument);
     }
+  }
+
+  setReturnVariable(name : Token, createNewVariable : boolean) {
+    this.returnVariable = name.toString();
+    this.createNewVariableForReturn = createNewVariable;
   }
 }
 
@@ -48,6 +56,7 @@ export function tokensToCommandList(tokens: Token[]): Commands {
 function _tokensToCommandList(w : Wrapper) : Commands {
   const commands : Commands = [];
   let currentCommand : Command | null = null;
+  let mustStartNewCommand = false;
   while (w.pointer < w.tokens.length) {
     if (w.tokens[w.pointer].eq("{")) {
       w.pointer++;
@@ -71,8 +80,21 @@ function _tokensToCommandList(w : Wrapper) : Commands {
     } else {
       if (currentCommand === null) {
         currentCommand = new Command(w.tokens[w.pointer]);
+        mustStartNewCommand = false;
       } else {
-        currentCommand.addArgument(w.tokens[w.pointer]);
+        if (mustStartNewCommand) throw new Error("There can not be more arguments after a return variable name"); // TODO Ugly message
+        if (w.tokens[w.pointer].eq("=>")) {
+          w.pointer++;
+          let createNewVariable = false;
+          if (w.tokens[w.pointer].eq("new")) {
+            w.pointer++;
+            createNewVariable = true;
+          }
+          currentCommand.setReturnVariable(w.tokens[w.pointer], createNewVariable);
+          mustStartNewCommand = true;
+        } else {
+          currentCommand.addArgument(w.tokens[w.pointer]);
+        }
       }
       w.pointer++;
     }

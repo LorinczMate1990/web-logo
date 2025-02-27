@@ -1,8 +1,8 @@
 import CoreCommands from "../CoreCommands";
-import { AbstractMemory, ArgType, VariableGetter, VariableSetter } from "../types";
+import { AbstractMemory, ArgType, CommandControl, VariableGetter, VariableSetter } from "../types";
 
 // This is the English dict
-const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory) => Promise<void>} = {
+const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory) => Promise<CommandControl>} = {
   "forward": CoreCommands.forward,
   "f": CoreCommands.forward,
   "backward": CoreCommands.backward,
@@ -24,6 +24,8 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory
   "each": CoreCommands.each,
   "wait": CoreCommands.coWait,
   "fill": CoreCommands.fill,
+  "return": CoreCommands.returnWithValue,
+  "eval": CoreCommands.eval,
 };
 
 export default BuiltinDictionary;
