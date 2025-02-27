@@ -3,6 +3,14 @@ import { StructuredMemoryData } from '../types'; // Adjust the import path based
 import { NonExistingVariableMemoryError } from './errors';
 
 describe('Memory', () => {
+  describe("getVariable", () => {
+    it('getting a nonexisting variable must throw an error with parents', () => {
+      const mem = new Memory(new Memory(undefined));
+      const getNonExistingVariable = () => mem.getVariable('nonExisting');
+      expect(getNonExistingVariable).toThrow(NonExistingVariableMemoryError);
+    });
+  });
+
   describe("setVariable and getVariable", ()=> {
     it('setting a nonexisting variable must throw an error with parents', () => {
       const mem = new Memory(new Memory(undefined));

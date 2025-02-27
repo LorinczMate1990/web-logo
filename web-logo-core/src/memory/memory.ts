@@ -96,7 +96,7 @@ export class Memory implements AbstractMemory {
       const memoryCell = this.variables[key];
       return memoryCell.value;
     }
-    if (this.parent === undefined) return 0; // TODO This should be an error
+    if (this.parent === undefined) throw new NonExistingVariableMemoryError("read", key); // TODO This should be an error
     return this.parent.getVariable(key);
   }
 }
