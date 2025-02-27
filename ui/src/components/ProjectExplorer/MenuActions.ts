@@ -2,6 +2,7 @@ import { Writable } from "stream";
 import { executeCode, getWritableStream } from "../../utils/FileHandling";
 import { Interpreter } from "web-logo-core";
 import { commandLinePubSub } from "../../pubsub/pubsubs";
+import sleep from "../../utils/async-sleep";
 
 function openCodeEditorPopup(popupName : string) {
   return window.open(
@@ -24,10 +25,15 @@ function openCodeEditorPopup(popupName : string) {
 }
 
 export function openCodeEditor(handle : FileSystemFileHandle, interpreter : Interpreter) {
-  getWritableStream(handle).then((writableHandle) => {
+  getWritableStream(handle).then(async (writableHandle) => {
     // After I aquired the writableHandle from the main page, I can aquire it from the popup, too
     const popup = openCodeEditorPopup(handle.name+"-editor");
     if (popup) {
+      delete (popup as any).readyForSharedData;
+      while ((popup as any).readyForSharedData !== true) {
+        await sleep(100);
+        console.log("Not yet")
+      }
       (popup as (Window & {sharedData: {
         fileHandle: FileSystemFileHandle,
         interpreter: Interpreter,

@@ -7,6 +7,7 @@ import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css'; //Example style, you can use another
 import { commandLinePubSub } from "../pubsub/pubsubs";
+import sleep from "../utils/async-sleep";
 
 
 function getLogoLanguagePrismModel(interpreter : Interpreter) {
@@ -20,12 +21,37 @@ function getLogoLanguagePrismModel(interpreter : Interpreter) {
     },
   });
 }
+
+type SharedData = {
+  fileHandle: FileSystemFileHandle,
+  executeCode: (code : string) => Promise<void>,
+  interpreter : Interpreter,
+};
+
 export default function CodeEditor() {
-  const sharedData = (window as unknown as (Window & { sharedData: {
-    fileHandle: FileSystemFileHandle,
-    executeCode: (code : string) => Promise<void>,
-    interpreter : Interpreter,
-  } })).sharedData;
+
+  const [sharedData, setSharedData] = useState<SharedData | undefined>();
+  useEffect(() => {
+    async function retriveSharedData() {
+      let sharedData = undefined;
+      while (sharedData === undefined) {
+        (window as any).readyForSharedData = true;
+        sharedData = (window as unknown as (Window & { sharedData:  SharedData })).sharedData;
+        if (!sharedData) await sleep(100);
+      }
+      setSharedData(sharedData)
+    }
+    retriveSharedData();
+  }, [setSharedData]);
+
+  if (sharedData) {
+    return <CodeEditorContent sharedData={sharedData}/>
+  }
+  return <div>Loading</div>
+}
+
+function CodeEditorContent({sharedData} : {sharedData : SharedData}) {
+  
   const openedFile = sharedData.fileHandle;
   const preparedExecuteCode = sharedData.executeCode;
   const interpreter = sharedData.interpreter;
