@@ -15,6 +15,7 @@ export class CommandsWithContext extends ExecutableWithContext {
     this.meta = meta;
   }
   async execute() : Promise<CommandControl> {
+    const commandLevelExecution = this.meta != undefined; // TODO : Currently the meta only means that this is a command
     for (let command of this.commands) {
       const label = command.label;
       // TODO This should be done from the ArgumentParser,
@@ -26,22 +27,10 @@ export class CommandsWithContext extends ExecutableWithContext {
         }
       });
       // The label can be a built-in command or a command in memory.
+      let receviedCommandControl : CommandControl; 
       if (label in BuiltinDictionary) {
         const func = BuiltinDictionary[label];
-        const receviedCommandControl = await func(packedArguments, this.context);
-        // A built-in command can give back a return value without sending a return signal
-        // TODO: Little bit hacky. Must rethink
-        if (receviedCommandControl.return) {
-          return receviedCommandControl;
-        }
-        // TODO Also code duplication
-        if (receviedCommandControl.returnValue && command.returnVariable) {
-          if (command.createNewVariableForReturn) {
-            this.context.createVariable(command.returnVariable, receviedCommandControl.returnValue);
-          } else {
-            this.context.setVariable(command.returnVariable, receviedCommandControl.returnValue);
-          }
-        }
+        receviedCommandControl = await func(packedArguments, this.context);
       } else {
         if (!this.context.hasVariable(label)) {
           throw new Error(`Command '${label}' not found`);
@@ -64,22 +53,25 @@ export class CommandsWithContext extends ExecutableWithContext {
               possibleCommand.context.createVariable(commandArgumentName, processedArgument);
             }
           }
-          const receviedCommandControl = await possibleCommand.execute();
-          if (receviedCommandControl.return) {
-            if (commandIsCalled) {
-              if (receviedCommandControl.returnValue && command.returnVariable) {
-                if (command.createNewVariableForReturn) {
-                  this.context.createVariable(command.returnVariable, receviedCommandControl.returnValue);
-                } else {
-                  this.context.setVariable(command.returnVariable, receviedCommandControl.returnValue);
-                }
-              }
-            } else {
-              return receviedCommandControl;
-            }
-          }
+          receviedCommandControl = await possibleCommand.execute();
         } else {
           throw new Error(`'${label}' contains '${this.context.getVariable(label)}', not an executable`);
+        }
+      }
+      if (receviedCommandControl.return) {
+        return {
+          return: !commandLevelExecution,
+          returnValue: receviedCommandControl.returnValue,
+        };
+      }
+      if (command.returnVariable) {
+        if (receviedCommandControl.returnValue === undefined) {
+          throw new Error("There is no return value from the called command");
+        }
+        if (command.createNewVariableForReturn) {
+          this.context.createVariable(command.returnVariable, receviedCommandControl.returnValue);
+        } else {
+          this.context.setVariable(command.returnVariable, receviedCommandControl.returnValue);
         }
       }
     }
