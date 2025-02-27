@@ -2,12 +2,12 @@
 
 A closure is a function that captures and retains access to its surrounding lexical scope, even after that scope has exited. This allows it to remember and use variables from its outer function, making it useful for encapsulation, callbacks, and functional programming patterns. Closures are common in languages like JavaScript, Python, and Swift, where functions are first-class citizens.
 
-# Creating vs. setting a variable
+## Creating vs. setting a variable
 
 To support closures properly, WebLogo must support correct variable declarations and settings.
 Finished @ bea8e53de5ad1295d44edf49e8cee33d5da70928
 
-# Handling return values
+## Handling return values
 
 Procedures must be able to return with something. Some use cases:
 * Return with an other procedure (needed for closures anyway)
@@ -25,7 +25,7 @@ Return values can be implemented in several ways:
     * This is similar to the global variable version, but it's cleaner
     * With proper syntax sugar, this would act exactly as in C
 
-## Implementation
+### Implementation
 
 The language needs a new command, the `return`. It must stop the execution of the current procedure, and must write a specific variable received from the caller. (If received.)
 The caller can give a variable to store the returned value with a new command: 
@@ -49,3 +49,12 @@ The later will create a new, local variable, the first one will use an existing 
 Using this method, simple argument evaluation is also possible by a new `eval` command.
 
 Created @ b049fd741f60cc6ffe4737c0c473598b0c3b496d
+
+## Using closures
+
+Closures can be used after the return and set was implemented. See the closure/closure.lgo.
+
+The factory function creates a scope for counter variable which is not a global one, but the counter instances can increase it.
+The script ends with an error, when the code tries to use the counter directly.
+
+An other interesting result of closures and structs is a primitive OOP-like functionality that can encapsulate some functions with their data and hide the data itself. (See closure/oop.lgo)

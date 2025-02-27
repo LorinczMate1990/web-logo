@@ -1,0 +1,37 @@
+learn constructor {
+  eval 0 => new counter
+  
+  learn increase {
+    eval counter+1 => counter
+  }
+  
+  learn decrease {
+    eval counter-1 => counter
+  }
+  
+  learn get { 
+    return counter
+  }
+  
+  eval increase => new a.increase
+  eval decrease => a.decrease
+  eval get => a.get
+  
+  return a
+}
+
+constructor => new instance
+
+rep 10 {
+  instance.increase
+}
+
+instance.get => new val
+f val*10
+l 90
+
+rep 5 {
+  instance.decrease
+}
+instance.get => val
+f val*10

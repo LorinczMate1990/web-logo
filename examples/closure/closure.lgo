@@ -1,0 +1,25 @@
+learn factory {
+  eval 0 => new counter
+  learn createCounterInstance {
+    learn callCounter {
+      eval counter+1 => counter
+      return counter
+    }
+    return callCounter
+  }
+  return createCounterInstance
+}
+
+factory => new createCounterInstance
+createCounterInstance => new counter1
+createCounterInstance => new counter2
+
+rep 10 { counter1 }
+counter2 => new val
+f val*10
+l 90
+f 10
+l 90
+f 110
+l 180
+f counter*10
