@@ -11,6 +11,15 @@ describe('tokensToCommandList', () => {
     expect(commands[0].arguments).toEqual([]);
   });
 
+  it('parses a simple command without arguments and return value', () => {
+    const tokens = [new Token("command1", 0, 0), new Token("=>", 0, 8), new Token("foo", 0, 10), new Token("\n", 0, 13)];
+    const commands = tokensToCommandList(tokens);
+    expect(commands.length).toEqual(1);
+    expect(commands[0].label).toEqual("command1");
+    expect(commands[0].returnVariable).toEqual("foo");
+    expect(commands[0].arguments).toEqual([]);
+  });
+
   // Test commands with single and multiple word arguments
   it('parses commands with single and multiple word arguments', () => {
     const tokens = [

@@ -29,8 +29,18 @@ export class CommandsWithContext extends ExecutableWithContext {
       if (label in BuiltinDictionary) {
         const func = BuiltinDictionary[label];
         const receviedCommandControl = await func(packedArguments, this.context);
+        // A built-in command can give back a return value without sending a return signal
+        // TODO: Little bit hacky. Must rethink
         if (receviedCommandControl.return) {
           return receviedCommandControl;
+        }
+        // TODO Also code duplication
+        if (receviedCommandControl.returnValue && command.returnVariable) {
+          if (command.createNewVariableForReturn) {
+            this.context.createVariable(command.returnVariable, receviedCommandControl.returnValue);
+          } else {
+            this.context.setVariable(command.returnVariable, receviedCommandControl.returnValue);
+          }
         }
       } else {
         if (!this.context.hasVariable(label)) {
@@ -57,8 +67,13 @@ export class CommandsWithContext extends ExecutableWithContext {
           const receviedCommandControl = await possibleCommand.execute();
           if (receviedCommandControl.return) {
             if (commandIsCalled) {
-              if (receviedCommandControl.returnValue)
-              this.context.createVariable("ans", receviedCommandControl.returnValue); // TODO : ans is const name, just for testing
+              if (receviedCommandControl.returnValue && command.returnVariable) {
+                if (command.createNewVariableForReturn) {
+                  this.context.createVariable(command.returnVariable, receviedCommandControl.returnValue);
+                } else {
+                  this.context.setVariable(command.returnVariable, receviedCommandControl.returnValue);
+                }
+              }
             } else {
               return receviedCommandControl;
             }

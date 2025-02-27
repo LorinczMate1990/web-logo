@@ -2,6 +2,7 @@ import { turtleCommandPubSub } from "./pubsub/pubsubs";
 import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "./types";
 import { Arguments, PossibleArgumentParsingMethods } from "./ArgumentParser";
 import ColorMap from "./utils/ColorMap";
+import { Command } from "./CommandList";
 
 function sleep(ms: number) {
   return new Promise((resolve, reject) => {
@@ -238,7 +239,8 @@ export default class CoreCommands {
     return {};
   }
 
-  static async setParameter(arg : ArgType, memory : AbstractMemory) {
-    return {};
+  @Arguments([['numeric', 'code', 'array']])
+  static async eval(arg : ArgType, memory : AbstractMemory) {
+    return {returnValue: arg[0]} as CommandControl;
   }
 }

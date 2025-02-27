@@ -25,7 +25,7 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory
   "wait": CoreCommands.coWait,
   "fill": CoreCommands.fill,
   "return": CoreCommands.returnWithValue,
-  "set": CoreCommands.setParameter,
+  "eval": CoreCommands.eval,
 };
 
 export default BuiltinDictionary;

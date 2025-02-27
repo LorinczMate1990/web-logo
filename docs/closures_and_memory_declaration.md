@@ -30,8 +30,20 @@ Return values can be implemented in several ways:
 The language needs a new command, the `return`. It must stop the execution of the current procedure, and must write a specific variable received from the caller. (If received.)
 The caller can give a variable to store the returned value with a new command: 
 ```
-let returnVariableName := command arg1 arg2 arg3
-new returnVariableName := command arg1 arg2 arg3
+let returnVariableName <= command arg1 arg2 arg3
+new returnVariableName <= command arg1 arg2 arg3
 ```
 
 The `let` will use an existing variable, the `new` will create a new variable at the current level.
+Storing the return value using a general purpose let/new is not good, because the programmer won't be able to copy an executable variable.
+Let's assume that `foo` is an executable.
+`let ret := foo ` can mean execute foo and copy its return value to ret or copy foo to ret.
+
+Handling return values needs a new syntax:
+
+`COMMAND arg1 arg2 arg3 ... => variable`
+OR
+`COMMAND arg1 arg2 arg3 ... => new variable`
+
+The later will create a new, local variable, the first one will use an existing variable.
+Using this method, simple argument evaluation is also possible by a new `eval` command.

@@ -9,8 +9,8 @@ learn foo a {
 }
 
 learn bar {
-  foo 10
-  rep ans { f 100; l 360/ans}
+  foo 10 => num
+  rep num { f 100; l 360/num}
 }
 
 bar
