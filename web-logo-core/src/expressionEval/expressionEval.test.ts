@@ -22,6 +22,35 @@ describe('numericEval', () => {
     };
   });
 
+  describe("Using character constants", () => {
+    it('evaluate constant character', () => {
+      expect(expressionEval("'(", memoryMock)).toEqual("(".charCodeAt(0));
+      expect(expressionEval("'a", memoryMock)).toEqual("a".charCodeAt(0));
+      expect(expressionEval("'A", memoryMock)).toEqual("A".charCodeAt(0));
+      expect(expressionEval("'Z", memoryMock)).toEqual("Z".charCodeAt(0));
+    });
+
+    it('do calculations with character constants at the end', () => {
+      expect(expressionEval("2*'a", memoryMock)).toEqual("a".charCodeAt(0)*2);
+    });
+    it('do calculations with character constants at the start', () => {
+      expect(expressionEval("'a*2", memoryMock)).toEqual("a".charCodeAt(0)*2);
+    });
+    it('do calculations with character constants in the middle', () => {
+      expect(expressionEval("2*'a*2", memoryMock)).toEqual("a".charCodeAt(0)*4);
+    });
+
+    it('evaluate special character constant \\n', () => {
+      expect(expressionEval("'\\n", memoryMock)).toEqual("\n".charCodeAt(0));
+    });
+    it('evaluate special character constant \\r', () => {
+      expect(expressionEval("'\\r", memoryMock)).toEqual("\r".charCodeAt(0));
+    });
+    it('evaluate special character constant \\\\', () => {
+      expect(expressionEval("'\\\\", memoryMock)).toEqual("\\".charCodeAt(0));
+    });    
+  });
+
   it('evaluates constant expression', () => {
     expect(expressionEval('4', memoryMock)).toEqual(4);
   }); 

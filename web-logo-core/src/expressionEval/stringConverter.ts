@@ -14,11 +14,13 @@ const tableOfEscapedChars: { [key: string]: string } = {
   "\\": "\\",
 }
 
-export function stringToArrayConverter(expression: string) {
+// TODO : Should be split to separate functions
+export function stringToArrayAndCharToNumberConverter(expression: string) {
   let currentToken = "";
   let insideString = false;
   let prevChar: string = "";
   let prevPrevChar: string = "";
+  let insideChar = false;
 
   let result = "";
 
@@ -43,11 +45,27 @@ export function stringToArrayConverter(expression: string) {
           currentToken += char;
         }
       }
+    } else if (insideChar) {
+      if (char == '\\' && prevChar == '\'') {
+        prevPrevChar = prevChar;
+        prevChar = char;
+        continue;
+      }
+      if (prevChar == '\\') {
+        result += tableOfEscapedChars[char].charCodeAt(0).toString();
+      } else {
+        result += char.charCodeAt(0).toString();
+      }
+      insideChar = false;
     } else {
       if (char == '"') {
         insideString = true;
       } else {
-        result += char;
+        if (char == '\'') {
+          insideChar = true;
+        } else {
+          result += char;
+        }
       }
     }
     prevPrevChar = prevChar;
