@@ -1,12 +1,12 @@
 import { isStructuredMemoryData, ParamType, StructuredMemoryData, VariableGetter } from "../types";
 import { isArrayToken, isNumeric, builtinFunctions, executeBinaryOperator, executeUnaryOperator, isBuiltinFunction, isOperator, isStrictlyUnaryOperator, precedence } from "./operators";
-import { stringToArrayConverter } from "./stringConverter";
+import { stringToArrayAndCharToNumberConverter } from "./stringConverter";
 import toPolishNotation from "./toPolishNotation";
 
 export function expressionEval(expression: string, memory: VariableGetter): ParamType {
   // Convert to Polish notation first (placeholder implementation)
   expression = expression.trim();
-  expression = stringToArrayConverter(expression);
+  expression = stringToArrayAndCharToNumberConverter(expression);
   const polishNotation = toPolishNotation(expression);
   return evaluatePolishForm(polishNotation, memory);
 }
