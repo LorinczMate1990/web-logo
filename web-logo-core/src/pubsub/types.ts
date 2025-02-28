@@ -66,6 +66,12 @@ type SetHomehMessage = {
   orientation : number;
 };
 
+type PrintMessage = {
+  topic: "trace";
+  command: "print";
+  message: string;
+};
+
 // Combine all messages into one TurtleCommandMessage type
 export type TurtleCommandMessage =
   | MoveMessage
@@ -77,4 +83,5 @@ export type TurtleCommandMessage =
   | SetPenColorMessage
   | SetPenWidthMessage
   | SetHomehMessage
-  | FillMessage;
+  | FillMessage
+  | PrintMessage;

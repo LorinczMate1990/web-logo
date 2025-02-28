@@ -3,6 +3,7 @@ import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableW
 import { Arguments, PossibleArgumentParsingMethods } from "./ArgumentParser";
 import ColorMap from "./utils/ColorMap";
 import { Command } from "./CommandList";
+import { isNumeric } from "./expressionEval/operators";
 
 function sleep(ms: number) {
   return new Promise((resolve, reject) => {
@@ -242,5 +243,34 @@ export default class CoreCommands {
   @Arguments([['numeric', 'code', 'array']])
   static async eval(arg : ArgType, memory : AbstractMemory) {
     return {returnValue: arg[0]} as CommandControl;
+  }
+
+  @Arguments({min: 1, default: new Set<PossibleArgumentParsingMethods>(['array', 'numeric'])})
+  static async print(arg : ArgType, memory : AbstractMemory) {
+    let message = "";
+    for (const i of arg) {
+      if (isStructuredMemoryData(i)) {
+        if (!Array.isArray(i.data)) new Error("Print only supports string arrays and numbers"); 
+        const array = i.data as ParamType[];
+        // Is this an ascii string?
+        for (const c of array) {
+          if (typeof c === "number" && c > 0 && c < 255) {
+            message += String.fromCharCode(c);
+          } else {
+            new Error("Print only supports string arrays and numbers"); // TODO Recursive message conversion
+          }
+        }
+        message += " ";
+      } else {
+        const value = i as number;
+        message += `${value} `;
+      }
+    }
+    turtleCommandPubSub.publish({
+      topic: "trace",
+      command: "print",
+      message
+    });
+    return {};
   }
 }
