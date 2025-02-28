@@ -14,6 +14,7 @@ const tableOfEscapedChars: { [key: string]: string } = {
   "\\": "\\",
 }
 
+// TODO : Should be split to separate functions
 export function stringToArrayAndCharToNumberConverter(expression: string) {
   let currentToken = "";
   let insideString = false;
