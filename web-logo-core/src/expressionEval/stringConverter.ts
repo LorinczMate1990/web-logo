@@ -36,7 +36,7 @@ export function stringToArrayAndCharToNumberConverter(expression: string) {
           // Do nothing, the next char will be escaped
         } else if (prevChar == "\\" && prevPrevChar != "\\") {
           // Escaped chars
-          if (!(char in tableOfEscapedChars)) {
+          if (char in tableOfEscapedChars) {
             currentToken += tableOfEscapedChars[char];
           } else {
             throw new Error(`Unknown escape sequence: ${char}`)
