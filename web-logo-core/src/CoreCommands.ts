@@ -2,8 +2,6 @@ import { turtleCommandPubSub } from "./pubsub/pubsubs";
 import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "./types";
 import { Arguments, PossibleArgumentParsingMethods } from "./ArgumentParser";
 import ColorMap from "./utils/ColorMap";
-import { Command } from "./CommandList";
-import { isNumeric } from "./expressionEval/operators";
 
 function sleep(ms: number) {
   return new Promise((resolve, reject) => {
@@ -246,7 +244,18 @@ export default class CoreCommands {
   }
 
   @Arguments({min: 1, default: new Set<PossibleArgumentParsingMethods>(['array', 'numeric'])})
-  static async print(arg : ArgType, memory : AbstractMemory) {
+  static async normalPrint(arg : ArgType, memory : AbstractMemory) {
+    await CoreCommands.print(arg, false);
+    return {};
+  }
+
+  @Arguments({min: 1, default: new Set<PossibleArgumentParsingMethods>(['array', 'numeric'])})
+  static async errorPrint(arg : ArgType, memory : AbstractMemory) {
+    await CoreCommands.print(arg, true);
+    return {};
+  }
+
+  static async print(arg : ArgType, error : boolean) {
     let message = "";
     for (const i of arg) {
       if (isStructuredMemoryData(i)) {
@@ -269,7 +278,8 @@ export default class CoreCommands {
     turtleCommandPubSub.publish({
       topic: "trace",
       command: "print",
-      message
+      message,
+      error,
     });
     return {};
   }

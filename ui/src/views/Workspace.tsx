@@ -17,7 +17,7 @@ export default function Workspace({interpreter } : {interpreter : Interpreter}) 
         commandLinePubSub.publish({
           topic: 'commandLine',
           content: message.message,
-          error: false,
+          error: message.error,
         })
         break;
     };

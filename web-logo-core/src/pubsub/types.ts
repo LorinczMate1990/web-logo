@@ -70,6 +70,7 @@ type PrintMessage = {
   topic: "trace";
   command: "print";
   message: string;
+  error: boolean;
 };
 
 // Combine all messages into one TurtleCommandMessage type
