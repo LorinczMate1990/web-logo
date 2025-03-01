@@ -1,4 +1,4 @@
-import React, { useState, KeyboardEvent, useRef } from 'react';
+import React, { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import './CommandLine.css'; // Import the CSS file
 import { Interpreter } from 'web-logo-core';
 import { commandLinePubSub, useSubscriber } from '../../pubsub/pubsubs';
@@ -20,8 +20,9 @@ const CommandLine: React.FC<{ maxLines: number, interpreter : Interpreter }> = (
   const [lastEditedCommand, setLastEditedCommand] = useState<string>(''); // State for storing last edited command
   const [responses, setResponses] = useState<CommandResponse[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const responseContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const outerResponses = useSubscriber(commandLinePubSub, (message) => {
+  useSubscriber(commandLinePubSub, (message) => {
     const newResponse : CommandResponse = {
       accepted : true,
       error: message.error,
@@ -29,6 +30,12 @@ const CommandLine: React.FC<{ maxLines: number, interpreter : Interpreter }> = (
     };
     setResponses((responses) => [...responses, newResponse]);
   }, [responses, setResponses]);
+
+  useEffect(() => {
+    if (responseContainerRef.current) {
+      responseContainerRef.current.scrollTop = responseContainerRef.current.scrollHeight;
+    }
+  }, [responses]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
@@ -152,7 +159,10 @@ const CommandLine: React.FC<{ maxLines: number, interpreter : Interpreter }> = (
 
   return (
     <div className="commandLineContainer" style={{ height: "100%" }} onClick={handleContainerClick}>
-      <div className="responseContainer" style={{ height: `calc(100% - ${commandPromptHeight*2}px)`, backgroundColor: "white" }}>
+      <div className="responseContainer" 
+        style={{ height: `calc(100% - ${commandPromptHeight*2}px)`, backgroundColor: "white" }} 
+        ref={responseContainerRef} 
+      >
         {responses.map((res, index) => (
           <p
             key={index}
