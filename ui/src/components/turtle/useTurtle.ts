@@ -28,6 +28,7 @@ export default function useTurtle(canvasData: CanvasData | null) {
     if (instance === undefined) {
       return;
     }
+    if (message.topic != "turtleCommand") return;
     switch (message.command) {
       case "forward":
         instance.go(message.distance);

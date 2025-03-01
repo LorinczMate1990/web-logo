@@ -1,13 +1,28 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import DrawingCanvas from '../components/DrawingCanvas';
 import Turtle from '../components/turtle/Turtle';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-
+import { turtleCommandPubSub, TurtleCommandMessage } from 'web-logo-core'
 import CommandLine from '../components/CommandLine/CommandLine';
 import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
 import { Interpreter } from 'web-logo-core';
+import { commandLinePubSub, useSubscriber } from '../pubsub/pubsubs';
 
 export default function Workspace({interpreter } : {interpreter : Interpreter}) {
+  useSubscriber(turtleCommandPubSub, (message) => {
+    console.log({message})
+    if (message.topic != "trace") return;
+    switch (message.command) {
+      case "print":
+        commandLinePubSub.publish({
+          topic: 'commandLine',
+          content: message.message,
+          error: message.error,
+        })
+        break;
+    };
+  });
+
   return <div className="App" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <PanelGroup direction="horizontal">
       {/* Resizable Side Panel */}
