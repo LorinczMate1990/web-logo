@@ -26,7 +26,9 @@ const CommandLine: React.FC<{ maxLines: number, interpreter : Interpreter }> = (
       error: message.error,
       response: message.content,
     };
-    setResponses([...responses, newResponse]);
+    setResponses((responses) => [...responses, newResponse]);
+    console.log({responses, newResponse})
+
 
   }, [responses, setResponses]);
 
@@ -57,12 +59,12 @@ const CommandLine: React.FC<{ maxLines: number, interpreter : Interpreter }> = (
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let result;
+    let result : CommandResponse;
     result = await executeCommand(input); // TODO How to catch this exception?
     
     if (result && result.accepted && result.response) {
-      setResponses([...responses, { ...result }]);
-      setHistory([...history, input]);
+      setResponses((responses) => [...responses, { ...result }]);
+      setHistory((history) => [...history, input]);
       setHistoryIndex(history.length + 1);
     }
     setInput('');
