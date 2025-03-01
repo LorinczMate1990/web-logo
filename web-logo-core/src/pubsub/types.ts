@@ -67,7 +67,7 @@ type SetHomehMessage = {
 };
 
 type PrintMessage = {
-  topic: "trace";
+  topic: "systemCommand";
   command: "print";
   message: string;
   error: boolean;

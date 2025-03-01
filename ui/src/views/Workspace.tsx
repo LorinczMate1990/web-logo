@@ -11,7 +11,7 @@ import { commandLinePubSub, useSubscriber } from '../pubsub/pubsubs';
 export default function Workspace({interpreter } : {interpreter : Interpreter}) {
   useSubscriber(turtleCommandPubSub, (message) => {
     console.log({message})
-    if (message.topic != "trace") return;
+    if (message.topic != "systemCommand") return;
     switch (message.command) {
       case "print":
         commandLinePubSub.publish({

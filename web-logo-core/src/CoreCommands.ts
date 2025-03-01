@@ -276,7 +276,7 @@ export default class CoreCommands {
       }
     }
     turtleCommandPubSub.publish({
-      topic: "trace",
+      topic: "systemCommand",
       command: "print",
       message,
       error,
