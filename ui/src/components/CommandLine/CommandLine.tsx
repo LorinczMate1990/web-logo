@@ -27,9 +27,6 @@ const CommandLine: React.FC<{ maxLines: number, interpreter : Interpreter }> = (
       response: message.content,
     };
     setResponses((responses) => [...responses, newResponse]);
-    console.log({responses, newResponse})
-
-
   }, [responses, setResponses]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
