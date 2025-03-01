@@ -19,6 +19,7 @@ const CommandLine: React.FC<{ maxLines: number, interpreter : Interpreter }> = (
   const [historyIndex, setHistoryIndex] = useState<number>(0);
   const [lastEditedCommand, setLastEditedCommand] = useState<string>(''); // State for storing last edited command
   const [responses, setResponses] = useState<CommandResponse[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const outerResponses = useSubscriber(commandLinePubSub, (message) => {
     const newResponse : CommandResponse = {
@@ -145,8 +146,12 @@ const CommandLine: React.FC<{ maxLines: number, interpreter : Interpreter }> = (
     ));
   };
 
+  const handleContainerClick = () => {
+    textareaRef.current?.focus();
+  };
+
   return (
-    <div className="commandLineContainer" style={{ height: "100%" }}>
+    <div className="commandLineContainer" style={{ height: "100%" }} onClick={handleContainerClick}>
       <div className="responseContainer" style={{ height: `calc(100% - ${commandPromptHeight*2}px)`, backgroundColor: "white" }}>
         {responses.map((res, index) => (
           <p
@@ -161,6 +166,7 @@ const CommandLine: React.FC<{ maxLines: number, interpreter : Interpreter }> = (
 
       <form onSubmit={handleSubmit}>
         <textarea
+          ref={textareaRef}
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
