@@ -11,7 +11,7 @@ export default function useTurtle(canvasData: CanvasData | null) {
   const canvasHeight = canvasData?.height ?? 0;
 
   const [graphTurtle, setGraphTurtle] = useState<GraphTurtleProperties | null>(null);
-  const turtleInstance = useRef<TurtleInstance>();
+  const turtleInstance = useRef<TurtleInstance | undefined>(undefined);
   useEffect(() => {
     if (turtleInstance.current === null || turtleInstance.current === undefined) {
       const instance = new TurtleInstance("turtle0", "turtles", { x: Math.round(canvasWidth / 2), y: Math.round(canvasHeight / 2) }, Math.PI / 2 * 3, context, canvasWidth, canvasHeight, "down", [0, 0, 0], 1);
