@@ -28,6 +28,8 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory
   "eval": CoreCommands.eval,
   "print": CoreCommands.normalPrint,
   "error": CoreCommands.errorPrint,
+  "clear": CoreCommands.clearScreen,
+  "cls": CoreCommands.clearScreen,
 };
 
 export default BuiltinDictionary;

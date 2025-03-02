@@ -73,6 +73,11 @@ type PrintMessage = {
   error: boolean;
 };
 
+type ClearScreenMessage = {
+  topic: "systemCommand";
+  command: "clearScreen";
+};
+
 // Combine all messages into one TurtleCommandMessage type
 export type TurtleCommandMessage =
   | MoveMessage
@@ -85,4 +90,5 @@ export type TurtleCommandMessage =
   | SetPenWidthMessage
   | SetHomehMessage
   | FillMessage
-  | PrintMessage;
+  | PrintMessage
+  | ClearScreenMessage;

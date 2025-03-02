@@ -1,11 +1,16 @@
 import React, { useRef, useEffect, useState, ReactNode } from 'react';
 import CanvasContext from './CanvasContext';
 
-interface DrawingCanvasProps {
-  children?: ReactNode; // Allow children props
+export interface DrawingCanvasRef {
+  clearCanvas: () => void;
 }
 
-const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ children }) => {
+interface DrawingCanvasProps {
+  children?: ReactNode;
+  ref?: React.RefObject<DrawingCanvasRef | null>;
+}
+
+const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, children }) => {
   const canvasContainerRef = useRef(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
@@ -58,7 +63,22 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ children }) => {
     };
   }, [canvasContainerRef.current, canvasRef.current]);
 
-  console.log(canvasSize);
+  useEffect(() => {
+    function clearCanvas() {
+      const ctx = canvasRef.current?.getContext('2d');
+      if (ctx && canvasRef.current) {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvasRef.current.width ?? 0, canvasRef.current.height);
+      }
+    } 
+
+    if (ref) {
+      (ref).current = {
+        clearCanvas,
+      };
+    }
+  }, [ref, canvasRef.current]);
+
   return (
     <div 
       ref={canvasContainerRef}

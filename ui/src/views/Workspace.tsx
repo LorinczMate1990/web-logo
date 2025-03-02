@@ -1,5 +1,5 @@
-import React from 'react';
-import DrawingCanvas from '../components/DrawingCanvas';
+import React, { useRef } from 'react';
+import DrawingCanvas, { DrawingCanvasRef } from '../components/DrawingCanvas';
 import Turtle from '../components/turtle/Turtle';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { turtleCommandPubSub, TurtleCommandMessage } from 'web-logo-core'
@@ -9,6 +9,8 @@ import { Interpreter } from 'web-logo-core';
 import { commandLinePubSub, useSubscriber } from '../pubsub/pubsubs';
 
 export default function Workspace({interpreter } : {interpreter : Interpreter}) {
+  const drawingCanvasRef = useRef<DrawingCanvasRef | null>(null);
+
   useSubscriber(turtleCommandPubSub, (message) => {
     console.log({message})
     if (message.topic != "systemCommand") return;
@@ -19,6 +21,9 @@ export default function Workspace({interpreter } : {interpreter : Interpreter}) 
           content: message.message,
           error: message.error,
         })
+        break;
+      case "clearScreen":
+        drawingCanvasRef.current?.clearCanvas();
         break;
     };
   });
@@ -38,7 +43,7 @@ export default function Workspace({interpreter } : {interpreter : Interpreter}) 
       <Panel minSize={1}>
         <PanelGroup direction="vertical">
           <Panel defaultSize={90} minSize={1}>
-            <DrawingCanvas>
+            <DrawingCanvas ref={drawingCanvasRef}>
               <Turtle name="Leo" />
             </DrawingCanvas>
           </Panel>

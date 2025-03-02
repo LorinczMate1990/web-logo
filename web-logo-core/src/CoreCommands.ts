@@ -283,4 +283,13 @@ export default class CoreCommands {
     });
     return {};
   }
+
+  @Arguments([])
+  static async clearScreen(arg : ArgType, memory : AbstractMemory) {
+    turtleCommandPubSub.publish({
+      topic: "systemCommand",
+      command: "clearScreen"
+    });
+    return {};
+  }  
 }
