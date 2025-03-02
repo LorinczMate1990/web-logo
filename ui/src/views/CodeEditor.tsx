@@ -62,7 +62,6 @@ function CodeEditorContent({sharedData} : {sharedData : SharedData}) {
   const [fileContent, setFileContent] = useState<string | null>(null);
 
   const save = async () => {
-    console.log("navigator.userActivation: ", (window.navigator as any).userActivation)
     if (fileContent) {
       const writableOpenedFile = await getWritableStream(openedFile);
       await writeFile(writableOpenedFile, fileContent);
@@ -142,7 +141,6 @@ function CodeEditorContent({sharedData} : {sharedData : SharedData}) {
           <Editor
             value={fileContent}
             onValueChange={(code) => {
-              console.log("On Value changed");
               setSaved(false);
               setFileContent(code);
             }}

@@ -32,7 +32,6 @@ export function openCodeEditor(handle : FileSystemFileHandle, interpreter : Inte
       delete (popup as any).readyForSharedData;
       while ((popup as any).readyForSharedData !== true) {
         await sleep(100);
-        console.log("Not yet")
       }
       (popup as (Window & {sharedData: {
         fileHandle: FileSystemFileHandle,

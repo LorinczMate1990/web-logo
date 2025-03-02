@@ -16,7 +16,6 @@ export const getWritableStream = async (handle: FileSystemFileHandle) => {
 };
 
 export const writeFile = async (writableHandle: FileSystemWritableFileStream, content: string) => {
-  console.log("navigator.userActivation before createWritable: ", (window.navigator as any).userActivation)
   await writableHandle.write(content);
   await writableHandle.close();
 };
@@ -36,7 +35,6 @@ export const executeCode = async (code: string, interpreter: Interpreter, comman
       })
     }
     if (success) {
-      console.log("Success")
       commandLinePubSub.publish({
         topic: "commandLine",
         error: false,
@@ -87,12 +85,10 @@ export const executeFile = async (handle: FileSystemFileHandle, interpreter: Int
 export const createNewDirectory = async (parentHandle: FileSystemDirectoryHandle) => {
   const dirName = window.prompt("Enter the name of the new directory:");
   if (!dirName) {
-    console.log("Error creating directory: Directory creation canceled.");
     return;
   }
 
   const dirHandle = await parentHandle.getDirectoryHandle(dirName, { create: true });
-  console.log(`Directory "${dirName}" created successfully.`);
   return dirHandle;
 };
 
@@ -106,12 +102,10 @@ export const deleteFileOrFolder = async (handle: FileSystemHandle, parentHandle:
   try {
     const confirmation = window.confirm(`Are you sure you want to delete "${handle.name}"?`);
     if (!confirmation) {
-      console.log("Deletion is canceled");
       return;
     }
 
     await parentHandle.removeEntry(handle.name); // This is not recursive by design
-    console.log(`Deleted "${handle.name}".`);
   } catch (error) {
     if ((error as Error).name == "InvalidModificationError") {
       window.alert("You can only delete empty folder");
@@ -125,11 +119,10 @@ export const deleteFileOrFolder = async (handle: FileSystemHandle, parentHandle:
 export const createNewFile = async (parentHandle: FileSystemDirectoryHandle) => {
   const fileName = window.prompt("Enter the name of the new file:");
   if (fileName == null) {
-    console.log("Error creating file: File creation canceled.");
+    alert("Error creating file: File creation canceled.");
     return;
   }
 
   const fileHandle = await parentHandle.getFileHandle(fileName, { create: true });
-  console.log(`File "${fileName}" created successfully.`);
   return fileHandle;
 };

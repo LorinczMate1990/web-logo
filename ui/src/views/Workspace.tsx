@@ -12,7 +12,6 @@ export default function Workspace({interpreter } : {interpreter : Interpreter}) 
   const drawingCanvasRef = useRef<DrawingCanvasRef | null>(null);
 
   useSubscriber(turtleCommandPubSub, (message) => {
-    console.log({message})
     if (message.topic != "systemCommand") return;
     switch (message.command) {
       case "print":

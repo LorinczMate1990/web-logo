@@ -27,7 +27,6 @@ const Folder: React.FC<FolderProps> = ({ name, handle, onFileDoubleClick, parent
   const [isLoading, setIsLoading] = useState(false);
 
   const refresh = async () => {
-    console.log("Reloading dir")
     if (!isOpen) {
       await toggleFolder();
     } else {

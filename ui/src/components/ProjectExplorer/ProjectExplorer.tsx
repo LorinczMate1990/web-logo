@@ -16,7 +16,6 @@ const ProjectExplorer: React.FC<{
   const [isLoading, setIsLoading] = useState(false);
 
   const refresh = async () => {
-    console.log("Try to refresh")
     await reloadContentList();
   }
 

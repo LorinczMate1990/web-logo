@@ -20,7 +20,6 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, children }) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     const resizeCanvas = () => {
-      console.log("Resize canvas")
       if (canvas) {
 
         // Save the current content of the canvas
