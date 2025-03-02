@@ -48,9 +48,18 @@ const ProjectExplorer: React.FC<{
   }
 
   const openFolder = async () => {
-    const dirHandle = await window.showDirectoryPicker();
-    rootHandle.current = dirHandle;
-    await reloadContentList();
+    try {
+      const dirHandle = await window.showDirectoryPicker();
+      rootHandle.current = dirHandle;
+      await reloadContentList();
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        // The user aborted, nothing to do
+      } else {
+        throw error;
+      }
+
+    }
 
   };
 
