@@ -8,9 +8,11 @@ export interface DrawingCanvasRef {
 interface DrawingCanvasProps {
   children?: ReactNode;
   ref?: React.RefObject<DrawingCanvasRef | null>;
+  onFocus? : () => void;
+  onBlur? : () => void;
 }
 
-const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, children }) => {
+const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, children }) => {
   const canvasContainerRef = useRef(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
@@ -80,11 +82,15 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, children }) => {
 
   return (
     <div 
+      tabIndex={0}
       ref={canvasContainerRef}
+      onFocus={onFocus}
+      onBlur={onBlur}
       style={{
         position: "relative",
         width: '100%',
-        height: '100%'
+        height: '100%',
+        outline: "none"
       }}>
       <canvas ref={canvasRef} style={{ 
         width: "100%",

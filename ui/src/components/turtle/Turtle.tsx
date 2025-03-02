@@ -2,17 +2,19 @@ import React, { useContext } from 'react';
 import CanvasContext from '../CanvasContext';
 import useTurtle from './useTurtle';
 
+export type TurtleVisibility = "visible" | "invisible";
+
 interface TurtleProps {
 	name: string;
-	// Additional properties for position, orientation, etc., can be added here
+	globalVisibility : TurtleVisibility;
 }
 
-const Turtle: React.FC<TurtleProps> = ({ name }) => {
+const Turtle: React.FC<TurtleProps> = ({ name, globalVisibility }) => {
 	const context = useContext(CanvasContext);
 	const turtle = useTurtle(context);
 	// The turtle must rendered correctly above the Canvas
 	// This is the purpose of this component
-	if (turtle == null) {
+	if (turtle == null || globalVisibility == "invisible") {
 		return <></>
 	}
 	return <div style={{
