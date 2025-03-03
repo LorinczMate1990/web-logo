@@ -50,6 +50,21 @@ Using this method, simple argument evaluation is also possible by a new `eval` c
 
 Created @ b049fd741f60cc6ffe4737c0c473598b0c3b496d
 
+The issue with this is syntax is that this is uncommon, unintuitive and complex, so using it for a learning language is bad idea.
+The syntax must be the following:
+
+For saving the return value: `existingVariableName := COMMAND arg1 arg2 ... ` or `new newVariableName := COMMAND arg1 arg2 ... `
+For saving the value of an expression: `existingVariableName := expression ` or `new newVariableName := expression `
+For creating an alias for a command: `existingVariableName := EVAL COMMAND ` or `new newVariableName := EVAL COMMAND`
+For creating an alias for an executable variable: `existingVariableName := EVAL executableVariable ` or `new newVariableName := EVAL executableVariable`
+
+The resolving logic will be the following:
+1) If it is an executable, it must be executed, and the return value must be given back
+2) If it's a variable, the variable must be copied (by reference when using structured variables)
+3) If it's neither, it must be tried to be evaluated as an expression
+
+
+
 ## Using closures
 
 Closures can be used after the return and set was implemented. See the closure/closure.lgo.

@@ -56,7 +56,6 @@ export function tokensToCommandList(tokens: Token[]): Commands {
 function _tokensToCommandList(w : Wrapper) : Commands {
   const commands : Commands = [];
   let currentCommand : Command | null = null;
-  let mustStartNewCommand = false;
   while (w.pointer < w.tokens.length) {
     if (w.tokens[w.pointer].eq("{")) {
       w.pointer++;
@@ -79,22 +78,22 @@ function _tokensToCommandList(w : Wrapper) : Commands {
       currentCommand = null;
     } else {
       if (currentCommand === null) {
-        currentCommand = new Command(w.tokens[w.pointer]);
-        mustStartNewCommand = false;
-      } else {
-        if (mustStartNewCommand) throw new Error("There can not be more arguments after a return variable name"); // TODO Ugly message
-        if (w.tokens[w.pointer].eq("=>")) {
-          w.pointer++;
+        if ((w.tokens.length > w.pointer+1 && w.tokens[w.pointer+1].eq(":=")) || w.tokens[w.pointer].eq("new")) {
           let createNewVariable = false;
           if (w.tokens[w.pointer].eq("new")) {
-            w.pointer++;
             createNewVariable = true;
+            w.pointer++;
           }
-          currentCommand.setReturnVariable(w.tokens[w.pointer], createNewVariable);
-          mustStartNewCommand = true;
+          const label = w.tokens[w.pointer+2];
+          const returnVariable = w.tokens[w.pointer];
+          currentCommand = new Command(label);
+          currentCommand.setReturnVariable(returnVariable, createNewVariable);
+          w.pointer+=2;
         } else {
-          currentCommand.addArgument(w.tokens[w.pointer]);
+          currentCommand = new Command(w.tokens[w.pointer]);
         }
+      } else {
+        currentCommand.addArgument(w.tokens[w.pointer]);
       }
       w.pointer++;
     }

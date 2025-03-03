@@ -31,31 +31,38 @@ export class CommandsWithContext extends ExecutableWithContext {
       if (label in BuiltinDictionary) {
         const func = BuiltinDictionary[label];
         receviedCommandControl = await func(packedArguments, this.context);
-      } else {
-        if (!this.context.hasVariable(label)) {
-          throw new Error(`Command '${label}' not found`);
-        }
-        const possibleCommandFactory = this.context.getVariable(label); // TODO Check if it exists
-        if (possibleCommandFactory instanceof CommandsWithContextFactory) {
-          // Set variables
-          // Check the numbers! This dialect doesn't support variable argument list
-          const possibleCommand = possibleCommandFactory.getNewExecutableWithContext();
-          const commandIsCalled = possibleCommand.meta != undefined;
-          if (commandIsCalled) { // If it has no meta, it can't accept any argument, it's just an inline codeblock
-            const numOfArguments = packedArguments.length;
-            const argTypes = Array.from({ length: packedArguments.length }, () => new Set<PossibleArgumentParsingMethods>(['numeric', 'array', 'code']));
-            const processedArguments = getProcessedArgumentList(packedArguments, argTypes, this.context);
-            
-            for (let i = 0; i < numOfArguments; ++i) {
-              const processedArgument = processedArguments[i];
-              const commandArgumentName = possibleCommand.meta.arguments[i];
-              if (typeof processedArgument == "string") throw new Error("This shouldn't be possible");
-              possibleCommand.context.createVariable(commandArgumentName, processedArgument);
-            }
+      } else if (this.context.hasVariable(label) && this.context.getVariable(label) instanceof CommandsWithContextFactory) {
+        const commandFactory = this.context.getVariable(label) as CommandsWithContextFactory;
+        // Set variables
+        // Check the numbers! This dialect doesn't support variable argument list
+        const executable = commandFactory.getNewExecutableWithContext();
+        const commandIsCalled = executable.meta != undefined;
+        if (commandIsCalled) {
+          const numOfArguments = packedArguments.length;
+          const argTypes = Array.from({ length: packedArguments.length }, () => new Set<PossibleArgumentParsingMethods>(['numeric', 'array', 'code']));
+          const processedArguments = getProcessedArgumentList(packedArguments, argTypes, this.context);
+          
+          for (let i = 0; i < numOfArguments; ++i) {
+            const processedArgument = processedArguments[i];
+            const commandArgumentName = executable.meta.arguments[i];
+            if (typeof processedArgument == "string") throw new Error("This shouldn't be possible");
+            executable.context.createVariable(commandArgumentName, processedArgument);
           }
-          receviedCommandControl = await possibleCommand.execute();
+        }
+        receviedCommandControl = await executable.execute();
+      } else {
+        if (this.context.hasVariable(label)) {
+          receviedCommandControl = {returnValue: this.context.getVariable(label)}
         } else {
-          throw new Error(`'${label}' contains '${this.context.getVariable(label)}', not an executable`);
+          const fullExpression = `${label} ${command.arguments.map((a) => {
+            if (typeof a === "string") {
+              return a;
+            } else {
+              throw new Error("Expression can not contain any code block");
+            }
+          }).join(" ")}`;
+          const processedEvaluation = getProcessedArgumentList([fullExpression], [new Set<PossibleArgumentParsingMethods>(['numeric', 'array'])], this.context);
+          receviedCommandControl = {returnValue: processedEvaluation[0] as ParamType}
         }
       }
       if (receviedCommandControl.return) {
