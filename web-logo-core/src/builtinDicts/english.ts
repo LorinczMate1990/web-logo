@@ -1,4 +1,5 @@
-import CoreCommands from "../CoreCommands";
+import ArrayCommands from "../language-commands/ArrayCommands";
+import CoreCommands from "../language-commands/CoreCommands";
 import { AbstractMemory, ArgType, CommandControl, VariableGetter, VariableSetter } from "../types";
 
 // This is the English dict
@@ -30,6 +31,14 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory
   "error": CoreCommands.errorPrint,
   "clear": CoreCommands.clearScreen,
   "cls": CoreCommands.clearScreen,
+
+  "insertBeforeFirst": ArrayCommands.insertBeforeFirst,
+  "insertAfterLast": ArrayCommands.insertAfterLast,
+  "insertAnywhere": ArrayCommands.insertAnywhere,
+  "removeFirst": ArrayCommands.removeFirst,
+  "removeLast": ArrayCommands.removeLast,
+  "removeAny": ArrayCommands.removeAny,
+  "slice": ArrayCommands.slice,
 };
 
 export default BuiltinDictionary;
