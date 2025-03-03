@@ -63,7 +63,7 @@ The resolving logic will be the following:
 2) If it's a variable, the variable must be copied (by reference when using structured variables)
 3) If it's neither, it must be tried to be evaluated as an expression
 
-
+Created @ 424a455e7e24ef7115ddc1befaa42e5f5adf0345
 
 ## Using closures
 

@@ -48,18 +48,20 @@ export function getProcessedArgumentList(args : ArgType, enabledTypes : Set<Poss
         } catch (e) {
           throw new Error(`Arg ${i} is not a valid expression: ${e}`);
         }
+      } else if (enabledType.size == 0) {
+        validatedArgs.push(arg);
       } else {
-        throw new Error(`Arg ${i} is not valid. Enabled variables: ${Array.from(enabledTypes).join(", ")}`);
+        throw new Error(`Arg ${i} is not valid. Enabled variables: ${Array.from(enabledType).join(", ")}`);
       }
     } else {
-      if (enabledType.has('code')) {
+      if (enabledType.has('code') || enabledType.size == 0) {
         if (isExecutableFactory(arg)) {
           validatedArgs.push(arg);
         } else {
           throw new Error(`The ${i}. input is a memory block, not a code block`);
         }
       } else {
-        throw new Error(`The ${i}. input can't be a code block. It can be ${Array.from(enabledTypes).join(", ")}`);
+        throw new Error(`The ${i}. input can't be a code block. It can be ${Array.from(enabledType).join(", ")}`);
       }
     }
 
@@ -94,8 +96,8 @@ export function Arguments(constraints : ArgumentListConstraint) {
       
       let enabledTypes : Set<PossibleArgumentParsingMethods>[] = [];
 
-      let enabledType = new Set<PossibleArgumentParsingMethods>();
       for (let i=0; i<args.length; ++i) {
+        let enabledType = new Set<PossibleArgumentParsingMethods>();
         if (constraints.front && i<useFrontUntil) {
           enabledType = toSet(constraints.front[i]);
         } else if (constraints.back && i>useBackAfter) {

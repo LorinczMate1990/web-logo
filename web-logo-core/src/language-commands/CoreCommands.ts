@@ -2,6 +2,7 @@ import { turtleCommandPubSub } from "../pubsub/pubsubs";
 import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "../types";
 import { Arguments, PossibleArgumentParsingMethods } from "../ArgumentParser";
 import ColorMap from "../utils/ColorMap";
+import { expressionEval } from "../expressionEval/expressionEval";
 
 function sleep(ms: number) {
   return new Promise((resolve, reject) => {
@@ -214,26 +215,46 @@ export default class CoreCommands {
     return {};
   }
 
-  @Arguments({min: 2, max: 3, front: ['numeric', 'code', 'code']})
+  @Arguments({min: 2, front: ['numeric', 'code'] })
   static async conditionalBranching(args: ArgType, memory : AbstractMemory) {
     /**
-     * usage: if condition { code block if true} { code block if false }
+     * usage: if condition { code block if true} [elif (condition) { code block}] else { code block if false }
      */
-    const condition = args[0] as number;
-    const trueBranchFactory = args[1] as ExecutableFactory;
-    const falseBranchFactory = (args.length == 3)? args[2] as ExecutableFactory : undefined; 
+    let condition = args[0] as number;
+    let branchIndex = 1; 
 
-    const trueBranch = trueBranchFactory.getNewExecutableWithContext();
-    const falseBranch = falseBranchFactory?.getNewExecutableWithContext();
-
-    let commandControl = {} as CommandControl;
-    if (condition) {
-      commandControl = await trueBranch.execute();
-    } else {
-      if (falseBranch) {
-        commandControl = await falseBranch.execute();
+    while (condition == 0) {
+      const controlWord = args[branchIndex+1];
+      if (typeof controlWord !== "string") {
+        throw new Error(`IF commmand must have an elif or else after a command branch, but the ${branchIndex+1} is ${controlWord}`);
+      }
+      if (controlWord == "else") {
+        branchIndex+=2;
+        condition = 1; 
+      } else {
+        const conditionExpression = args[branchIndex+2];
+        if (typeof conditionExpression !== "string") {
+          throw new Error(`Invalid expression for IF command: ${conditionExpression}`)
+        }
+        const evaluatedCondition = expressionEval(conditionExpression, memory);
+        if (typeof evaluatedCondition !== "number") {
+          throw new Error(`Invalid expression for IF command: ${conditionExpression}, it should be number`)
+        }
+        condition = evaluatedCondition;
+        branchIndex+=3;
       }
     }
+
+    let commandControl = {} as CommandControl;
+    
+    const executableBranchFactory = args[branchIndex];
+    if (!isExecutableFactory(executableBranchFactory)) {
+      throw new Error(`Invalid codeblock at IF command at position ${branchIndex}`);
+    }
+    const branch = executableBranchFactory.getNewExecutableWithContext();
+
+    commandControl = await branch.execute();
+    
     if (commandControl.return) return commandControl;
     return {};
   }

@@ -8,7 +8,7 @@ learn koch n a {
         l 60
         koch n-1 a/3
         wait
-    } {
+    } else {
         f a
     }
 }
