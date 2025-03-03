@@ -96,8 +96,8 @@ export function Arguments(constraints : ArgumentListConstraint) {
       
       let enabledTypes : Set<PossibleArgumentParsingMethods>[] = [];
 
-      let enabledType = new Set<PossibleArgumentParsingMethods>();
       for (let i=0; i<args.length; ++i) {
+        let enabledType = new Set<PossibleArgumentParsingMethods>();
         if (constraints.front && i<useFrontUntil) {
           enabledType = toSet(constraints.front[i]);
         } else if (constraints.back && i>useBackAfter) {

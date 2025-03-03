@@ -215,7 +215,7 @@ export default class CoreCommands {
     return {};
   }
 
-  @Arguments({min: 2, })
+  @Arguments({min: 2, front: ['numeric', 'code'] })
   static async conditionalBranching(args: ArgType, memory : AbstractMemory) {
     /**
      * usage: if condition { code block if true} [elif (condition) { code block}] else { code block if false }
