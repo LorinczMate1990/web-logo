@@ -99,7 +99,9 @@ function splitArrayToElements(array: string): string[] {
     }
 
   }
-  elements.push(currentElement);
+  if (currentElement.trim().length > 0) {
+    elements.push(currentElement);
+  }
   return elements;
 }
 

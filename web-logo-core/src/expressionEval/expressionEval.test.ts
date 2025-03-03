@@ -271,7 +271,16 @@ describe("Handling arrays as input variables", () => {
     }
   };
 
-
+  it('Empty array expression', () => {
+    expect(expressionEval('[]', mockGetter)).toEqual(new StructuredMemoryData([]));
+  });
+  it('Empty array expression with whitespace', () => {
+    expect(expressionEval('[ ]', mockGetter)).toEqual(new StructuredMemoryData([]));
+  });
+  it('Empty string expression', () => {
+    expect(expressionEval('""', mockGetter)).toEqual(new StructuredMemoryData([]));
+  });
+  
   it('Simple array expression', () => {
     expect(expressionEval('[1,2,3]', mockGetter)).toEqual(new StructuredMemoryData([1,2,3]));
   });

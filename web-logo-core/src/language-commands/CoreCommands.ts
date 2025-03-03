@@ -1,7 +1,7 @@
-import { turtleCommandPubSub } from "./pubsub/pubsubs";
-import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "./types";
-import { Arguments, PossibleArgumentParsingMethods } from "./ArgumentParser";
-import ColorMap from "./utils/ColorMap";
+import { turtleCommandPubSub } from "../pubsub/pubsubs";
+import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "../types";
+import { Arguments, PossibleArgumentParsingMethods } from "../ArgumentParser";
+import ColorMap from "../utils/ColorMap";
 
 function sleep(ms: number) {
   return new Promise((resolve, reject) => {
@@ -291,5 +291,5 @@ export default class CoreCommands {
       command: "clearScreen"
     });
     return {};
-  }  
+  }
 }
