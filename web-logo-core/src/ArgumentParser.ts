@@ -48,18 +48,20 @@ export function getProcessedArgumentList(args : ArgType, enabledTypes : Set<Poss
         } catch (e) {
           throw new Error(`Arg ${i} is not a valid expression: ${e}`);
         }
+      } else if (enabledType.size == 0) {
+        validatedArgs.push(arg);
       } else {
-        throw new Error(`Arg ${i} is not valid. Enabled variables: ${Array.from(enabledTypes).join(", ")}`);
+        throw new Error(`Arg ${i} is not valid. Enabled variables: ${Array.from(enabledType).join(", ")}`);
       }
     } else {
-      if (enabledType.has('code')) {
+      if (enabledType.has('code') || enabledType.size == 0) {
         if (isExecutableFactory(arg)) {
           validatedArgs.push(arg);
         } else {
           throw new Error(`The ${i}. input is a memory block, not a code block`);
         }
       } else {
-        throw new Error(`The ${i}. input can't be a code block. It can be ${Array.from(enabledTypes).join(", ")}`);
+        throw new Error(`The ${i}. input can't be a code block. It can be ${Array.from(enabledType).join(", ")}`);
       }
     }
 
