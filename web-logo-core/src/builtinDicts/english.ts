@@ -3,7 +3,7 @@ import CoreCommands from "../language-commands/CoreCommands";
 import { AbstractMemory, ArgType, CommandControl, VariableGetter, VariableSetter } from "../types";
 
 // This is the English dict
-const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory) => Promise<CommandControl>} = {
+const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) => Promise<CommandControl>} = {
   "forward": CoreCommands.forward,
   "f": CoreCommands.forward,
   "backward": CoreCommands.backward,
@@ -15,7 +15,7 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory
   "repeat": CoreCommands.repeat,
   "rep": CoreCommands.repeat,
   "learn": CoreCommands.learn,
-  "if": CoreCommands.conditionalBranching,
+  "if": (args: ArgType, memory: AbstractMemory) => CoreCommands.conditionalBranching(args, memory, "elif", "else"),
   "penup": CoreCommands.penUp,
   "pendown": CoreCommands.penDown,
   "pencolor": CoreCommands.setPenColor,
@@ -40,5 +40,8 @@ const BuiltinDictionary : {[i : string] : (args: ArgType, memory: AbstractMemory
   "removeAny": ArrayCommands.removeAny,
   "slice": ArrayCommands.slice,
 };
+const ExtraKeywords : {"extraKeywords" : string[]} = {
+  "extraKeywords": ["elif", "else"],
+};
 
-export default BuiltinDictionary;
+export default Object.assign(EnglishCommands, ExtraKeywords);

@@ -216,22 +216,22 @@ export default class CoreCommands {
   }
 
   @Arguments({min: 2, front: ['numeric', 'code'] })
-  static async conditionalBranching(args: ArgType, memory : AbstractMemory) {
+  static async conditionalBranching(args: ArgType, memory : AbstractMemory, elifWord : string, elseWord : string) {
     /**
      * usage: if condition { code block if true} [elif (condition) { code block}] else { code block if false }
      */
     let condition = args[0] as number;
     let branchIndex = 1; 
 
-    while (condition == 0) {
+    while (condition == 0 && args.length > 2) {
       const controlWord = args[branchIndex+1];
       if (typeof controlWord !== "string") {
-        throw new Error(`IF commmand must have an elif or else after a command branch, but the ${branchIndex+1} is ${controlWord}`);
+        throw new Error(`IF commmand must have an ${elifWord} or ${elseWord} after a command branch, but the ${branchIndex+1} is ${controlWord}`);
       }
-      if (controlWord == "else") {
+      if (controlWord == elseWord) {
         branchIndex+=2;
         condition = 1; 
-      } else {
+      } else if (controlWord == elifWord) {
         const conditionExpression = args[branchIndex+2];
         if (typeof conditionExpression !== "string") {
           throw new Error(`Invalid expression for IF command: ${conditionExpression}`)
@@ -242,6 +242,8 @@ export default class CoreCommands {
         }
         condition = evaluatedCondition;
         branchIndex+=3;
+      } else {
+        throw new Error(`IF commmand: After a control block there must be ${elseWord} or ${elifWord}, got ${controlWord}`);
       }
     }
 
@@ -253,9 +255,10 @@ export default class CoreCommands {
     }
     const branch = executableBranchFactory.getNewExecutableWithContext();
 
-    commandControl = await branch.execute();
-    
-    if (commandControl.return) return commandControl;
+    if (condition) {
+      commandControl = await branch.execute();
+      if (commandControl.return) return commandControl;
+    }
     return {};
   }
 

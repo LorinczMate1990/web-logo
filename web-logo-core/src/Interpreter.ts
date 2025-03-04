@@ -9,7 +9,7 @@ class Interpreter {
   getKeywordList() {
     // TODO : Translating keyword is an important featur
     // When keywords are translated, this list must be updated, too
-    return Object.keys(BuiltinDictionary);
+    return [...Object.keys(BuiltinDictionary), ...BuiltinDictionary.extraKeywords];
   }
 
   async execute(code: string) {
