@@ -1,16 +1,15 @@
 learn simplelogo instructions {
     each instructions {
-        if (i = 70) {
+        if (i = 'F) {
             f 50
         }
-        if (i = 76) {
+        if (i = 'L) {
             l 45
         }
-        if (i = 82) {
+        if (i = 'R) {
             r 45
         }
     }
 }
 
-simplelogo [82, 82, 70, 70, 82, 70, 82, 82, 70, 82, 70, 70, 82, 82, 70, 70]
 simplelogo "FFLFLLFLFFLLFF"

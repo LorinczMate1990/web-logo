@@ -9,9 +9,9 @@ import 'prismjs/themes/prism.css'; //Example style, you can use another
 import { commandLinePubSub } from "../pubsub/pubsubs";
 import sleep from "../utils/async-sleep";
 
-
 function getLogoLanguagePrismModel(interpreter : Interpreter) {
   const keywords = interpreter.getKeywordList();
+
   return languages.extend('clike', {
     keyword: new RegExp(`\\b(?:${keywords.join('|')})\\b`),
     number: /\b(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)\b/i,
@@ -19,6 +19,14 @@ function getLogoLanguagePrismModel(interpreter : Interpreter) {
         pattern: /(^|[^.])(?:\+\+|--|&&|\|\||->|=>|<<|>>>?|==|!=|[<>]=?|[+\-*/%&|^=!<>])(?!=)/,
         lookbehind: true
     },
+    string: {
+      pattern: /"(?:\\.|[^"\\])*"/, // Only double-quoted strings
+      greedy: true
+    },    
+    charlikeNumber: {
+      pattern: /'(?:\\.|[^\s\\])/, // Matches `'a` or `'\n`
+      alias: 'number'
+    }
   });
 }
 
