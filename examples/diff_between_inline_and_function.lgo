@@ -1,0 +1,19 @@
+learn foo {
+  print "The inline codeblocks and functions handle RETURN differently"
+  learn bar {
+    return
+  }
+  new spam := eval { return }
+  print "bar:" bar
+  print "spam:" spam
+  
+  print "Calling bar"
+  bar
+  print "Bar called, nothing happened"
+  
+  print "Calling spam"
+  spam
+  print "You won't see this, the return statement executed at foo-level"
+}
+
+foo

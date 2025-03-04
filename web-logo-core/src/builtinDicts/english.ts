@@ -27,8 +27,8 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   "fill": CoreCommands.fill,
   "return": CoreCommands.returnWithValue,
   "eval": CoreCommands.eval,
-  "print": CoreCommands.normalPrint,
-  "error": CoreCommands.errorPrint,
+  "print": (args: ArgType, memory: AbstractMemory) => CoreCommands.print(args, memory, false),
+  "error": (args: ArgType, memory: AbstractMemory) => CoreCommands.print(args, memory, true),
   "clear": CoreCommands.clearScreen,
   "cls": CoreCommands.clearScreen,
 

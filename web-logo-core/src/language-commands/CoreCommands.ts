@@ -1,5 +1,5 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs";
-import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType } from "../types";
+import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types";
 import { Arguments, PossibleArgumentParsingMethods } from "../ArgumentParser";
 import ColorMap from "../utils/ColorMap";
 import { expressionEval } from "../expressionEval/expressionEval";
@@ -268,43 +268,59 @@ export default class CoreCommands {
   }
 
   @Arguments({min: 1, default: new Set<PossibleArgumentParsingMethods>(['array', 'numeric'])})
-  static async normalPrint(arg : ArgType, memory : AbstractMemory) {
-    await CoreCommands.print(arg, false);
-    return {};
-  }
-
-  @Arguments({min: 1, default: new Set<PossibleArgumentParsingMethods>(['array', 'numeric'])})
-  static async errorPrint(arg : ArgType, memory : AbstractMemory) {
-    await CoreCommands.print(arg, true);
-    return {};
-  }
-
-  static async print(arg : ArgType, error : boolean) {
-    let message = "";
-    for (const i of arg) {
-      if (isStructuredMemoryData(i)) {
-        if (!Array.isArray(i.data)) new Error("Print only supports string arrays and numbers"); 
-        const array = i.data as ParamType[];
-        // Is this an ascii string?
-        for (const c of array) {
-          if (typeof c === "number" && c > 0 && c < 255) {
-            message += String.fromCharCode(c);
-          } else {
-            new Error("Print only supports string arrays and numbers"); // TODO Recursive message conversion
-          }
-        }
-        message += " ";
-      } else {
-        const value = i as number;
-        message += `${value} `;
+  static async print(arg: ArgType, memory: AbstractMemory, error: boolean) {
+    function isStructuredMemoryDataAPrintableString(d : StructuredMemoryData) {
+      if (!Array.isArray(d.data)) return false;
+      let retValue = "";
+      for (const c of d.data) {
+        if (!(typeof(c) === "number")) return false;
+        if (0 > c || c > 255) return false;
+        retValue += String.fromCharCode(c);
       }
+      return retValue;
     }
+
+    function formatStructuredData(data: ParamType | string): string {
+      if (isExecutableFactory(data)) {
+        const {meta} = data;
+        if (meta === undefined)
+          return "[Inline codeblock]";
+        else if (meta.arguments.length === 0) {
+          return "[Executable without arguments]";
+        } else {
+          return `[Executable with arguments: ${meta.arguments.join(", ")}]`;
+        }
+      } else if (typeof data === "string") {
+        return data; // This is impossible
+      } else if (typeof data === "number") {
+        // Convert to ASCII if possible
+        return data.toString();
+      } else if (isStructuredMemoryData(data)) {
+        if (Array.isArray(data.data)) {
+          const possiblePrintableString = isStructuredMemoryDataAPrintableString(data);
+          if (possiblePrintableString) {
+            return `"${possiblePrintableString}"`;
+          } else {
+            return `[${data.data.map(formatStructuredData).join(", ")}]`;
+          }
+        } else {
+          return `{ ${Object.entries(data.data)
+            .map(([key, value]) => `${key}: ${formatStructuredData(value)}`)
+            .join(", ")} }`;
+        }
+      }
+      return "[Unknown Data]";
+    }
+  
+    let message = arg.map(formatStructuredData).join(" ");
+    
     turtleCommandPubSub.publish({
       topic: "systemCommand",
       command: "print",
       message,
       error,
     });
+  
     return {};
   }
 
