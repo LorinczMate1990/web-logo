@@ -74,10 +74,10 @@ export function Arguments(constraints : ArgumentListConstraint) {
   return function(
     target: Object,
     propertyKey: string | symbol,
-    descriptor: TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory) => Promise<CommandControl>>
-  ) : TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory) => Promise<CommandControl>> {
+    descriptor: TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory, ...extraArgs: any[]) => Promise<CommandControl>>
+  ) : TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory, ...extraArgs: any[]) => Promise<CommandControl>> {
     const originalMethod = descriptor.value!;
-    descriptor.value = async function(args: ArgType, context: AbstractMemory) {
+    descriptor.value = async function(args: ArgType, context: AbstractMemory, ...extraArgs: any[]) {
       if (Array.isArray(constraints)) {
         const simplifiedConstraints = constraints
         constraints = {
@@ -120,7 +120,7 @@ export function Arguments(constraints : ArgumentListConstraint) {
       }
         
       // Call the original function
-      return originalMethod(validatedArgs, context);
+      return originalMethod(validatedArgs, context, ...extraArgs);
     };
     return descriptor;
   }
