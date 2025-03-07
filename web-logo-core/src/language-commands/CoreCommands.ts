@@ -19,13 +19,15 @@ export default class CoreCommands {
     } as CommandControl;
   }
 
-  @Arguments(['numeric', 'code'])
+  @Arguments( {variableArgumentLists: true, 2 : ['numeric', 'code'], 3: ['word', 'numeric', 'code']} )
   static async repeat(args: ArgType, memory : AbstractMemory) {
-    const repeatNumber = parseFloat(String(args[0]));
-    const cycleCoreFactory = args[1] as ExecutableFactory;
+    const repeatNumber = parseFloat(String(args[(args.length == 2)?0:1]));
+    const nameOfCylceParameter = (args.length == 2)?"i":(args[0] as string);
+    const cycleCoreFactory = ((args.length == 2)?args[1]:args[2]) as ExecutableFactory;
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
-    for (let i=0; i<repeatNumber; ++i) {
-      cycleCore.context.createVariable("i", i);
+    const [lowerLimit, upperLimit] = (repeatNumber>0)?[0, repeatNumber]:[repeatNumber+1,1];
+    for (let i=lowerLimit; i<upperLimit; ++i) {
+      cycleCore.context.createVariable(nameOfCylceParameter, i);
       const commandControl = await cycleCore.execute();
       if (commandControl.return) return commandControl;
     }
