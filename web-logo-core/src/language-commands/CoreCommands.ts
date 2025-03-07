@@ -58,12 +58,6 @@ export default class CoreCommands {
     return {};
   }
 
-  /*@Arguments({exact: 2, front: ['numeric', new Set(['code', 'numeric', 'string'])]})
-  static async createVar(args: ArgType, memory : AbstractMemory) {
-    // TODO: args[1] can be too many things and I can't make proper difference between them,
-    // I need typed createVar-s
-  }*/
-
   @Arguments({min: 2, back: ['code'], default: 'word'})
   static async learn(args: ArgType, memory : AbstractMemory) {
     /**

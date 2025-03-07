@@ -34,6 +34,11 @@ type GoHomeMessage = {
   command: "goHome";
 };
 
+type SetHomeMessage = {
+  topic: "turtleCommand";
+  command: "setHome";
+};
+
 type SetPenStateMessage = {
   topic: "turtleCommand";
   command: "setPenState";
@@ -91,4 +96,5 @@ export type TurtleCommandMessage =
   | SetHomehMessage
   | FillMessage
   | PrintMessage
-  | ClearScreenMessage;
+  | ClearScreenMessage
+  | SetHomeMessage;

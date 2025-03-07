@@ -55,7 +55,7 @@ export default function useTurtle(canvasData: CanvasData | null) {
         instance.goHome();
         break;
       case "setHome":
-        instance.setHome(message.x, message.y, message.orientation);
+        instance.setHome();
         break;
       case "fill":
         instance.fill(message.tolerance);

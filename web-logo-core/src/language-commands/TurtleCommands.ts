@@ -126,8 +126,11 @@ export default class CoreCommands {
   
   @Arguments([])
   static async setHome(args: ArgType, memory : AbstractMemory) {
-    
-    return {};
+    turtleCommandPubSub.publish({
+        topic: "turtleCommand",
+        command: "setHome",
+      });
+      return {};
   }
 
   @Arguments({max: 1, front: ['numeric']}) 
