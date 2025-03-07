@@ -5,13 +5,19 @@ import { AbstractMemory, ArgType, CommandControl, isExecutableFactory } from "./
 export type PossibleArgumentParsingMethods = 'word' | 'numeric' | 'code' | 'variable' | 'array';
 
 type ArgumentListConstraint = {
+  variableArgumentLists?: false, 
   front?: (PossibleArgumentParsingMethods | Set<PossibleArgumentParsingMethods>)[],
   back?: (PossibleArgumentParsingMethods | Set<PossibleArgumentParsingMethods>)[],
   default?: (PossibleArgumentParsingMethods | Set<PossibleArgumentParsingMethods>),
   min?: number,
   max?: number,
   exact?: number,
-} | (PossibleArgumentParsingMethods | PossibleArgumentParsingMethods[])[];
+} 
+| (PossibleArgumentParsingMethods | PossibleArgumentParsingMethods[])[]
+| { 
+  variableArgumentLists: true, 
+  [key : number] : (PossibleArgumentParsingMethods | PossibleArgumentParsingMethods[])[]
+};
 
 function isValidWord(possibleWord : string) {
   return /^\p{L}+\p{N}*$/u.test(possibleWord);
@@ -78,32 +84,41 @@ export function Arguments(constraints : ArgumentListConstraint) {
   ) : TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory, ...extraArgs: any[]) => Promise<CommandControl>> {
     const originalMethod = descriptor.value!;
     descriptor.value = async function(args: ArgType, context: AbstractMemory, ...extraArgs: any[]) {
-      if (Array.isArray(constraints)) {
-        const simplifiedConstraints = constraints
-        constraints = {
+      let localConstraints = constraints;
+      if (!Array.isArray(localConstraints) && localConstraints.variableArgumentLists) {
+        const argumentList = localConstraints[args.length]
+        console.log("Variable list argument: ", {constraints: localConstraints, argumentList})
+        if (argumentList === undefined) {
+          throw new Error(`${String(propertyKey)} can't have ${args.length} arguments`);
+        }
+        localConstraints = argumentList;
+      } 
+      if (Array.isArray(localConstraints)) {
+        const simplifiedConstraints = localConstraints
+        localConstraints = {
           front: [],
           exact: simplifiedConstraints.length
         };
         for (const i of simplifiedConstraints) {
-          constraints.front!.push(Array.isArray(i)?new Set(i):new Set([i]));
+          localConstraints.front!.push(Array.isArray(i)?new Set(i):new Set([i]));
         }
       }
-      let useFrontUntil = constraints.front?.length ?? 0;
-      let useBackAfter = args.length - (constraints.back?.length ?? 0) - 1;
-      if (constraints.exact && constraints.exact != args.length) throw new Error(`${String(propertyKey)} must have exactly ${constraints.exact} arguments. (Got ${args.length})`);
-      if (constraints.min && constraints.min > args.length) throw new Error(`${String(propertyKey)} must have at least ${constraints.min} arguments. (Got ${args.length})`);
-      if (constraints.max && constraints.max < args.length) throw new Error(`${String(propertyKey)} must have max ${constraints.max} arguments. (Got ${args.length})`);
+      let useFrontUntil = localConstraints.front?.length ?? 0;
+      let useBackAfter = args.length - (localConstraints.back?.length ?? 0) - 1;
+      if (localConstraints.exact && localConstraints.exact != args.length) throw new Error(`${String(propertyKey)} must have exactly ${localConstraints.exact} arguments. (Got ${args.length})`);
+      if (localConstraints.min && localConstraints.min > args.length) throw new Error(`${String(propertyKey)} must have at least ${localConstraints.min} arguments. (Got ${args.length})`);
+      if (localConstraints.max && localConstraints.max < args.length) throw new Error(`${String(propertyKey)} must have max ${localConstraints.max} arguments. (Got ${args.length})`);
       
       let enabledTypes : Set<PossibleArgumentParsingMethods>[] = [];
 
       for (let i=0; i<args.length; ++i) {
         let enabledType = new Set<PossibleArgumentParsingMethods>();
-        if (constraints.front && i<useFrontUntil) {
-          enabledType = toSet(constraints.front[i]);
-        } else if (constraints.back && i>useBackAfter) {
-          enabledType = toSet(constraints.back[i - useBackAfter - 1]);
-        } else if (constraints.default) {
-          enabledType = toSet(constraints.default);
+        if (localConstraints.front && i<useFrontUntil) {
+          enabledType = toSet(localConstraints.front[i]);
+        } else if (localConstraints.back && i>useBackAfter) {
+          enabledType = toSet(localConstraints.back[i - useBackAfter - 1]);
+        } else if (localConstraints.default) {
+          enabledType = toSet(localConstraints.default);
         }
         if (enabledType.has('word') && (enabledType.has('variable') || enabledType.has('numeric') || enabledType.has('code'))) {
           // These and words can't differentiated in every time
