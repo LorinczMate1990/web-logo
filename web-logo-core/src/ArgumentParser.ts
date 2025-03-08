@@ -2,7 +2,7 @@ import BuiltinDictionary from "./builtinDicts/english";
 import { expressionEval } from "./expressionEval/expressionEval";
 import { AbstractMemory, ArgType, CommandControl, isExecutableFactory } from "./types";
 
-export type PossibleArgumentParsingMethods = 'word' | 'numeric' | 'code' | 'variable' | 'array';
+export type PossibleArgumentParsingMethods = 'word' | 'numeric' | 'code' | 'variable' | 'array' | "ignore";
 
 type ArgumentListConstraint = {
   variableArgumentLists?: false, 
@@ -41,7 +41,9 @@ export function getProcessedArgumentList(args : ArgType, enabledTypes : Set<Poss
       //  - A string expression containing a template string
       //  - A single variable containing a number/string or an Executable
       //  - An array
-      if (enabledType.has('word') && isValidWord(arg)) {
+      if (enabledType.has('ignore')) {
+        validatedArgs.push(arg);
+      } else if (enabledType.has('word') && isValidWord(arg)) {
         validatedArgs.push(arg);
       } else if (context.hasVariable(arg) && (enabledType.has('variable') || enabledType.has('code'))) {
         // TODO I should check the variable type
