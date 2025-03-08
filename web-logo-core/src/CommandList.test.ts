@@ -12,7 +12,7 @@ describe('tokensToCommandList', () => {
   });
 
   it('parses a simple command without arguments and return value', () => {
-    const tokens = [new Token("command1", 0, 0), new Token("=>", 0, 8), new Token("foo", 0, 10), new Token("\n", 0, 13)];
+    const tokens = [new Token("foo", 0, 0), new Token(":=", 0, 0), new Token("command1", 0, 0), new Token("\n", 0, 13)];
     const commands = tokensToCommandList(tokens);
     expect(commands.length).toEqual(1);
     expect(commands[0].label).toEqual("command1");
