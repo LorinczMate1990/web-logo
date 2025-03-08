@@ -88,10 +88,18 @@ describe('tokenizer', () => {
     expect(tokenizer('command (bracketed content) +1').map(t => t.val)).toEqual(['command', '(bracketed content)', '+1']);
   });
 
-  // Test for handling spaces within square brackets
   it('should include spaces in tokens within square brackets', () => {
     expect(tokenizer('command2 [arg with spaces]').map(t => t.val)).toEqual(['command2', '[arg with spaces]']);
   });
+
+  it('should handle expression containing square bracket as one', () => {
+    expect(tokenizer('command a[1]+1').map(t => t.val)).toEqual(['command', 'a[1]+1']);
+  });
+
+  it('should handle expression containing bracket as one', () => {
+    expect(tokenizer('command a(1)+1').map(t => t.val)).toEqual(['command', 'a(1)+1']);
+  });
+
 
   // Test for handling nested square brackets
   it('should handle nested square brackets correctly', () => {

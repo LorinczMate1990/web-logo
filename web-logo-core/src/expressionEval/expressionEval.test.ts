@@ -188,7 +188,8 @@ describe('Handle structured variables', () => {
       const variables: { [key: string]: ParamType } = {
         'foo.bar.spam': 42,
         'foo.arr[0]': 1,
-        'foo.arr[1][1]': 100
+        'foo.arr[1][1]': 100,
+        'arr[0]': 10,
       };
       return variables[name] || 0;
     }
@@ -209,6 +210,10 @@ describe('Handle structured variables', () => {
   it('Reach fields based on nested indexing', () => {
     expect(expressionEval('foo.arr[foo.arr[0]][1]', mockGetter)).toEqual(100);
   });
+  it('Use indexed array variable in expression', () => {
+    expect(expressionEval('1+arr[0]', mockGetter)).toEqual(11);
+    expect(expressionEval('arr[0]+1', mockGetter)).toEqual(11);
+  })
 });
 
 describe('Handle builtin functions', () => {

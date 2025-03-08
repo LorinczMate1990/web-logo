@@ -85,7 +85,6 @@ export function tokenizer(command: string): Token[] {
       currentToken.push(c);
       if (squareBraketCounter == 0 && currentEnvironment == "squareBraket") {
         currentEnvironment = "none";
-        startNewToken();
       }
     } else if (c == "(") {
       if (currentEnvironment == "none") currentEnvironment = "braket";

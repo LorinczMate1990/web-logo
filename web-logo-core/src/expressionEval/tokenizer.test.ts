@@ -51,6 +51,11 @@ describe('tokenize', () => {
     expect(result).toEqual(['a[23].b', '+', 'c']);
   });
 
+  it('handles array variables without expressions', () => {
+    const result = tokenize('a[23]+c');
+    expect(result).toEqual(['a[23]', '+', 'c']);
+  });
+
   it('handles structured variables', () => {
     const result = tokenize('a[23+34].b+c');
     expect(result).toEqual(['a[23+34].b', '+', 'c']);
