@@ -19,6 +19,21 @@ export default class CoreCommands {
     } as CommandControl;
   }
 
+  @Arguments(['ignore', 'code'])
+  static async whileCycle(args: ArgType, memory : AbstractMemory) {
+    const expression = args[0] as string;
+    let expressionResult = expressionEval(expression, memory);
+    if (typeof expressionResult != "number") throw new Error("First parameter of while must be an expression with numeric value");
+    const cycleCoreFactory = args[1] as ExecutableFactory;
+    const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
+    while (expressionResult) {
+      const commandControl = await cycleCore.execute();
+      if (commandControl.return) return commandControl;
+      expressionResult = expressionEval(expression, memory);
+    }
+    return {};
+  }
+
   @Arguments( {variableArgumentLists: true, 2 : ['numeric', 'code'], 3: ['word', 'numeric', 'code']} )
   static async repeat(args: ArgType, memory : AbstractMemory) {
     const repeatNumber = parseFloat(String(args[(args.length == 2)?0:1]));

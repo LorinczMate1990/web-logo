@@ -33,6 +33,7 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   "eval": CoreCommands.eval,
   "print": (args: ArgType, memory: AbstractMemory) => CoreCommands.print(args, memory, false),
   "error": (args: ArgType, memory: AbstractMemory) => CoreCommands.print(args, memory, true),
+  "while": CoreCommands.whileCycle,
 
   "insertBeforeFirst": ArrayCommands.insertBeforeFirst,
   "insertAfterLast": ArrayCommands.insertAfterLast,
