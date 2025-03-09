@@ -77,17 +77,14 @@ export class Memory implements AbstractMemory {
   }
 
   hasVariable(key: string): boolean {
-    try {
-      this.getVariable(key);
-      return true;
-    } catch (error) {
-      return false;
-    }
+    let {baseName} = getBaseVariableName(key);
+    return baseName in this.variables || (this.parent != undefined && this.parent.hasVariable(baseName));
   }
 
   getVariable(key: string): ParamType {
     if (isStructuredVariableName(key)) {
       const {baseName, rest: variablePath} = getBaseVariableName(key);
+      if (!this.hasVariable(baseName)) return 0; // TODO This should be an error
       const memoryCellValue = this.getVariable(baseName);
       if (!isStructuredMemoryData(memoryCellValue)) {
         throw new Error("Memory cell wasn't string or struct");
