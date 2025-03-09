@@ -3,6 +3,7 @@ import { getProcessedArgumentList, PossibleArgumentParsingMethods } from "./Argu
 import BuiltinDictionary from "./builtinDicts/english";
 import { Memory } from "./memory/memory";
 import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl } from "./types";
+import { expressionEval } from "./expressionEval/expressionEval";
 
 export class CommandsWithContext extends ExecutableWithContext {
   commands : Commands;
@@ -18,6 +19,10 @@ export class CommandsWithContext extends ExecutableWithContext {
     const commandLevelExecution = this.meta != undefined; // TODO : Currently the meta only means that this is a command
     for (let command of this.commands) {
       const label = command.label;
+      let evaluatedLabel = undefined;
+      try {
+        evaluatedLabel = expressionEval(label, this.context);
+      } catch (error) {}
       // TODO This should be done from the ArgumentParser,
       const packedArguments = command.arguments.map((arg) => {
         if (typeof arg === "string") {
@@ -31,7 +36,7 @@ export class CommandsWithContext extends ExecutableWithContext {
       if (label in BuiltinDictionary) {
         const func = BuiltinDictionary[label];
         receviedCommandControl = await func(packedArguments, this.context);
-      } else if (this.context.hasVariable(label) && this.context.getVariable(label) instanceof CommandsWithContextFactory) {
+      } else if (evaluatedLabel instanceof CommandsWithContextFactory) {
         const commandFactory = this.context.getVariable(label) as CommandsWithContextFactory;
         // Set variables
         // Check the numbers! This dialect doesn't support variable argument list
@@ -51,19 +56,15 @@ export class CommandsWithContext extends ExecutableWithContext {
         }
         receviedCommandControl = await executable.execute();
       } else {
-        if (this.context.hasVariable(label)) {
-          receviedCommandControl = {returnValue: this.context.getVariable(label)}
-        } else {
-          const fullExpression = `${label} ${command.arguments.map((a) => {
-            if (typeof a === "string") {
-              return a;
-            } else {
-              throw new Error("Expression can not contain any code block");
-            }
-          }).join(" ")}`;
-          const processedEvaluation = getProcessedArgumentList([fullExpression], [new Set<PossibleArgumentParsingMethods>(['numeric', 'array'])], this.context);
-          receviedCommandControl = {returnValue: processedEvaluation[0] as ParamType}
-        }
+        const fullExpression = `${label} ${command.arguments.map((a) => {
+          if (typeof a === "string") {
+            return a;
+          } else {
+            throw new Error("Expression can not contain any code block");
+          }
+        }).join(" ")}`;
+        const processedEvaluation = getProcessedArgumentList([fullExpression], [new Set<PossibleArgumentParsingMethods>(['numeric', 'array'])], this.context);
+        receviedCommandControl = {returnValue: processedEvaluation[0] as ParamType}
       }
       if (receviedCommandControl.return) {
         return {
