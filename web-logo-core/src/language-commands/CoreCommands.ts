@@ -49,14 +49,16 @@ export default class CoreCommands {
     return {};
   }
 
-  @Arguments(['array', 'code'])
+  @Arguments( {variableArgumentLists: true, 2 : ['array', 'code'], 3: ['word', 'array', 'code']} )
   static async each(args: ArgType, memory : AbstractMemory) {
-    if (!(isStructuredMemoryData(args[0]) && Array.isArray(args[0].data))) throw new Error("TODO To decorator"); // TODO
-    const collection = args[0].data as ParamType[];
-    const cycleCoreFactory = args[1] as ExecutableFactory;
+    const arrayIndex = (args.length == 2)?0:1;
+    if (!(isStructuredMemoryData(args[arrayIndex]) && Array.isArray(args[arrayIndex].data))) throw new Error("TODO To decorator"); // TODO
+    const collection = args[arrayIndex].data as ParamType[];
+    const nameOfCylceParameter = (args.length == 2)?"i":(args[0] as string);
+    const cycleCoreFactory = ((args.length == 2)?args[1]:args[2]) as ExecutableFactory;
     const cycleCore = cycleCoreFactory.getNewExecutableWithContext();
     for (const i of collection) {
-      cycleCore.context.createVariable("i", i);
+      cycleCore.context.createVariable(nameOfCylceParameter, i);
       const commandControl = await cycleCore.execute();
       if (commandControl.return) return commandControl;
     }
