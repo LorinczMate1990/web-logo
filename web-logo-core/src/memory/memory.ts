@@ -29,11 +29,20 @@ export class Memory implements AbstractMemory {
   }
 
   setVariable(key: string, value: ParamType): void {
-    let {baseName} = getBaseVariableName(key);
+    const {baseName, rest: variablePath} = getBaseVariableName(key);
+    let processedKey = key;
+    if (isStructuredVariableName(key)) {
+      const processedPath = evaluateVariableName(variablePath, this);
+      processedKey = `${baseName}${processedPath}`
+    }
+    this._setVariable(baseName, key, processedKey, value);
+  }
+
+  _setVariable(baseName : string, key : string, processedKey : string, value : ParamType) : void {
     if (baseName in this.variables) {
-      this.createVariable(key, value);
+      this.createVariable(processedKey, value);
     } else if (this.parent) {
-      this.parent.setVariable(key, value);
+      this.parent.setVariable(processedKey, value);
     } else {
       throw new NonExistingVariableMemoryError("create", key);
     }
