@@ -17,6 +17,15 @@ describe('Memory', () => {
       const setNonExistingVariable = () => mem.setVariable('nonExisting', StructuredMemoryData.build_from_string('nonExisting'));
       expect(setNonExistingVariable).toThrow(NonExistingVariableMemoryError);
     });
+    
+    it('setting upper variable indexed by variable from the current scope', () => {
+      const parentMem = new Memory(undefined);
+      const lowerMem = new Memory(parentMem);
+      parentMem.createVariable("array", new StructuredMemoryData([0,1,2,3,4]));
+      lowerMem.createVariable("i", 2);
+      expect(() => lowerMem.setVariable("array[i]", 0)).not.toThrow();
+    });
+
     it('setting a nonexisting variable must throw an error without parents', () => {
       const mem = new Memory(undefined);
       const setNonExistingVariable = () => mem.setVariable('nonExisting', StructuredMemoryData.build_from_string('nonExisting'));

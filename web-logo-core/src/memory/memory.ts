@@ -39,7 +39,7 @@ export class Memory implements AbstractMemory {
     }
   }
 
-  createVariable(key: string, value: ParamType) { // TODO maybe it exists in parent. I should create a separate declarator
+  createVariable(key: string, value: ParamType) {
     if (isStructuredVariableName(key)){
       const {baseName, rest: variablePath} = getBaseVariableName(key);
       if (!(baseName in this.variables)) {
@@ -82,6 +82,7 @@ export class Memory implements AbstractMemory {
   }
 
   getVariable(key: string): ParamType {
+    console.log("getVariable", key, {this:this})
     if (isStructuredVariableName(key)) {
       const {baseName, rest: variablePath} = getBaseVariableName(key);
       const memoryCellValue = this.getVariable(baseName);
