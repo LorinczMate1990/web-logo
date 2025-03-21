@@ -33,7 +33,8 @@ export class Memory implements AbstractMemory {
     let processedKey = key;
     if (isStructuredVariableName(key)) {
       const processedPath = evaluateVariableName(variablePath, this);
-      processedKey = `${baseName}${processedPath}`
+      const infix = (processedPath[0]) == '['?"":"." // TODO structs and arrays should be handled the same way with evaluateVariableName, but the . is missing
+      processedKey = `${baseName}${infix}${processedPath}`
     }
     this._setVariable(baseName, key, processedKey, value);
   }
@@ -91,12 +92,11 @@ export class Memory implements AbstractMemory {
   }
 
   getVariable(key: string): ParamType {
-    console.log("getVariable", key, {this:this})
     if (isStructuredVariableName(key)) {
       const {baseName, rest: variablePath} = getBaseVariableName(key);
       const memoryCellValue = this.getVariable(baseName);
       if (!isStructuredMemoryData(memoryCellValue)) {
-        throw new Error("Memory cell wasn't string or struct");
+        throw new Error(`Memory cell "${baseName}" wasn't string or struct`);
       }
       const processedKey = evaluateVariableName(variablePath, this);
       const result = getDataMember(processedKey, memoryCellValue);

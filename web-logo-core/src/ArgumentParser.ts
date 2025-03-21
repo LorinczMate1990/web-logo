@@ -89,7 +89,6 @@ export function Arguments(constraints : ArgumentListConstraint) {
       let localConstraints = constraints;
       if (!Array.isArray(localConstraints) && localConstraints.variableArgumentLists) {
         const argumentList = localConstraints[args.length]
-        console.log("Variable list argument: ", {constraints: localConstraints, argumentList})
         if (argumentList === undefined) {
           throw new Error(`${String(propertyKey)} can't have ${args.length} arguments`);
         }
