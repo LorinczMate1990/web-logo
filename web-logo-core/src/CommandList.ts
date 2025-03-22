@@ -3,12 +3,16 @@ import { Token } from "./Tokenizer";
 export type Commands = Command[];
 
 export class Command {
+  lineNumber : number;
+  charNumber : number;
   label: string;
   arguments: (string | Commands)[];
   returnVariable : string | undefined;
   createNewVariableForReturn : boolean;
 
   constructor(label: Token) {
+    this.lineNumber = label.lineNumber;
+    this.charNumber = label.charNumber;
     this.label = label.val;
     this.arguments = [];
     this.createNewVariableForReturn = false;
