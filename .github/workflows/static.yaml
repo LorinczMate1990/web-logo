@@ -1,4 +1,4 @@
-name: Release React App
+name: Deploy to Github pages
 
 on:
   release:
