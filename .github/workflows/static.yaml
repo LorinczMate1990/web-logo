@@ -1,4 +1,4 @@
-name: Release React App
+name: Deploy to Github pages
 
 on:
   release:
@@ -40,18 +40,22 @@ jobs:
         with:
           node-version: 18
 
-      - name: Start building the core
-        run: cd web-logo-core
+      - name: Install dependencies for core module
+        run: npm install
+        working-directory: ./web-logo-core
 
       - name: Build the core module
         run: npm run build
+        working-directory: ./web-logo-core
 
-      - name: Start building the project
-        run: cd ../ui
+      - name: Install dependencies for ui
+        run: npm install
+        working-directory: ./ui
 
       - name: Build the project
         run: |
-          PUBLIC_URL=${{ env.BASE_PATH }} npm run build
+          CI=false PUBLIC_URL=${{ env.BASE_PATH }} npm run build
+        working-directory: ./ui
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -59,7 +63,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ env.BUILD_DIR }}/.
+          path: ui/${{ env.BUILD_DIR }}/.
 
       - name: Deploy to GitHub Pages
         id: deployment

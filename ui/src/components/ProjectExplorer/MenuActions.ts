@@ -1,4 +1,4 @@
-import { Writable } from "stream";
+import config from '../../config';
 import { executeCode, getWritableStream } from "../../utils/FileHandling";
 import { Interpreter } from "web-logo-core";
 import { commandLinePubSub } from "../../pubsub/pubsubs";
@@ -6,7 +6,7 @@ import sleep from "../../utils/async-sleep";
 
 function openCodeEditorPopup(popupName : string) {
   return window.open(
-    "/code-editor",
+    `${config.basename}?code-editor`,
     popupName,
     `
     width=600,
