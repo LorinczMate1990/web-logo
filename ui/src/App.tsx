@@ -8,7 +8,7 @@ function App() {
   const interpreter = useRef<Interpreter>(new Interpreter());
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={process.env.PUBLIC_URL}>
       <Routes>
         <Route path="/" element={<Workspace interpreter={interpreter.current}/>} />
         <Route path="/code-editor" element={<CodeEditor/>} />
