@@ -1,37 +1,37 @@
-learn constructor {
-  eval 0 => new counter
+learn constructCounter {
+  new counter := 0 
   
   learn increase {
-    eval counter+1 => counter
+    counter := counter+1
   }
   
   learn decrease {
-    eval counter-1 => counter
+    counter := counter-1
   }
   
   learn get { 
     return counter
   }
   
-  eval increase => new a.increase
-  eval decrease => a.decrease
-  eval get => a.get
+  new a := 0
+  a.increase := eval increase
+  a.decrease := eval decrease
+  a.get := eval get
   
   return a
 }
 
-constructor => new instance
+new instance := constructCounter
 
 rep 10 {
   instance.increase
 }
 
-instance.get => new val
-f val*10
-l 90
+new val := instance.get
+print "After 10 increase: " val
 
 rep 5 {
   instance.decrease
 }
-instance.get => val
-f val*10
+val := instance.get
+print "After 5 decrease: " val
