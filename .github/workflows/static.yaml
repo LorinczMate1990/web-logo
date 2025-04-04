@@ -40,18 +40,14 @@ jobs:
         with:
           node-version: 18
 
-      - name: Start building the core
-        run: cd web-logo-core
-
       - name: Build the core module
         run: npm run build
-
-      - name: Start building the project
-        run: cd ../ui
+        working-directory: ./web-logo-core
 
       - name: Build the project
         run: |
           PUBLIC_URL=${{ env.BASE_PATH }} npm run build
+        working-directory: ./ui
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
