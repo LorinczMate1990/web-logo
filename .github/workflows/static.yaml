@@ -65,7 +65,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ env.BUILD_DIR }}/.
-        working-directory: ./ui
 
       - name: Deploy to GitHub Pages
         id: deployment
