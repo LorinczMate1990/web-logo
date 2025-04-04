@@ -6,7 +6,7 @@ import sleep from "../../utils/async-sleep";
 
 function openCodeEditorPopup(popupName : string) {
   return window.open(
-    `${config.basename}/code-editor`,
+    `${config.basename}?code-editor`,
     popupName,
     `
     width=600,
