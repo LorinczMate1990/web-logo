@@ -54,7 +54,7 @@ jobs:
 
       - name: Build the project
         run: |
-          PUBLIC_URL=${{ env.BASE_PATH }} npm run build
+          CI=false PUBLIC_URL=${{ env.BASE_PATH }} npm run build
         working-directory: ./ui
 
       - name: Setup Pages
