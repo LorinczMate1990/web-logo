@@ -121,9 +121,9 @@ export function Arguments(constraints : ArgumentListConstraint) {
         } else if (localConstraints.default) {
           enabledType = toSet(localConstraints.default);
         }
-        if (enabledType.has('word') && (enabledType.has('variable') || enabledType.has('numeric') || enabledType.has('code'))) {
+        if (enabledType.has('word') && (enabledType.has('variable') || enabledType.has('numeric') || enabledType.has('code') || enabledType.has('array'))) {
           // These and words can't differentiated in every time
-          throw new Error(`Coding error: ${String(propertyKey)} for ${i}. argument lets word and other types which is not array`)
+          throw new Error(`Coding error: ${String(propertyKey)} for ${i}. argument lets word and other types`)
         } 
         enabledTypes.push(enabledType);
       }

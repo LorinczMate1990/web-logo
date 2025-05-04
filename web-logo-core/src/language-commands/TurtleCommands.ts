@@ -68,7 +68,7 @@ export default class CoreCommands {
     return {};
   }
 
-  @Arguments([['word', 'array']])
+  @Arguments( {variableArgumentLists: true, 1 : ['word'], 3: ['numeric', 'numeric', 'numeric']} )
   static async setPenColor(args: ArgType, memory : AbstractMemory) {
     // The color can be any of the following formats: "colorname" or "#RRGGBB"
     // This function must convert them to RGB
@@ -76,14 +76,10 @@ export default class CoreCommands {
     let RR = 0;
     let GG = 0;
     let BB = 0;
-    if (isStructuredMemoryData(args[0])) {
-      if (Array.isArray(args[0].data)) {
-        RR = args[0].data[0] as number; // TODO Should be checked
-        GG = args[0].data[1] as number; // TODO Should be checked
-        BB = args[0].data[2] as number; // TODO Should be checked
-      } else {
-        throw new Error(`The input of setPenColor must be a color name or a three-element numeric array`);
-      }
+    if (args.length == 3) {
+      RR = args[0] as number;
+      GG = args[1] as number;
+      BB = args[2] as number;
     } else {
       const inputColor = args[0] as string;
       const colorCode = (inputColor[0] == "#")?inputColor:ColorMap[inputColor];
