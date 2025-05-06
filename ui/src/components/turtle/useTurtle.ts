@@ -62,9 +62,41 @@ export default function useTurtle(canvasData: CanvasData | null) {
         break;
     }
     setGraphTurtle({
-      ...instance
+      ...instance,
+      position: { ...instance.position }
     });
   }, [turtleInstance.current]);
 
-  return graphTurtle;
+  function moveTurtle(dX : number, dY : number) {
+    const instance = turtleInstance.current;
+    if (instance === undefined) {
+      return;
+    }
+    instance.position.x += dX;
+    instance.position.y += dY;
+    setGraphTurtle({
+      ...instance,
+      position: { ...instance.position }
+    });
+  }
+
+  function rotateTurtle(alpha : number) {
+    const instance = turtleInstance.current;
+    if (instance === undefined) {
+      return;
+    }
+
+    instance.orientation = (instance.orientation + alpha) % (2*Math.PI);
+
+    setGraphTurtle({
+      ...instance,
+      position: { ...instance.position }
+    });
+  }
+
+  return {
+    graphTurtle, 
+    moveTurtle,
+    rotateTurtle,
+  };
 }
