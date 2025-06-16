@@ -38,4 +38,7 @@ pencolor 0 0 0
 home
 pendown
 clear
+new baseTick := tick
 mandelbrot 100 80 4
+new deltaTick := tick baseTick
+print "Delta ticks: " deltaTick

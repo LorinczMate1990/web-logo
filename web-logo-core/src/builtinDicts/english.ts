@@ -1,6 +1,7 @@
 import ArrayCommands from "../language-commands/ArrayCommands";
 import CoreCommands from "../language-commands/CoreCommands";
 import TurtleCommands from "../language-commands/TurtleCommands";
+import DebugCommands from "../language-commands/DebugCommands";
 import { AbstractMemory, ArgType, CommandControl, VariableGetter, VariableSetter } from "../types";
 
 // This is the English dict
@@ -42,6 +43,8 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   "removeLast": ArrayCommands.removeLast,
   "removeAny": ArrayCommands.removeAny,
   "slice": ArrayCommands.slice,
+
+  "tick": DebugCommands.tick,
 };
 const ExtraKeywords : {"extraKeywords" : string[]} = {
   "extraKeywords": ["elif", "else"],
