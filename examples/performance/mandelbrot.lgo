@@ -1,0 +1,44 @@
+learn howConvergent x y iterNum {
+  repeat iterNum {
+    new squaredRe := x*x - y*y
+    new squaredIm := 2*x*y
+    x := squaredRe + x
+    y := squaredIm + y
+    new complexLength := sqrt(x*x + y*y)
+    if complexLength>2 {
+      return i/iterNum
+    }
+  }
+  return 1
+}
+
+learn mandelbrot sideSize iterNum pixelsize {
+  penwidth pixelsize
+  repeat x sideSize {
+    pendown
+    repeat y sideSize {
+      new convergent := howConvergent x/sideSize y/sideSize iterNum
+      if convergent=1  {
+        pencolor 0 0 0
+      } else {
+        pencolor 255*convergent*2 255*convergent*2 255*convergent
+      }
+      forward pixelsize
+    }
+    penup
+    backward sideSize*pixelsize
+    right 90
+    forward pixelsize
+    left 90
+  }
+}
+
+
+pencolor 0 0 0
+home
+pendown
+clear
+new baseTick := tick
+mandelbrot 100 80 4
+new deltaTick := tick baseTick
+print "Delta ticks: " deltaTick
