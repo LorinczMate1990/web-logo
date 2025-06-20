@@ -1,8 +1,8 @@
-import ArrayCommands from "../language-commands/ArrayCommands";
-import CoreCommands from "../language-commands/CoreCommands";
-import TurtleCommands from "../language-commands/TurtleCommands";
-import DebugCommands from "../language-commands/DebugCommands";
-import { AbstractMemory, ArgType, CommandControl, VariableGetter, VariableSetter } from "../types";
+import ArrayCommands from "../language-commands/ArrayCommands.js";
+import CoreCommands from "../language-commands/CoreCommands.js";
+import TurtleCommands from "../language-commands/TurtleCommands.js";
+import DebugCommands from "../language-commands/DebugCommands.js";
+import { AbstractMemory, ArgType, CommandControl, VariableGetter, VariableSetter } from "../types.js";
 
 // This is the English dict
 const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) => Promise<CommandControl>} = {

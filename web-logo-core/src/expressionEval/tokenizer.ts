@@ -1,4 +1,4 @@
-import { operators } from "./operators";
+import { operators } from "./operators.js";
 
 function isAtomicToken(char: string) {
   const atomicTokens = new Set([...operators, '(', ')', ',']);

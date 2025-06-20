@@ -1,9 +1,9 @@
-import { Commands } from "./CommandList";
-import { getProcessedArgumentList, PossibleArgumentParsingMethods } from "./ArgumentParser";
-import BuiltinDictionary from "./builtinDicts/english";
-import { Memory } from "./memory/memory";
-import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl } from "./types";
-import { expressionEval } from "./expressionEval/expressionEval";
+import { Commands } from "./CommandList.js";
+import { getProcessedArgumentList, PossibleArgumentParsingMethods } from "./ArgumentParser.js";
+import BuiltinDictionary from "./builtinDicts/english.js";
+import { Memory } from "./memory/memory.js";
+import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl } from "./types.js";
+import { expressionEval } from "./expressionEval/expressionEval.js";
 
 export class CommandsWithContext extends ExecutableWithContext {
   commands : Commands;

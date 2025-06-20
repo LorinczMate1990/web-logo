@@ -1,4 +1,4 @@
-import { PenColor, PenState } from "../turtle-types/DrawingTypes";
+import { PenColor, PenState } from "../turtle-types/DrawingTypes.js";
 
 type MoveMessage = {
   topic: "turtleCommand";

@@ -1,5 +1,4 @@
-import { isNumberObject } from "util/types";
-import { isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types";
+import { isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 
 export function isStructuredVariableName(name: string): boolean {
   return name.includes('.') || name.includes('[') || name.includes(']');

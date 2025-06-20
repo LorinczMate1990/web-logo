@@ -1,6 +1,6 @@
-import { Memory } from './memory'; // Adjust the import path accordingly
-import { StructuredMemoryData } from '../types'; // Adjust the import path based on your project structure
-import { NonExistingVariableMemoryError } from './errors';
+import { Memory } from './memory.js'; // Adjust the import path accordingly
+import { StructuredMemoryData } from '../types.js'; // Adjust the import path based on your project structure
+import { NonExistingVariableMemoryError } from './errors.js';
 
 describe('Memory', () => {
   describe("getVariable", () => {

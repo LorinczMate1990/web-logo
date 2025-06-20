@@ -1,7 +1,7 @@
-import { tokensToCommandList } from "./CommandList";
-import { tokenizer } from "./Tokenizer";
-import BuiltinDictionary from "./builtinDicts/english";
-import Core from "./core";
+import { tokensToCommandList } from "./CommandList.js";
+import { tokenizer } from "./Tokenizer.js";
+import BuiltinDictionary from "./builtinDicts/english.js";
+import Core from "./core.js";
 
 class Interpreter {
   core : Core = new Core();

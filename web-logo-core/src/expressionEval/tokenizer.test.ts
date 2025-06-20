@@ -1,4 +1,4 @@
-import { tokenize } from './tokenizer';
+import { tokenize } from './tokenizer.js';
 
 describe('tokenize', () => {
   it('handles negative numbers', () => {

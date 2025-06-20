@@ -1,5 +1,5 @@
-import { isOperator, precedence } from "./operators";
-import { tokenize } from "./tokenizer";
+import { isOperator, precedence } from "./operators.js";
+import { tokenize } from "./tokenizer.js";
 
 // Converts an infix expression to Polish notation (prefix notation)
 export default function toPolishNotation(infix: string): string[] {

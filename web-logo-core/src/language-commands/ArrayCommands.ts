@@ -1,7 +1,7 @@
-import { turtleCommandPubSub } from "../pubsub/pubsubs";
-import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types";
-import { Arguments, PossibleArgumentParsingMethods } from "../ArgumentParser";
-import ColorMap from "../utils/ColorMap";
+import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
+import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
+import { Arguments, PossibleArgumentParsingMethods } from "../ArgumentParser.js";
+import ColorMap from "../utils/ColorMap.js";
 
 export default class ArrayCommands {
   @Arguments({min:2, max:3, front: ["array", "numeric", "numeric"] })

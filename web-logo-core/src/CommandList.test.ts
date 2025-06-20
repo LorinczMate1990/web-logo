@@ -1,5 +1,5 @@
-import { Commands, tokensToCommandList } from "./CommandList";
-import { Token } from "./Tokenizer";
+import { Commands, tokensToCommandList } from "./CommandList.js";
+import { Token } from "./Tokenizer.js";
 
 describe('tokensToCommandList', () => {
   // Test a simple command without arguments

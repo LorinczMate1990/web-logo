@@ -1,6 +1,6 @@
-import BuiltinDictionary from "./builtinDicts/english";
-import { expressionEval } from "./expressionEval/expressionEval";
-import { AbstractMemory, ArgType, CommandControl, isExecutableFactory } from "./types";
+import BuiltinDictionary from "./builtinDicts/english.js";
+import { expressionEval } from "./expressionEval/expressionEval.js";
+import { AbstractMemory, ArgType, CommandControl, isExecutableFactory } from "./types.js";
 
 export type PossibleArgumentParsingMethods = 'word' | 'numeric' | 'code' | 'variable' | 'array' | "ignore";
 

@@ -1,4 +1,4 @@
-import { TooManyClosingBraceletError, TooManyClosingBracketError, TooManyClosingSquareBracketError, UnclosedBraceletError, UnclosedBracketError, UnclosedSquareBracketError } from "./errors";
+import { TooManyClosingBraceletError, TooManyClosingBracketError, TooManyClosingSquareBracketError, UnclosedBraceletError, UnclosedBracketError, UnclosedSquareBracketError } from "./errors.js";
 
 export class Token {
   lineNumber : number;
