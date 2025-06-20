@@ -1,5 +1,5 @@
-import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from './structuredVariableHandler'; // Adjust the import path based on your project structure
-import { ParamType, StructuredMemoryData, VariableGetter } from '../types';
+import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from './structuredVariableHandler.js'; // Adjust the import path based on your project structure
+import { ParamType, StructuredMemoryData, VariableGetter } from '../types.js';
 
 function toAsciiStructMemData(str : string) {
   return new StructuredMemoryData(Array.from(str, char => char.charCodeAt(0)))

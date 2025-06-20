@@ -1,4 +1,4 @@
-const basename = process.env.PUBLIC_URL || '/';
+const basename = import.meta.env.VITE_PUBLIC_URL || '/';
 
 export default {
   basename,

@@ -1,7 +1,7 @@
-import { turtleCommandPubSub } from "../pubsub/pubsubs";
-import { AbstractMemory, ArgType, isStructuredMemoryData } from "../types";
-import { Arguments } from "../ArgumentParser";
-import ColorMap from "../utils/ColorMap";
+import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
+import { AbstractMemory, ArgType, isStructuredMemoryData } from "../types.js";
+import { Arguments } from "../ArgumentParser.js";
+import ColorMap from "../utils/ColorMap.js";
 
 export default class CoreCommands {
   @Arguments(['numeric'])

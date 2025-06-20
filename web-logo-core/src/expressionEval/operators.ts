@@ -1,4 +1,4 @@
-import { isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types";
+import { isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 
 function assertMustBeNumber(op: string, input: ParamType): asserts input is number {
   if (typeof input !== 'number') throw new Error(`Invalid expression. ${op} needs number but got ${input} (${typeof input})`);

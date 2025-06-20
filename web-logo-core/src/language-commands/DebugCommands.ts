@@ -1,7 +1,7 @@
-import { turtleCommandPubSub } from "../pubsub/pubsubs";
-import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, isExecutableFactory, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types";
-import { Arguments, PossibleArgumentParsingMethods } from "../ArgumentParser";
-import { expressionEval } from "../expressionEval/expressionEval";
+import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
+import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, isExecutableFactory, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
+import { Arguments, PossibleArgumentParsingMethods } from "../ArgumentParser.js";
+import { expressionEval } from "../expressionEval/expressionEval.js";
 
 export default class DebugCommands {
   @Arguments({max: 1, front: [ "numeric"]})
