@@ -2,22 +2,28 @@ import { Commands } from "./CommandList.js";
 import { getProcessedArgumentList, PossibleArgumentParsingMethods } from "./ArgumentParser.js";
 import BuiltinDictionary from "./builtinDicts/english.js";
 import { Memory } from "./memory/memory.js";
-import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl } from "./types.js";
+import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl, InterpreterHooks } from "./types.js";
 import { expressionEval } from "./expressionEval/expressionEval.js";
 
 export class CommandsWithContext extends ExecutableWithContext {
   commands : Commands;
   context : AbstractMemory;
   meta: MemoryMetaData | undefined;
-  constructor(commands: Commands, context : AbstractMemory, meta : MemoryMetaData | undefined) {
+  hooks : InterpreterHooks;
+
+  constructor(commands: Commands, context : AbstractMemory, meta : MemoryMetaData | undefined, hooks: InterpreterHooks) {
     super();
     this.commands = commands;
     this.context = context;
     this.meta = meta;
+    this.hooks = hooks;
   }
   async execute() : Promise<CommandControl> {
     const commandLevelExecution = this.meta != undefined; // TODO : Currently the meta only means that this is a command
     for (let command of this.commands) {
+      if (this.hooks.beforeRunNewCommandHook) {
+        await this.hooks.beforeRunNewCommandHook(command);
+      }
       try {
         const label = command.label;
         let evaluatedLabel = undefined;
@@ -29,7 +35,7 @@ export class CommandsWithContext extends ExecutableWithContext {
           if (typeof arg === "string") {
             return arg;
           } else {
-            return new CommandsWithContextFactory(arg, this.context);
+            return new CommandsWithContextFactory(arg, this.context, this.hooks);
           }
         });
         // The label can be a built-in command or a command in memory.
@@ -94,18 +100,20 @@ export class CommandsWithContext extends ExecutableWithContext {
 export class CommandsWithContextFactory extends ExecutableFactory {
   commands : Commands;
   parentContext : AbstractMemory;
+  hooks : InterpreterHooks;
   
-  constructor(commands: Commands, parentContext: AbstractMemory) {
+  constructor(commands: Commands, parentContext: AbstractMemory, hooks: InterpreterHooks) {
     super();
     this.commands = commands;
     this.parentContext = parentContext;
+    this.hooks = hooks;
   }
   
   meta: MemoryMetaData | undefined;
 
   getNewExecutableWithContext(): ExecutableWithContext {
     const newMemory = new Memory(this.parentContext);
-    return new CommandsWithContext(this.commands, newMemory, this.meta);
+    return new CommandsWithContext(this.commands, newMemory, this.meta, this.hooks);
   }
 
 }
@@ -114,13 +122,15 @@ export class CommandsWithContextFactory extends ExecutableFactory {
 
 class Core {
   globalMemory : AbstractMemory;
+  hooks : InterpreterHooks;
 
-  constructor() {
+  constructor(hooks : InterpreterHooks) {
     this.globalMemory = new Memory(undefined);
+    this.hooks = hooks;
   }
 
   async executeCommands(commands : Commands) {
-    const commandsWithContext = new CommandsWithContext(commands, this.globalMemory, undefined);
+    const commandsWithContext = new CommandsWithContext(commands, this.globalMemory, undefined, this.hooks);
     await commandsWithContext.execute();
   }
 }

@@ -2,9 +2,14 @@ import { tokensToCommandList } from "./CommandList.js";
 import { tokenizer } from "./Tokenizer.js";
 import BuiltinDictionary from "./builtinDicts/english.js";
 import Core from "./core.js";
+import { InterpreterHooks } from "./types.js";
 
 class Interpreter {
-  core : Core = new Core();
+  core : Core;
+
+  constructor(hooks : InterpreterHooks) {
+    this.core = new Core(hooks);
+  }
 
   getKeywordList() {
     // TODO : Translating keyword is an important featur

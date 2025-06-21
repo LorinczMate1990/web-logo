@@ -1,3 +1,9 @@
+export interface CommandData {
+  getLineNumber() : number;
+  getCharNumber() : number;
+  getLabel() : string;
+}
+
 export type SuccesfulExecuteResponse = {
   success: true,
   response: string,
@@ -132,4 +138,8 @@ export interface AbstractMemory extends VariableGetter, VariableSetter {
 
 export interface HasContextMemory {
   get context() : AbstractMemory;
+}
+
+export type InterpreterHooks = {
+  beforeRunNewCommandHook? : (command : CommandData) => Promise<void> // Todo: Using some input param, this could be more useful
 }
