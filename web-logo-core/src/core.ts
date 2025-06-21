@@ -10,9 +10,11 @@ export class CommandsWithContext extends ExecutableWithContext {
   context : AbstractMemory;
   meta: MemoryMetaData | undefined;
   hooks : InterpreterHooks;
+  sessionId : string;
 
-  constructor(commands: Commands, context : AbstractMemory, meta : MemoryMetaData | undefined, hooks: InterpreterHooks) {
+  constructor(commands: Commands, context : AbstractMemory, meta : MemoryMetaData | undefined, hooks: InterpreterHooks, sessionId : string) {
     super();
+    this.sessionId = sessionId;
     this.commands = commands;
     this.context = context;
     this.meta = meta;
@@ -21,8 +23,8 @@ export class CommandsWithContext extends ExecutableWithContext {
   async execute() : Promise<CommandControl> {
     const commandLevelExecution = this.meta != undefined; // TODO : Currently the meta only means that this is a command
     for (let command of this.commands) {
-      if (this.hooks.beforeRunNewCommandHook) {
-        await this.hooks.beforeRunNewCommandHook(command);
+      if (this.hooks.beforeRunNewCommand) {
+        await this.hooks.beforeRunNewCommand({command, sessionId: this.sessionId});
       }
       try {
         const label = command.label;
@@ -35,7 +37,7 @@ export class CommandsWithContext extends ExecutableWithContext {
           if (typeof arg === "string") {
             return arg;
           } else {
-            return new CommandsWithContextFactory(arg, this.context, this.hooks);
+            return new CommandsWithContextFactory(arg, this.context, this.hooks, this.sessionId);
           }
         });
         // The label can be a built-in command or a command in memory.
@@ -101,19 +103,21 @@ export class CommandsWithContextFactory extends ExecutableFactory {
   commands : Commands;
   parentContext : AbstractMemory;
   hooks : InterpreterHooks;
+  sessionId : string;
   
-  constructor(commands: Commands, parentContext: AbstractMemory, hooks: InterpreterHooks) {
+  constructor(commands: Commands, parentContext: AbstractMemory, hooks: InterpreterHooks, sessionId : string) {
     super();
     this.commands = commands;
     this.parentContext = parentContext;
     this.hooks = hooks;
+    this.sessionId = sessionId;
   }
   
   meta: MemoryMetaData | undefined;
 
   getNewExecutableWithContext(): ExecutableWithContext {
     const newMemory = new Memory(this.parentContext);
-    return new CommandsWithContext(this.commands, newMemory, this.meta, this.hooks);
+    return new CommandsWithContext(this.commands, newMemory, this.meta, this.hooks, this.sessionId);
   }
 
 }
@@ -129,8 +133,8 @@ class Core {
     this.hooks = hooks;
   }
 
-  async executeCommands(commands : Commands) {
-    const commandsWithContext = new CommandsWithContext(commands, this.globalMemory, undefined, this.hooks);
+  async executeCommands(commands : Commands, sessionId : string) {
+    const commandsWithContext = new CommandsWithContext(commands, this.globalMemory, undefined, this.hooks, sessionId);
     await commandsWithContext.execute();
   }
 }
