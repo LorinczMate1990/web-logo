@@ -1,8 +1,9 @@
 import { Token } from "./Tokenizer.js";
+import { CommandData } from "./types.js";
 
 export type Commands = Command[];
 
-export class Command {
+export class Command implements CommandData {
   lineNumber : number;
   charNumber : number;
   label: string;
@@ -16,6 +17,15 @@ export class Command {
     this.label = label.val;
     this.arguments = [];
     this.createNewVariableForReturn = false;
+  }
+  getLineNumber(): number {
+    return this.lineNumber;
+  }
+  getCharNumber(): number {
+    return this.charNumber;
+  }
+  getLabel(): string {
+    return this.label;
   }
 
   addArgument(argument: Token | Commands) {
