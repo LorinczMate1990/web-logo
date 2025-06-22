@@ -1,5 +1,5 @@
-import CodeEditorContent from "../components/CodeEditor/CodeEditorContent";
-import useSharedData from "../components/CodeEditor/useSharedData";
+import CodeEditorContent from "../components/CodeEditor/CodeEditorContent.js";
+import useSharedData from "../components/CodeEditor/useSharedData.js";
 
 export default function CodeEditor() {
 

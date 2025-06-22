@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import DrawingCanvas, { DrawingCanvasRef } from '../components/DrawingCanvas';
-import Turtle, { TurtleVisibility } from '../components/turtle/Turtle';
+import DrawingCanvas, { DrawingCanvasRef } from '../components/DrawingCanvas.js';
+import Turtle, { TurtleVisibility } from '../components/turtle/Turtle.js';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { turtleCommandPubSub, TurtleCommandMessage } from 'web-logo-core'
-import CommandLine from '../components/CommandLine/CommandLine';
-import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
+import CommandLine from '../components/CommandLine/CommandLine.js';
+import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer.js';
 import { Interpreter } from 'web-logo-core';
-import { commandLinePubSub, useSubscriber } from '../pubsub/pubsubs';
-import InterpreterSettingsModal from '../components/InterpreterSettings/InterpreterSettingsModal';
-import WebInterpreterHooksConfig from '../interpreter-hooks/WebInterpreterHooksConfig';
+import { commandLinePubSub, useSubscriber } from '../pubsub/pubsubs.js';
+import InterpreterSettingsModal from '../components/InterpreterSettings/InterpreterSettingsModal.js';
+import WebInterpreterHooksConfig from '../interpreter-hooks/WebInterpreterHooksConfig.js';
 
 export default function Workspace({ interpreter, interpreterConfig }: { interpreter: Interpreter, interpreterConfig : WebInterpreterHooksConfig }) {
   const drawingCanvasRef = useRef<DrawingCanvasRef | null>(null);

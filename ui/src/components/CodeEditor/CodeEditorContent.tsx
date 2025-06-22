@@ -1,9 +1,9 @@
 
-import { getWritableStream, readFile, writeFile } from '../../utils/FileHandling'
+import { getWritableStream, readFile, writeFile } from '../../utils/FileHandling.js'
 import { useEffect, useState } from "react";
 import { Interpreter } from "web-logo-core";
-import EditorMenu from './EditorMenu';
-import MultilinedEditor from './NumberedEditor';
+import EditorMenu from './EditorMenu.js';
+import MultilinedEditor from './NumberedEditor.js';
 
 type CodeEditorContent = {
   openedFile: FileSystemFileHandle;

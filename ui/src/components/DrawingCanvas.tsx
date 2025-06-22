@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, ReactNode } from 'react';
-import CanvasContext from './CanvasContext';
+import CanvasContext from './CanvasContext.js';
 
 export interface DrawingCanvasRef {
   clearCanvas: () => void;

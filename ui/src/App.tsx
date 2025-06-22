@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
 import { Interpreter } from 'web-logo-core';
-import Workspace from './views/Workspace';
-import CodeEditor from './views/CodeEditor';
-import { getQueryParam } from './utils/get-query-params';
-import WebInterpreterHooks from './interpreter-hooks/WebInterpreterHooks';
+import Workspace from './views/Workspace.js';
+import CodeEditor from './views/CodeEditor.js';
+import { getQueryParam } from './utils/get-query-params.js';
+import WebInterpreterHooks from './interpreter-hooks/WebInterpreterHooks.js';
 
 // Using query parameters instead of React Router paths because GitHub Pages and other static hosts 
 // don't support client-side routing.

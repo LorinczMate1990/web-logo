@@ -1,8 +1,8 @@
-import config from '../../config';
-import { executeCode, getWritableStream } from "../../utils/FileHandling";
+import config from '../../config.js';
+import { executeCode, getWritableStream } from "../../utils/FileHandling.js";
 import { Interpreter } from "web-logo-core";
-import { commandLinePubSub } from "../../pubsub/pubsubs";
-import sleep from "../../utils/async-sleep";
+import { commandLinePubSub } from "../../pubsub/pubsubs.js";
+import sleep from "../../utils/async-sleep.js";
 
 function openCodeEditorPopup(popupName : string) {
   return window.open(

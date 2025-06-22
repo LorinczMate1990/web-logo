@@ -1,9 +1,9 @@
 import React, { useRef, useState } from "react";
 import './ProjectExplorer.css';
 import * as ContextMenu from "@radix-ui/react-context-menu";
-import Folder, { FileOrFolder } from "./Folder";
-import File from "./File";
-import { createNewDirectory, createNewFile } from "../../utils/FileHandling";
+import Folder, { FileOrFolder } from "./Folder.js";
+import File from "./File.js";
+import { createNewDirectory, createNewFile } from "../../utils/FileHandling.js";
 import { Interpreter } from "web-logo-core";
 
 const ProjectExplorer: React.FC<{

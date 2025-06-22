@@ -1,6 +1,6 @@
 import { InterpreterHooks } from "web-logo-core";
-import sleep from "../utils/async-sleep";
-import WebInterpreterHooksConfig from "./WebInterpreterHooksConfig";
+import sleep from "../utils/async-sleep.js";
+import WebInterpreterHooksConfig from "./WebInterpreterHooksConfig.js";
 
 export default class WebInterpreterHooks implements InterpreterHooks, WebInterpreterHooksConfig {
   lastTime = 0;

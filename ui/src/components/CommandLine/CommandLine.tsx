@@ -1,7 +1,7 @@
 import React, { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import './CommandLine.css'; // Import the CSS file
 import { Interpreter } from 'web-logo-core';
-import { commandLinePubSub, useSubscriber } from '../../pubsub/pubsubs';
+import { commandLinePubSub, useSubscriber } from '../../pubsub/pubsubs.js';
 
 interface CommandResponse {
   accepted: boolean;

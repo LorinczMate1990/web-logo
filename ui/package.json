@@ -2,6 +2,7 @@
   "name": "web-logo",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@radix-ui/react-context-menu": "^2.2.4",
     "@types/jest": "^29.5.13",

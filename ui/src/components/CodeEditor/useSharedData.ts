@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Interpreter } from "web-logo-core";
-import sleep from "../../utils/async-sleep";
+import sleep from "../../utils/async-sleep.js";
 
 export type SharedData = {
   fileHandle: FileSystemFileHandle,

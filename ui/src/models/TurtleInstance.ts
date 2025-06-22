@@ -1,7 +1,7 @@
 import { PenState, Orientation, Position, PenColor } from "web-logo-core";
 import simpleTurtle from '../assets/simple-turtle.png'
-import CoordSet from "../utils/CoordSet";
-import { rgbToHex } from "../utils/ColorManipulation";
+import CoordSet from "../utils/CoordSet.js";
+import { rgbToHex } from "../utils/ColorManipulation.js";
 
 type TurtlePicture = {
   path: string,

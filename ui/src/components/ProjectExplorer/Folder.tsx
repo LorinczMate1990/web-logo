@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import './ProjectExplorer.css';
-import File from "./File"
-import { createNewDirectory, createNewFile, deleteFileOrFolder } from "../../utils/FileHandling";
+import File from "./File.js"
+import { createNewDirectory, createNewFile, deleteFileOrFolder } from "../../utils/FileHandling.js";
 import { Interpreter } from "web-logo-core";
 
 export type FileOrFolder = {

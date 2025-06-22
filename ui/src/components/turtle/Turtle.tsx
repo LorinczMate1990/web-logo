@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
-import CanvasContext from '../CanvasContext';
-import useTurtle from './useTurtle';
-import Draggable from '../Draggable';
+import CanvasContext from '../CanvasContext.js';
+import useTurtle from './useTurtle.js';
+import Draggable from '../Draggable.js';
 
 export type TurtleVisibility = "visible" | "invisible";
 

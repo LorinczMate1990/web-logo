@@ -1,5 +1,5 @@
 import Editor from "react-simple-code-editor";
-import getLogoLanguagePrismModel from "./LogoSyntax";
+import getLogoLanguagePrismModel from "./LogoSyntax.js";
 import { highlight } from "prismjs";
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';

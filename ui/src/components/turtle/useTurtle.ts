@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import TurtleInstance, { GraphTurtleProperties } from "../../models/TurtleInstance";
-import { useSubscriber } from "../../pubsub/pubsubs";
+import TurtleInstance, { GraphTurtleProperties } from "../../models/TurtleInstance.js";
+import { useSubscriber } from "../../pubsub/pubsubs.js";
 import { turtleCommandPubSub, TurtleCommandMessage } from 'web-logo-core'
 import simpleTurtle from '../../assets/simple-turtle.png'
-import { CanvasData } from "../CanvasContext";
+import { CanvasData } from "../CanvasContext.js";
 
 export default function useTurtle(canvasData: CanvasData | null) {
   const context = (canvasData == null) ? null : canvasData.context;

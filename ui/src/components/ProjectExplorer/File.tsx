@@ -1,8 +1,8 @@
 import React from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import './ProjectExplorer.css';
-import { openCodeEditor } from "./MenuActions";
-import { deleteFileOrFolder, executeFile } from "../../utils/FileHandling";
+import { openCodeEditor } from "./MenuActions.js";
+import { deleteFileOrFolder, executeFile } from "../../utils/FileHandling.js";
 import { Interpreter } from "web-logo-core";
 
 type FileProps = {

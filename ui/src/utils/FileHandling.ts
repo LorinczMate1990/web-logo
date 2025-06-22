@@ -1,5 +1,5 @@
 import { Interpreter } from "web-logo-core";
-import { CommandLineMessage, commandLinePubSub } from "../pubsub/pubsubs";
+import { CommandLineMessage, commandLinePubSub } from "../pubsub/pubsubs.js";
 import PubSub from "typesafe-bus";
 
 export const readFile = async (handle: FileSystemFileHandle) => {

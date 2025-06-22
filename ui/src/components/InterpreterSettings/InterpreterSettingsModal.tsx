@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./InterpreterSettingsModal.css";
-import WebInterpreterHooksConfig from '../../interpreter-hooks/WebInterpreterHooksConfig';
+import WebInterpreterHooksConfig from '../../interpreter-hooks/WebInterpreterHooksConfig.js';
 
 interface InterpreterSettingsModalProps {
   visible: boolean;
