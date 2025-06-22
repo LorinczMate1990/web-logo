@@ -17,7 +17,7 @@ function App() {
   console.log({isCodeEditor})
 
   if (isCodeEditor) return <CodeEditor/>;
-  return <Workspace interpreter={interpreter.current}/>;
+  return <Workspace interpreter={interpreter.current} interpreterConfig={interpreterHooks.current}/>;
   
 }
 
