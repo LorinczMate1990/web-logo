@@ -1,7 +1,7 @@
-import { evaluateVariableName } from "../expressionEval/expressionEval";
-import { AbstractMemory, ExecutableFactory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, isExecutableFactory, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types";
-import { NonExistingVariableMemoryError } from "./errors";
-import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from "./structuredVariableHandler";
+import { evaluateVariableName } from "../expressionEval/expressionEval.js";
+import { AbstractMemory, ExecutableFactory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, isExecutableFactory, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types.js";
+import { NonExistingVariableMemoryError } from "./errors.js";
+import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from "./structuredVariableHandler.js";
 
 type StructMemoryCell = {
   type: "struct",

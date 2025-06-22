@@ -1,3 +1,9 @@
+export interface CommandData {
+  getLineNumber() : number;
+  getCharNumber() : number;
+  getLabel() : string;
+}
+
 export type SuccesfulExecuteResponse = {
   success: true,
   response: string,
@@ -132,4 +138,11 @@ export interface AbstractMemory extends VariableGetter, VariableSetter {
 
 export interface HasContextMemory {
   get context() : AbstractMemory;
+}
+
+export type InterpreterHooks = {
+  beforeRunNewCommand? : (p : {sessionId : string, command : CommandData}) => Promise<void> // Todo: Using some input param, this could be more useful
+  beforeStartSession? : (p : {sessionId : string}) => Promise<void>
+  afterFinishSession? : (p : {sessionId : string}) => Promise<void>
+  afterError? : (p : {sessionId : string, error : Error}) => Promise<void>
 }

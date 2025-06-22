@@ -1,5 +1,5 @@
-import { Token, filterTokens, tokenizer } from './Tokenizer';
-import { TooManyClosingBracketError, UnclosedBracketError } from "./errors";
+import { Token, filterTokens, tokenizer } from './Tokenizer.js';
+import { TooManyClosingBracketError, UnclosedBracketError } from "./errors.js";
 
 describe('filterTokens', () => {
   // Test empty input

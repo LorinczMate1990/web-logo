@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      BUILD_DIR: build
+      BUILD_DIR: dist
       BASE_PATH: /${{ github.event.repository.name }}
 
     steps:
@@ -54,7 +54,7 @@ jobs:
 
       - name: Build the project
         run: |
-          CI=false PUBLIC_URL=${{ env.BASE_PATH }} npm run build
+          CI=false VITE_PUBLIC_URL=${{ env.BASE_PATH }} npm run build
         working-directory: ./ui
 
       - name: Setup Pages

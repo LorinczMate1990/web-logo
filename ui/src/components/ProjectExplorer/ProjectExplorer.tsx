@@ -8,8 +8,9 @@ import { Interpreter } from "web-logo-core";
 
 const ProjectExplorer: React.FC<{
   onFileDoubleClick: (file: FileSystemFileHandle) => void;
-  interpreter : Interpreter,
-}> = ({ onFileDoubleClick, interpreter }) => {
+  interpreter: Interpreter;
+  openInterpreterSettings: () => void;
+}> = ({ onFileDoubleClick, interpreter, openInterpreterSettings }) => {
   const rootHandle = useRef<FileSystemDirectoryHandle | null>(null);
   const [items, setItems] = useState<FileOrFolder[] | null>(null);
   const [handles, setHandles] = useState<Record<string, FileSystemHandle>>({});
@@ -17,7 +18,7 @@ const ProjectExplorer: React.FC<{
 
   const refresh = async () => {
     await reloadContentList();
-  }
+  };
 
   const reloadContentList = async () => {
     try {
@@ -45,7 +46,7 @@ const ProjectExplorer: React.FC<{
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   const openFolder = async () => {
     try {
@@ -58,18 +59,24 @@ const ProjectExplorer: React.FC<{
       } else {
         throw error;
       }
-
     }
-
   };
-
-
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <button onClick={openFolder} style={{ padding: "10px 20px", fontSize: "16px" }}>
-        Open Folder
-      </button>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <button onClick={openFolder} style={{ padding: "10px 20px", fontSize: "16px" }}>
+          Open Folder
+        </button>
+        <button
+          onClick={openInterpreterSettings}
+          style={{ padding: "10px", fontSize: "16px" }}
+          title="Settings"
+        >
+          ⚙️
+        </button>
+      </div>
+
       {rootHandle.current !== null && (
         <div style={{ marginTop: "20px" }}>
           <ContextMenu.Root>

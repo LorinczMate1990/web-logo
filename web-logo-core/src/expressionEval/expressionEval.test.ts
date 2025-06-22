@@ -1,5 +1,5 @@
-import { ParamType, StructuredMemoryData, VariableGetter } from '../types';
-import { evaluateVariableName, expressionEval } from './expressionEval';
+import { ParamType, StructuredMemoryData, VariableGetter } from '../types.js';
+import { evaluateVariableName, expressionEval } from './expressionEval.js';
 
 describe('numericEval', () => {
   let memoryMock: VariableGetter;

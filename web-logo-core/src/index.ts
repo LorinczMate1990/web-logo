@@ -1,7 +1,8 @@
-import Interpreter from './Interpreter';
-import { PenState, PenColor, Orientation, Position } from './turtle-types/DrawingTypes';
-import { turtleCommandPubSub } from "./pubsub/pubsubs";
-import { TurtleCommandMessage } from './pubsub/types';
+import Interpreter from './Interpreter.js';
+import { PenState, PenColor, Orientation, Position } from './turtle-types/DrawingTypes.js';
+import { turtleCommandPubSub } from "./pubsub/pubsubs.js";
+import { TurtleCommandMessage } from './pubsub/types.js';
+import { CommandData, InterpreterHooks } from './types.js';
 
 export { Interpreter, 
     turtleCommandPubSub,
@@ -9,8 +10,7 @@ export { Interpreter,
     PenColor,
     Orientation,
     Position,
-};
-
-export {
+    InterpreterHooks,
+    CommandData,
     TurtleCommandMessage
 }

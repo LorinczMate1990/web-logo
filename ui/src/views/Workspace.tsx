@@ -7,11 +7,15 @@ import CommandLine from '../components/CommandLine/CommandLine';
 import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
 import { Interpreter } from 'web-logo-core';
 import { commandLinePubSub, useSubscriber } from '../pubsub/pubsubs';
+import InterpreterSettingsModal from '../components/InterpreterSettings/InterpreterSettingsModal';
+import WebInterpreterHooksConfig from '../interpreter-hooks/WebInterpreterHooksConfig';
 
-export default function Workspace({interpreter } : {interpreter : Interpreter}) {
+export default function Workspace({ interpreter, interpreterConfig }: { interpreter: Interpreter, interpreterConfig : WebInterpreterHooksConfig }) {
   const drawingCanvasRef = useRef<DrawingCanvasRef | null>(null);
   const [turtleVisibility, setTurtleVisibility] = useState<TurtleVisibility>("visible");
   const [isCanvasFocused, setCanvasFocused] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
 
   useSubscriber(turtleCommandPubSub, (message) => {
     if (message.topic != "systemCommand") return;
@@ -42,37 +46,47 @@ export default function Workspace({interpreter } : {interpreter : Interpreter}) 
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isCanvasFocused]);  
+  }, [isCanvasFocused]);
 
-  return <div className="App" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+  return <>
+    <div className="App" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <PanelGroup direction="horizontal">
-      {/* Resizable Side Panel */}
-      <Panel defaultSize={15} style={{ backgroundColor: "#f0f0f0" }}>
-        <ProjectExplorer
-          onFileDoubleClick={(e) => window.alert(`e: ${e}`)}
-          interpreter={interpreter}
-        />
-      </Panel>
-      {/* Resize Handle */}
-      <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", width: "5px" }} />
-      {/* Main Content */}
-      <Panel minSize={1}>
-        <PanelGroup direction="vertical">
-          <Panel defaultSize={90} minSize={1}>
-            <DrawingCanvas 
-              onFocus={() => setCanvasFocused(true)}
-              onBlur={() => setCanvasFocused(false)}
-              ref={drawingCanvasRef}
-            >
-              <Turtle name="Leo" globalVisibility={turtleVisibility}/>
-            </DrawingCanvas>
-          </Panel>
-          <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", height: "5px" }} />
-          <Panel>
-            <CommandLine maxLines={10} interpreter={interpreter} />
-          </Panel>
-        </PanelGroup>
-      </Panel>
-    </PanelGroup>
-  </div>
+        {/* Resizable Side Panel */}
+        <Panel defaultSize={15} style={{ backgroundColor: "#f0f0f0" }}>
+          <ProjectExplorer
+            onFileDoubleClick={(e) => window.alert(`e: ${e}`)}
+            interpreter={interpreter}
+            openInterpreterSettings={() => setIsSettingsOpen(true)}
+          />
+        </Panel>
+        {/* Resize Handle */}
+        <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", width: "5px" }} />
+        {/* Main Content */}
+        <Panel minSize={1}>
+          <PanelGroup direction="vertical">
+            <Panel defaultSize={90} minSize={1}>
+              <DrawingCanvas
+                onFocus={() => setCanvasFocused(true)}
+                onBlur={() => setCanvasFocused(false)}
+                ref={drawingCanvasRef}
+              >
+                <Turtle name="Leo" globalVisibility={turtleVisibility} />
+              </DrawingCanvas>
+            </Panel>
+            <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", height: "5px" }} />
+            <Panel>
+              <CommandLine maxLines={10} interpreter={interpreter} />
+            </Panel>
+          </PanelGroup>
+        </Panel>
+      </PanelGroup>
+    </div>
+
+
+    <InterpreterSettingsModal
+      visible={isSettingsOpen}
+      onClose={() => setIsSettingsOpen(false)}
+      config={interpreterConfig}
+    />
+  </>
 }

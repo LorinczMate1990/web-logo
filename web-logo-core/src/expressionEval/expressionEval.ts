@@ -1,7 +1,7 @@
-import { isStructuredMemoryData, ParamType, StructuredMemoryData, VariableGetter } from "../types";
-import { isArrayToken, isNumeric, builtinFunctions, executeBinaryOperator, executeUnaryOperator, isBuiltinFunction, isOperator, isStrictlyUnaryOperator, precedence } from "./operators";
-import { stringToArrayAndCharToNumberConverter } from "./stringConverter";
-import toPolishNotation from "./toPolishNotation";
+import { isStructuredMemoryData, ParamType, StructuredMemoryData, VariableGetter } from "../types.js";
+import { isArrayToken, isNumeric, builtinFunctions, executeBinaryOperator, executeUnaryOperator, isBuiltinFunction, isOperator, isStrictlyUnaryOperator, precedence } from "./operators.js";
+import { stringToArrayAndCharToNumberConverter } from "./stringConverter.js";
+import toPolishNotation from "./toPolishNotation.js";
 
 export function expressionEval(expression: string, memory: VariableGetter): ParamType {
   // Convert to Polish notation first (placeholder implementation)
