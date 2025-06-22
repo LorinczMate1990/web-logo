@@ -3,11 +3,22 @@ import { isArrayToken, isNumeric, builtinFunctions, executeBinaryOperator, execu
 import { stringToArrayAndCharToNumberConverter } from "./stringConverter.js";
 import toPolishNotation from "./toPolishNotation.js";
 
+const cache : {[index: string] : string[]} = {};
+
+function getCachedPolishNotation(expression: string) : string[] {
+  if (expression in cache) {
+    return cache[expression];
+  } else {
+    expression = expression.trim();
+    expression = stringToArrayAndCharToNumberConverter(expression);
+    const polishNotation = toPolishNotation(expression);
+    cache[expression] = polishNotation;
+    return polishNotation;
+  }
+}
+
 export function expressionEval(expression: string, memory: VariableGetter): ParamType {
-  // Convert to Polish notation first (placeholder implementation)
-  expression = expression.trim();
-  expression = stringToArrayAndCharToNumberConverter(expression);
-  const polishNotation = toPolishNotation(expression);
+  const polishNotation = getCachedPolishNotation(expression);
   return evaluatePolishForm(polishNotation, memory);
 }
 
