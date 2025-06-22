@@ -3,36 +3,53 @@ import { isArrayToken, isNumeric, builtinFunctions, executeBinaryOperator, execu
 import { stringToArrayAndCharToNumberConverter } from "./stringConverter.js";
 import toPolishNotation from "./toPolishNotation.js";
 
+const cache: { [index: string]: AtomicInstruction[] } = {};
+
 export function expressionEval(expression: string, memory: VariableGetter): ParamType {
-  // Convert to Polish notation first (placeholder implementation)
+  let compiledPolishNotation : AtomicInstruction[] = [];
+  if (expression in cache) {
+    compiledPolishNotation = cache[expression];
+  } else {
+    const polishNotation = getPolishNotation(expression);
+    compiledPolishNotation = compilePolishNotation(polishNotation);
+    cache[expression] = compiledPolishNotation;
+  }
+  return evaluatePolishNotation(compiledPolishNotation, memory);
+}
+
+function getPolishNotation(expression: string): string[] {
   expression = expression.trim();
   expression = stringToArrayAndCharToNumberConverter(expression);
   const polishNotation = toPolishNotation(expression);
-  return evaluatePolishForm(polishNotation, memory);
+  return polishNotation;
 }
 
-// TODO: Most of the files should be moved in other files
-// but expressionEval is referenced from them
-// Solution: Add expressionEval as a parameter to functions using it
-// It could be a generic expressionEval at their level
-// Other approach: OOP
-// Lots of variables are common (memory for example is needed from many places)
-// So a nice class hierarchy with DI could be also nice
-function evaluatePolishForm(tokens: string[], memory: VariableGetter): ParamType {
-  const stack: ParamType[] = [];
+type AtomicInstruction = (stack: ParamType[], memory: VariableGetter) => void;
+
+function compilePolishNotation(tokens: string[]): AtomicInstruction[] {
+  let instructions: AtomicInstruction[] = [];
   for (let i = tokens.length - 1; i >= 0; i--) {
     const token = tokens[i];
     if (isOperator(token)) {
-      handleOperator(stack, token);
+      instructions.push((stack, memory) => handleOperator(stack, token));
     } else if (isBuiltinFunction(token)) {
-      handleBuiltinFunctions(stack, token);
+      instructions.push((stack, memory) => handleBuiltinFunctions(stack, token));
     } else if (isNumeric(token)) {
-      stack.push(parseFloat(token));
+      instructions.push((stack, memory) => stack.push(parseFloat(token)));
     } else if (isArrayToken(token)) {
-      handleArrays(stack, token, memory);
+      instructions.push((stack, memory) => handleArrays(stack, token, memory));
     } else {
-      handleVariableNames(stack, token, memory);
+      instructions.push((stack, memory) => handleVariableNames(stack, token, memory));
     }
+  }
+  return instructions.reverse();
+}
+
+function evaluatePolishNotation(instructions: AtomicInstruction[], memory: VariableGetter): ParamType {
+  const stack : ParamType[] = [];
+  for (let i = instructions.length - 1; i >= 0; i--) {
+    const instruction = instructions[i];
+    instruction(stack, memory);
   }
   if (stack.length !== 1) throw new Error(`Invalid expression. The stack is: ${stack.length}`);
   return stack[0];
@@ -59,7 +76,7 @@ function handleBuiltinFunctions(stack: ParamType[], token: string) {
   stack.push(func.function(params));
 }
 
-function handleArrays(stack: ParamType[], token: string, memory : VariableGetter) {
+function handleArrays(stack: ParamType[], token: string, memory: VariableGetter) {
   // Have to split on , when they are not inside of a ( ) or nested [ ] or " "
   const elements = splitArrayToElements(token.slice(1, token.length - 1));
   let evaluatedArray = new StructuredMemoryData([]);
@@ -105,7 +122,7 @@ function splitArrayToElements(array: string): string[] {
   return elements;
 }
 
-function handleVariableNames(stack: ParamType[], token: string, memory : VariableGetter) {
+function handleVariableNames(stack: ParamType[], token: string, memory: VariableGetter) {
   const variableName = evaluateVariableName(token, memory);
   const variableValue = memory.getVariable(variableName);
   stack.push(variableValue);
