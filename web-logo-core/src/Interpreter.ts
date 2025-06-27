@@ -2,7 +2,7 @@ import { tokensToCommandList } from "./CommandList.js";
 import { tokenizer } from "./Tokenizer.js";
 import BuiltinDictionary from "./builtinDicts/english.js";
 import Core from "./core.js";
-import { InterpreterHooks } from "./types.js";
+import { InterpreterHooks, StructuredMemoryData } from "./types.js";
 
 class Interpreter {
   core : Core;
@@ -11,6 +11,22 @@ class Interpreter {
   constructor(hooks : InterpreterHooks) {
     this.core = new Core(hooks);
     this.hooks = hooks;
+
+    // init memory
+    const turtles = new StructuredMemoryData([
+      new StructuredMemoryData({
+        name: StructuredMemoryData.build_from_string("turtle0"),
+        group: StructuredMemoryData.build_from_string("main"),
+        listen: 1,
+        position: new StructuredMemoryData({x: 0, y: 0}),
+        home: new StructuredMemoryData({x: 0, y: 0}),
+        pencolor: new StructuredMemoryData([0, 0, 0]),
+        penwidth: 1,
+        penstate: 1,
+        customData: new StructuredMemoryData({})
+      })
+    ])
+    this.core.globalMemory.createVariable('turtles', turtles);
   }
 
   getKeywordList() {
