@@ -1,8 +1,11 @@
 import React, { useRef, useEffect, useState, ReactNode } from 'react';
 import CanvasContext from './CanvasContext.js';
+import { rgbToHex } from '../utils/ColorManipulation.js';
 
 export interface DrawingCanvasRef {
   clearCanvas: () => void;
+  drawLine: (x0: number, y0: number, x1: number, y1: number, color: [number, number, number], penWidth: number) => void;
+  fill: (x: number, y : number, color: [number, number, number]) => void;
 }
 
 interface DrawingCanvasProps {
@@ -73,9 +76,27 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, chi
       }
     } 
 
+    function fill(x: number, y : number, color: [number, number, number]) {
+      // todo Implement fill
+    }
+
+    function drawLine(x0: number, y0: number, x1: number, y1: number, color: [number, number, number], penWidth: number) {
+      const ctx = canvasRef.current?.getContext('2d');
+      if (ctx) {
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.strokeStyle = rgbToHex(color);
+        ctx.lineWidth = penWidth;
+        ctx.stroke();
+      }
+    }
+
     if (ref) {
       (ref).current = {
         clearCanvas,
+        fill,
+        drawLine
       };
     }
   }, [ref, canvasRef.current]);

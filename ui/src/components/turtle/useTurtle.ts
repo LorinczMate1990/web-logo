@@ -30,35 +30,10 @@ export default function useTurtle(canvasData: CanvasData | null) {
     }
     if (message.topic != "turtleCommand") return;
     switch (message.command) {
-      case "forward":
-        instance.go(message.distance);
-        break;
-      case "backward":
-        instance.go(-message.distance);
-        break;
-      case "left":
-        instance.rotate(-message.radian);
-        break;
-      case "right":
-        instance.rotate(message.radian);
-        break;
-      case "setPenState":
-        instance.setPenState(message.penState);
-        break;
-      case "setPenColor":
-        instance.setPenColor(message.color);
-        break;
-      case "setPenWidth":
-        instance.setPenWidth(message.width);
-        break;
-      case "goHome":
-        instance.goHome();
-        break;
-      case "setHome":
-        instance.setHome();
-        break;
-      case "fill":
-        instance.fill(message.tolerance);
+      case "move":
+        instance.position.x = message.x;
+        instance.position.y = message.y;
+        instance.orientation = message.orientation / 180 * Math.PI;
         break;
     }
     setGraphTurtle({
@@ -67,35 +42,16 @@ export default function useTurtle(canvasData: CanvasData | null) {
     });
   }, [turtleInstance.current]);
 
-  function moveTurtle(dX : number, dY : number) {
-    const instance = turtleInstance.current;
-    if (instance === undefined) {
-      return;
-    }
-    instance.position.x += dX;
-    instance.position.y += dY;
-    setGraphTurtle({
-      ...instance,
-      position: { ...instance.position }
-    });
+  function moveTurtle(dX: number, dY: number) {
+    // TODO: Move turtle from UI
   }
 
-  function rotateTurtle(alpha : number) {
-    const instance = turtleInstance.current;
-    if (instance === undefined) {
-      return;
-    }
-
-    instance.orientation = (instance.orientation + alpha) % (2*Math.PI);
-
-    setGraphTurtle({
-      ...instance,
-      position: { ...instance.position }
-    });
+  function rotateTurtle(alpha: number) {
+    // TODO: Rotate turtle from UI
   }
 
   return {
-    graphTurtle, 
+    graphTurtle,
     moveTurtle,
     rotateTurtle,
   };

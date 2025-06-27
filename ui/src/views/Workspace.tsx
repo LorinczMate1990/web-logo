@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import DrawingCanvas, { DrawingCanvasRef } from '../components/DrawingCanvas.js';
 import Turtle, { TurtleVisibility } from '../components/turtle/Turtle.js';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { turtleCommandPubSub, TurtleCommandMessage } from 'web-logo-core'
+import { turtleCommandPubSub } from 'web-logo-core'
 import CommandLine from '../components/CommandLine/CommandLine.js';
 import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer.js';
 import { Interpreter } from 'web-logo-core';
@@ -10,7 +10,7 @@ import { commandLinePubSub, useSubscriber } from '../pubsub/pubsubs.js';
 import InterpreterSettingsModal from '../components/InterpreterSettings/InterpreterSettingsModal.js';
 import WebInterpreterHooksConfig from '../interpreter-hooks/WebInterpreterHooksConfig.js';
 
-export default function Workspace({ interpreter, interpreterConfig }: { interpreter: Interpreter, interpreterConfig : WebInterpreterHooksConfig }) {
+export default function Workspace({ interpreter, interpreterConfig }: { interpreter: Interpreter, interpreterConfig: WebInterpreterHooksConfig }) {
   const drawingCanvasRef = useRef<DrawingCanvasRef | null>(null);
   const [turtleVisibility, setTurtleVisibility] = useState<TurtleVisibility>("visible");
   const [isCanvasFocused, setCanvasFocused] = useState(false);
@@ -18,19 +18,42 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
 
 
   useSubscriber(turtleCommandPubSub, (message) => {
-    if (message.topic != "systemCommand") return;
-    switch (message.command) {
-      case "print":
-        commandLinePubSub.publish({
-          topic: 'commandLine',
-          content: message.message,
-          error: message.error,
-        })
-        break;
-      case "clearScreen":
-        drawingCanvasRef.current?.clearCanvas();
-        break;
-    };
+    if (message.topic == "systemCommand") {
+      switch (message.command) {
+        case "print":
+          commandLinePubSub.publish({
+            topic: 'commandLine',
+            content: message.message,
+            error: message.error,
+          })
+          break;
+        case "clearScreen":
+          drawingCanvasRef.current?.clearCanvas();
+          break;
+      };
+    }
+    if (message.topic == 'drawing') {
+      switch (message.command) {
+        case "fill": {
+          const x = message.x;
+          const y = message.y;
+          const color = message.color;
+          drawingCanvasRef.current?.fill(x, y, color);
+          break;
+        }
+        case "line": {
+          const x0 = message.x0;
+          const y0 = message.y0;
+          const x1 = message.x1;
+          const y1 = message.y1;
+          const color = message.color;
+          const penWidth = message.penWidth;
+          drawingCanvasRef.current?.drawLine(x0, y0, x1, y1, color, penWidth);
+          break;
+        }
+
+      };
+    }
   });
 
   useEffect(() => {

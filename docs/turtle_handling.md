@@ -28,4 +28,5 @@ The drawing commands and everything else must be implemented inside of the inter
 
 ## Steps
 
-1) Memory must be inicialized 
+1) Memory must be inicialized ( ca4c53106b76410d310208a19a36296444c9fa0d )
+2) Every move logic must be implemented in interpreter
