@@ -6,7 +6,6 @@ import { GlobalTurtle, GlobalTurtles } from "../Interpreter.js";
 
 function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
   const turtles: GlobalTurtles = memory.getVariable("$turtles") as any;
-  console.log(turtles);
   for (const turtle of turtles.data) {
     action(turtle.data);
   }
@@ -203,8 +202,6 @@ export default class CoreCommands {
     const y = arg[3] as number;
     const orientation = arg[4] as number;
 
-    console.log("Itt vagyok")
-
     const newTurtle : {[key : string] : ParamType} = {
       name,
       group,
@@ -217,13 +214,10 @@ export default class CoreCommands {
       penstate: 1,
       customData: new StructuredMemoryData({})
     };
-    console.log("Memory")
 
     const turtles = memory.getVariable("$turtles");
     if (!isStructuredMemoryData(turtles) || !Array.isArray(turtles.data)) return {};
     turtles.data.push(new StructuredMemoryData(newTurtle));
-
-    console.log("Itt is")
 
     turtleCommandPubSub.publish({
       topic: "turtleCommand",
