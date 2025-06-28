@@ -9,6 +9,7 @@ import { Interpreter } from 'web-logo-core';
 import { commandLinePubSub, useSubscriber } from '../pubsub/pubsubs.js';
 import InterpreterSettingsModal from '../components/InterpreterSettings/InterpreterSettingsModal.js';
 import WebInterpreterHooksConfig from '../interpreter-hooks/WebInterpreterHooksConfig.js';
+import Turtles from '../components/turtle/Turtles.js';
 
 export default function Workspace({ interpreter, interpreterConfig }: { interpreter: Interpreter, interpreterConfig: WebInterpreterHooksConfig }) {
   const drawingCanvasRef = useRef<DrawingCanvasRef | null>(null);
@@ -27,9 +28,6 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
             error: message.error,
           })
           break;
-        case "clearScreen":
-          drawingCanvasRef.current?.clearCanvas();
-          break;
       };
     }
     if (message.topic == 'drawing') {
@@ -41,6 +39,9 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
           drawingCanvasRef.current?.fill(x, y, color);
           break;
         }
+        case "clearScreen":
+          drawingCanvasRef.current?.clearCanvas();
+          break;        
         case "line": {
           const x0 = message.x0;
           const y0 = message.y0;
@@ -93,7 +94,8 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
                 onBlur={() => setCanvasFocused(false)}
                 ref={drawingCanvasRef}
               >
-                <Turtle name="Leo" globalVisibility={turtleVisibility} />
+                {/* Somehow I must detect every turtles here and build the turtles dynamically */}
+                <Turtles globalVisibility={turtleVisibility}/>
               </DrawingCanvas>
             </Panel>
             <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", height: "5px" }} />

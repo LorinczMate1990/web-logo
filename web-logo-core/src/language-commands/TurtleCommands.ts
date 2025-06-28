@@ -148,6 +148,15 @@ export default class CoreCommands {
       turtle.position.data.x = turtle.home.data.x;
       turtle.position.data.y = turtle.home.data.y;
       turtle.orientation = turtle.home.data.orientation;
+
+      turtleCommandPubSub.publish({
+        topic: "turtleCommand",
+        command: "move",
+        name: String.fromCharCode(...turtle.name.data),
+        x: turtle.position.data.x,
+        y: turtle.position.data.y,
+        orientation: turtle.orientation,
+      });
     });
     return {};
   }
@@ -180,7 +189,7 @@ export default class CoreCommands {
   @Arguments([])
   static async clearScreen(arg: ArgType, memory: AbstractMemory) {
     turtleCommandPubSub.publish({
-      topic: "systemCommand",
+      topic: "drawing",
       command: "clearScreen"
     });
     return {};

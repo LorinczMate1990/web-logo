@@ -36,7 +36,7 @@ type PrintMessage = {
 };
 
 type ClearScreenMessage = {
-  topic: "systemCommand";
+  topic: "drawing";
   command: "clearScreen";
 };
 
