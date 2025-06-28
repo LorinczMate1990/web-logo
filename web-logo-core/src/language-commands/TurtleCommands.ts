@@ -2,10 +2,11 @@ import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
 import { AbstractMemory, ArgType, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
-import { GlobalTurtle, GlobalTurtles } from "../Interpreter.js";
+import { GlobalTurtle, isGlobalTurtles } from "../builtin-data/types.js";
 
 function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
-  const turtles: GlobalTurtles = memory.getVariable("$turtles") as any;
+  const turtles = memory.getVariable("$turtles");
+  if (!isGlobalTurtles(turtles)) throw new Error("The global $turtles array is damaged");
   for (const turtle of turtles.data) {
     action(turtle.data);
   }
@@ -196,20 +197,20 @@ export default class CoreCommands {
 
   @Arguments(['array', 'array', 'numeric', 'numeric', 'numeric'])
   static async addTurtle(arg: ArgType, memory: AbstractMemory) {
-    const name = arg[0] as StructuredMemoryData;
-    const group = arg[1] as StructuredMemoryData;
+    const name = arg[0] as StructuredMemoryData & {data: number[]};
+    const group = arg[1] as StructuredMemoryData & {data: number[]};
     const x = arg[2] as number;
     const y = arg[3] as number;
     const orientation = arg[4] as number;
 
-    const newTurtle : {[key : string] : ParamType} = {
+    const newTurtle : GlobalTurtle = {
       name,
       group,
       listen: 1,
       orientation,
-      position: new StructuredMemoryData({ x, y }),
-      home: new StructuredMemoryData({ x, y, orientation }),
-      pencolor: new StructuredMemoryData([0, 0, 0]),
+      position: new StructuredMemoryData({ x, y }) as StructuredMemoryData & {data: {x: number, y: number}},
+      home: new StructuredMemoryData({ x, y, orientation }) as StructuredMemoryData & {data: {x: number, y: number, orientation: number}},
+      pencolor: new StructuredMemoryData([0, 0, 0]) as StructuredMemoryData & {data: [number, number, number]},
       penwidth: 1,
       penstate: 1,
       customData: new StructuredMemoryData({})
