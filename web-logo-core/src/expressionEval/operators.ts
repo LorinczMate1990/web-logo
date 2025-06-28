@@ -137,7 +137,6 @@ export function executeBinaryOperator(op: string, a?: ParamType, b?: ParamType):
     case ':': {
       assertMustBeStructuredMemoryDataWithArrayContent(op, a);
       assertMustBeStructuredMemoryDataWithArrayContent(op, b);
-      a;
       return new StructuredMemoryData([...a.data, ...b.data]);
 
     }
@@ -201,6 +200,13 @@ export const builtinFunctions: { [key: string]: { params: number, function: (a: 
     function: (a: ParamType[]) => {
       assertMustBeNumber("abs", a[0]);
       return Math.abs(a[0]);
+    }
+  },
+  'tostring': {
+    params: 1,
+    function: (a: ParamType[]) => {
+      assertMustBeNumber("tostring", a[0]);
+      return StructuredMemoryData.build_from_string(a.toString());
     }
   },
   'length': {

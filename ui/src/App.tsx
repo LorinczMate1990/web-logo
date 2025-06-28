@@ -14,8 +14,6 @@ function App() {
   const interpreter = useRef<Interpreter>(new Interpreter(interpreterHooks.current));
   const isCodeEditor = getQueryParam('code-editor') !== null;
 
-  console.log({isCodeEditor})
-
   if (isCodeEditor) return <CodeEditor/>;
   return <Workspace interpreter={interpreter.current} interpreterConfig={interpreterHooks.current}/>;
   

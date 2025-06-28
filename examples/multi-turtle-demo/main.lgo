@@ -1,0 +1,7 @@
+repeat 1000 {
+   newturtle ("turtle_":tostring(i)) "gr" 500 i*5 0
+}
+
+f 100 
+l 45 
+f 100

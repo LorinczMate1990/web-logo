@@ -1,78 +1,113 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, isStructuredMemoryData } from "../types.js";
+import { AbstractMemory, ArgType, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
+import { GlobalTurtle, isGlobalTurtles } from "../builtin-data/types.js";
+
+function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
+  const turtles = memory.getVariable("$turtles");
+  if (!isGlobalTurtles(turtles)) throw new Error("The global $turtles array is damaged");
+  for (const turtle of turtles.data) {
+    action(turtle.data);
+  }
+}
+
+function go(distance: number, memory: AbstractMemory) {
+  forAllTurtles(memory, (turtle) => {
+    const rad = turtle.orientation / 180 * Math.PI;
+    const x = turtle.position.data.x;
+    const y = turtle.position.data.y;
+    const newX = x + distance * Math.cos(rad);
+    const newY = y + distance * Math.sin(rad);
+    turtle.position.data.x = newX;
+    turtle.position.data.y = newY;
+    turtleCommandPubSub.publish({
+      topic: "turtleCommand",
+      command: "move",
+      name: String.fromCharCode(...turtle.name.data),
+      x: newX,
+      y: newY,
+      orientation: turtle.orientation,
+    });
+    if (turtle.penstate) {
+      turtleCommandPubSub.publish({
+        topic: "drawing",
+        command: "line",
+        x0: x,
+        y0: y,
+        x1: newX,
+        y1: newY,
+        color: turtle.pencolor.data as any,
+        penWidth: turtle.penwidth,
+      });
+    }
+  });
+}
+
+function rotate(angle: number, memory: AbstractMemory) {
+  forAllTurtles(memory, (turtle) => {
+    turtle.orientation = (turtle.orientation + angle) % 360;
+    turtleCommandPubSub.publish({
+      topic: "turtleCommand",
+      command: "move",
+      name: String.fromCharCode(...turtle.name.data),
+      x: turtle.position.data.x,
+      y: turtle.position.data.y,
+      orientation: turtle.orientation,
+    });
+  });
+}
 
 export default class CoreCommands {
   @Arguments(['numeric'])
-  static async forward(args: ArgType, memory : AbstractMemory) {
+  static async forward(args: ArgType, memory: AbstractMemory) {
     const distance = args[0] as number;
-    turtleCommandPubSub.publish({
-      topic: "turtleCommand",
-      command: "forward",
-      distance
-    });
+    go(distance, memory);
     return {};
   }
 
   @Arguments(['numeric'])
-  static async backward(args: ArgType, memory : AbstractMemory) {
+  static async backward(args: ArgType, memory: AbstractMemory) {
     const distance = args[0] as number;
-    turtleCommandPubSub.publish({
-      topic: "turtleCommand",
-      command: "backward",
-      distance
-    });
+    go(-distance, memory);
     return {};
   }
 
   @Arguments(['numeric'])
-  static async left(args: ArgType, memory : AbstractMemory) {
-    const radian = parseFloat(String(args[0])) / 180.0 * Math.PI;
-    turtleCommandPubSub.publish({
-      topic: "turtleCommand",
-      command: "left",
-      radian
-    });
+  static async left(args: ArgType, memory: AbstractMemory) {
+    const angle = args[0] as number;
+    rotate(-angle, memory);
     return {};
   }
 
   @Arguments(['numeric'])
-  static async right(args: ArgType, memory : AbstractMemory) {
-    const radian = parseFloat(String(args[0])) / 180.0 * Math.PI;
-    turtleCommandPubSub.publish({
-      topic: "turtleCommand",
-      command: "right",
-      radian
+  static async right(args: ArgType, memory: AbstractMemory) {
+    const angle = args[0] as number;
+    rotate(angle, memory);
+    return {};
+  }
+
+  @Arguments([])
+  static async penUp(args: ArgType, memory: AbstractMemory) {
+    forAllTurtles(memory, (turtle) => {
+      turtle.penstate = 0;
     });
     return {};
   }
 
   @Arguments([])
-  static async penUp(args: ArgType, memory : AbstractMemory) {
-    turtleCommandPubSub.publish({
-      topic: "turtleCommand",
-      command: "setPenState",
-      penState: 'up'
+  static async penDown(args: ArgType, memory: AbstractMemory) {
+    forAllTurtles(memory, (turtle) => {
+      turtle.penstate = 1;
     });
     return {};
   }
 
-  @Arguments([])
-  static async penDown(args: ArgType, memory : AbstractMemory) {
-    turtleCommandPubSub.publish({
-      topic: "turtleCommand",
-      command: "setPenState",
-      penState: 'down'
-    });
-    return {};
-  }
-
-  @Arguments( {variableArgumentLists: true, 1 : ['word'], 3: ['numeric', 'numeric', 'numeric']} )
-  static async setPenColor(args: ArgType, memory : AbstractMemory) {
+  @Arguments({ variableArgumentLists: true, 1: ['word'], 3: ['numeric', 'numeric', 'numeric'] })
+  static async setPenColor(args: ArgType, memory: AbstractMemory) {
     // The color can be any of the following formats: "colorname" or "#RRGGBB"
     // This function must convert them to RGB
-  
+
     let RR = 0;
     let GG = 0;
     let BB = 0;
@@ -82,69 +117,131 @@ export default class CoreCommands {
       BB = args[2] as number;
     } else {
       const inputColor = args[0] as string;
-      const colorCode = (inputColor[0] == "#")?inputColor:ColorMap[inputColor];
+      const colorCode = (inputColor[0] == "#") ? inputColor : ColorMap[inputColor];
       if (colorCode == undefined || colorCode.length != 7) {
         throw new Error(`The ${inputColor} color is not recognized`);
       }
-      RR = parseInt(colorCode.slice(1,3), 16);
-      GG = parseInt(colorCode.slice(3,5), 16);
-      BB = parseInt(colorCode.slice(5,7), 16);
+      RR = parseInt(colorCode.slice(1, 3), 16);
+      GG = parseInt(colorCode.slice(3, 5), 16);
+      BB = parseInt(colorCode.slice(5, 7), 16);
     }
 
-    turtleCommandPubSub.publish({
-      topic: "turtleCommand",
-      command: "setPenColor",
-      color: [RR, GG, BB],
+    forAllTurtles(memory, (turtle) => {
+      turtle.pencolor.data = [RR, GG, BB];
     });
     return {};
   }
 
   @Arguments(['numeric'])
-  static async setPenWidth(args: ArgType, memory : AbstractMemory) {
+  static async setPenWidth(args: ArgType, memory: AbstractMemory) {
     const width = args[0] as number;
-    
-    turtleCommandPubSub.publish({
-      topic: "turtleCommand",
-      command: "setPenWidth",
-      width,
+
+    forAllTurtles(memory, (turtle) => {
+      turtle.penwidth = width;
     });
     return {};
   }
 
   @Arguments([])
-  static async goHome(args: ArgType, memory : AbstractMemory) {
-    turtleCommandPubSub.publish({
-      topic: "turtleCommand",
-      command: "goHome",
-    });
-    return {};
-  }
-  
-  @Arguments([])
-  static async setHome(args: ArgType, memory : AbstractMemory) {
-    turtleCommandPubSub.publish({
+  static async goHome(args: ArgType, memory: AbstractMemory) {
+    forAllTurtles(memory, (turtle) => {
+      turtle.position.data.x = turtle.home.data.x;
+      turtle.position.data.y = turtle.home.data.y;
+      turtle.orientation = turtle.home.data.orientation;
+
+      turtleCommandPubSub.publish({
         topic: "turtleCommand",
-        command: "setHome",
+        command: "move",
+        name: String.fromCharCode(...turtle.name.data),
+        x: turtle.position.data.x,
+        y: turtle.position.data.y,
+        orientation: turtle.orientation,
       });
-      return {};
-  }
-
-  @Arguments({max: 1, front: ['numeric']}) 
-  static async fill(args: ArgType, memory: AbstractMemory) {
-    const tolerance = (args.length == 0)?0:args[0] as number;
-    turtleCommandPubSub.publish({
-      topic: "turtleCommand",
-      command: "fill",
-      tolerance,
     });
     return {};
   }
 
   @Arguments([])
-  static async clearScreen(arg : ArgType, memory : AbstractMemory) {
+  static async setHome(args: ArgType, memory: AbstractMemory) {
+    forAllTurtles(memory, (turtle) => {
+      turtle.home.data.x = turtle.position.data.x;
+      turtle.home.data.y = turtle.position.data.y;
+      turtle.home.data.orientation = turtle.orientation;
+    });
+    return {};
+  }
+
+  @Arguments({ max: 1, front: ['numeric'] })
+  static async fill(args: ArgType, memory: AbstractMemory) {
+    const tolerance = (args.length == 0) ? 0 : args[0] as number;
+    forAllTurtles(memory, (turtle) => {
+      turtleCommandPubSub.publish({
+        topic: "drawing",
+        command: "fill",
+        color: turtle.pencolor.data as any,
+        x: turtle.position.data.x,
+        y: turtle.position.data.y
+      });
+    });
+    return {};
+  }
+
+  @Arguments([])
+  static async clearScreen(arg: ArgType, memory: AbstractMemory) {
     turtleCommandPubSub.publish({
-      topic: "systemCommand",
+      topic: "drawing",
       command: "clearScreen"
+    });
+    return {};
+  }
+
+  @Arguments(['array', 'array', 'numeric', 'numeric', 'numeric'])
+  static async addTurtle(arg: ArgType, memory: AbstractMemory) {
+    const name = arg[0] as StructuredMemoryData & {data: number[]};
+    const group = arg[1] as StructuredMemoryData & {data: number[]};
+    const x = arg[2] as number;
+    const y = arg[3] as number;
+    const orientation = arg[4] as number;
+
+    const newTurtle : GlobalTurtle = {
+      name,
+      group,
+      listen: 1,
+      orientation,
+      position: new StructuredMemoryData({ x, y }) as StructuredMemoryData & {data: {x: number, y: number}},
+      home: new StructuredMemoryData({ x, y, orientation }) as StructuredMemoryData & {data: {x: number, y: number, orientation: number}},
+      pencolor: new StructuredMemoryData([0, 0, 0]) as StructuredMemoryData & {data: [number, number, number]},
+      penwidth: 1,
+      penstate: 1,
+      customData: new StructuredMemoryData({})
+    };
+
+    const turtles = memory.getVariable("$turtles");
+    if (!isStructuredMemoryData(turtles) || !Array.isArray(turtles.data)) return {};
+    turtles.data.push(new StructuredMemoryData(newTurtle));
+
+    turtleCommandPubSub.publish({
+      topic: "turtleCommand",
+      command: "move",
+      name: String.fromCharCode(...(name.data as number[])),
+      x,
+      y,
+      orientation,
+    });
+    return {};
+  }
+
+  @Arguments([])
+  static async refreshTurtles(arg: ArgType, memory: AbstractMemory) {
+    forAllTurtles(memory, turtle => {
+      turtleCommandPubSub.publish({
+        topic: "turtleCommand",
+        command: "move",
+        name: String.fromCharCode(...turtle.name.data),
+        x: turtle.position.data.x,
+        y: turtle.position.data.y,
+        orientation: turtle.orientation,
+      });
     });
     return {};
   }

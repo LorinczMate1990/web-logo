@@ -7,6 +7,8 @@ type Position = {
   y: number;
 };
   
-type Orientation = number; // Orientation is now just a number (radians)
+type Orientation = number; // Orientation is now just a number (degrees)
+
+
 
 export { PenState, PenColor, Position, Orientation };
