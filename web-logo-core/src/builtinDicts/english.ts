@@ -23,6 +23,8 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   "fill": TurtleCommands.fill,
   "clear": TurtleCommands.clearScreen,
   "cl": TurtleCommands.clearScreen,
+  "newturtle": TurtleCommands.addTurtle,
+  "refreshturtles": TurtleCommands.refreshTurtles,
   
   "repeat": CoreCommands.repeat,
   "rep": CoreCommands.repeat,

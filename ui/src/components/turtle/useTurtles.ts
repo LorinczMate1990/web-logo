@@ -19,7 +19,11 @@ export default function useTurtles() {
 
         const updatedInstance = new TurtleInstance({x, y}, orientation);
 
-        setTurtleInstances((instances) => {return {...instances, name: updatedInstance}});
+        setTurtleInstances((instances) => {
+          const ret = {...instances};
+          ret[name] = updatedInstance;
+          return ret;
+        });
 
         break;
     }

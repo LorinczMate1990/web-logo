@@ -1,5 +1,5 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, isStructuredMemoryData } from "../types.js";
+import { AbstractMemory, ArgType, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
 import { GlobalTurtle, GlobalTurtles } from "../Interpreter.js";
@@ -191,6 +191,62 @@ export default class CoreCommands {
     turtleCommandPubSub.publish({
       topic: "drawing",
       command: "clearScreen"
+    });
+    return {};
+  }
+
+  @Arguments(['array', 'array', 'numeric', 'numeric', 'numeric'])
+  static async addTurtle(arg: ArgType, memory: AbstractMemory) {
+    const name = arg[0] as StructuredMemoryData;
+    const group = arg[1] as StructuredMemoryData;
+    const x = arg[2] as number;
+    const y = arg[3] as number;
+    const orientation = arg[4] as number;
+
+    console.log("Itt vagyok")
+
+    const newTurtle : {[key : string] : ParamType} = {
+      name,
+      group,
+      listen: 1,
+      orientation,
+      position: new StructuredMemoryData({ x, y }),
+      home: new StructuredMemoryData({ x, y, orientation }),
+      pencolor: new StructuredMemoryData([0, 0, 0]),
+      penwidth: 1,
+      penstate: 1,
+      customData: new StructuredMemoryData({})
+    };
+    console.log("Memory")
+
+    const turtles = memory.getVariable("$turtles");
+    if (!isStructuredMemoryData(turtles) || !Array.isArray(turtles.data)) return {};
+    turtles.data.push(new StructuredMemoryData(newTurtle));
+
+    console.log("Itt is")
+
+    turtleCommandPubSub.publish({
+      topic: "turtleCommand",
+      command: "move",
+      name: String.fromCharCode(...(name.data as number[])),
+      x,
+      y,
+      orientation,
+    });
+    return {};
+  }
+
+  @Arguments([])
+  static async refreshTurtles(arg: ArgType, memory: AbstractMemory) {
+    forAllTurtles(memory, turtle => {
+      turtleCommandPubSub.publish({
+        topic: "turtleCommand",
+        command: "move",
+        name: String.fromCharCode(...turtle.name.data),
+        x: turtle.position.data.x,
+        y: turtle.position.data.y,
+        orientation: turtle.orientation,
+      });
     });
     return {};
   }
