@@ -43,13 +43,15 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
           drawingCanvasRef.current?.clearCanvas();
           break;        
         case "line": {
-          const x0 = message.x0;
-          const y0 = message.y0;
-          const x1 = message.x1;
-          const y1 = message.y1;
-          const color = message.color;
-          const penWidth = message.penWidth;
-          drawingCanvasRef.current?.drawLine(x0, y0, x1, y1, color, penWidth);
+          for (const segment of message.segments) {
+            const x0 = segment.x0;
+            const y0 = segment.y0;
+            const x1 = segment.x1;
+            const y1 = segment.y1;
+            const color = segment.color;
+            const penWidth = segment.penWidth;
+            drawingCanvasRef.current?.drawLine(x0, y0, x1, y1, color, penWidth);
+          }
           break;
         }
 

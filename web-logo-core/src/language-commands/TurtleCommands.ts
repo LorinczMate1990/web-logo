@@ -21,7 +21,7 @@ function go(distance: number, memory: AbstractMemory) {
     const newY = y + distance * Math.sin(rad);
     turtle.position.data.x = newX;
     turtle.position.data.y = newY;
-    turtleCommandPubSub.publish({
+    turtleCommandPubSub.addToQueue({
       topic: "turtleCommand",
       command: "move",
       name: String.fromCharCode(...turtle.name.data),
@@ -30,15 +30,17 @@ function go(distance: number, memory: AbstractMemory) {
       orientation: turtle.orientation,
     });
     if (turtle.penstate) {
-      turtleCommandPubSub.publish({
+      turtleCommandPubSub.addToQueue({
         topic: "drawing",
         command: "line",
-        x0: x,
-        y0: y,
-        x1: newX,
-        y1: newY,
-        color: turtle.pencolor.data as any,
-        penWidth: turtle.penwidth,
+        segments: [{
+          x0: x,
+          y0: y,
+          x1: newX,
+          y1: newY,
+          color: turtle.pencolor.data as any,
+          penWidth: turtle.penwidth,
+        }]
       });
     }
   });
@@ -47,7 +49,7 @@ function go(distance: number, memory: AbstractMemory) {
 function rotate(angle: number, memory: AbstractMemory) {
   forAllTurtles(memory, (turtle) => {
     turtle.orientation = (turtle.orientation + angle) % 360;
-    turtleCommandPubSub.publish({
+    turtleCommandPubSub.addToQueue({
       topic: "turtleCommand",
       command: "move",
       name: String.fromCharCode(...turtle.name.data),
@@ -149,7 +151,7 @@ export default class CoreCommands {
       turtle.position.data.y = turtle.home.data.y;
       turtle.orientation = turtle.home.data.orientation;
 
-      turtleCommandPubSub.publish({
+      turtleCommandPubSub.addToQueue({
         topic: "turtleCommand",
         command: "move",
         name: String.fromCharCode(...turtle.name.data),
@@ -175,7 +177,7 @@ export default class CoreCommands {
   static async fill(args: ArgType, memory: AbstractMemory) {
     const tolerance = (args.length == 0) ? 0 : args[0] as number;
     forAllTurtles(memory, (turtle) => {
-      turtleCommandPubSub.publish({
+      turtleCommandPubSub.addToQueue({
         topic: "drawing",
         command: "fill",
         color: turtle.pencolor.data as any,
@@ -188,7 +190,7 @@ export default class CoreCommands {
 
   @Arguments([])
   static async clearScreen(arg: ArgType, memory: AbstractMemory) {
-    turtleCommandPubSub.publish({
+    turtleCommandPubSub.addToQueue({
       topic: "drawing",
       command: "clearScreen"
     });
@@ -220,7 +222,7 @@ export default class CoreCommands {
     if (!isStructuredMemoryData(turtles) || !Array.isArray(turtles.data)) return {};
     turtles.data.push(new StructuredMemoryData(newTurtle));
 
-    turtleCommandPubSub.publish({
+    turtleCommandPubSub.addToQueue({
       topic: "turtleCommand",
       command: "move",
       name: String.fromCharCode(...(name.data as number[])),
@@ -234,7 +236,7 @@ export default class CoreCommands {
   @Arguments([])
   static async refreshTurtles(arg: ArgType, memory: AbstractMemory) {
     forAllTurtles(memory, turtle => {
-      turtleCommandPubSub.publish({
+      turtleCommandPubSub.addToQueue({
         topic: "turtleCommand",
         command: "move",
         name: String.fromCharCode(...turtle.name.data),

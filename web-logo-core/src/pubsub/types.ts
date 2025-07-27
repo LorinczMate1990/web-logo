@@ -3,12 +3,14 @@ import { PenColor, PenState } from "../turtle-types/DrawingTypes.js";
 type DrawLine = {
   topic: "drawing";
   command: "line";
-  x0 : number;
-  y0 : number;
-  x1 : number;
-  y1 : number;
-  color: [number, number, number];
-  penWidth: number;
+  segments: {  
+    x0 : number;
+    y0 : number;
+    x1 : number;
+    y1 : number;
+    color: [number, number, number];
+    penWidth: number;
+  }[]
 };
 
 type FillArea = {

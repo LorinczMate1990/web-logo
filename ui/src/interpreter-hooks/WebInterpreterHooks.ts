@@ -39,7 +39,7 @@ export default class WebInterpreterHooks implements InterpreterHooks, WebInterpr
     delete this.table[sessionId];
   }
 
-  async beforeRunNewCommand({sessionId} : {sessionId : string}) : Promise<void> {
+  async beforeRunNewCommand({sessionId, flushCommandQueue} : {sessionId : string, flushCommandQueue: () => void}) : Promise<void> {
     const currentTime = Date.now();
     if (!(sessionId in this.table)) {
       this.table[sessionId] = {startTime: Date.now(), lastSleep : Date.now()};
@@ -48,6 +48,7 @@ export default class WebInterpreterHooks implements InterpreterHooks, WebInterpr
 
     const lastTime = this.table[sessionId].lastSleep;
     if (currentTime - lastTime > this.asyncTime) {
+      flushCommandQueue();
       await sleep(0);
       this.table[sessionId].lastSleep = currentTime;
     }

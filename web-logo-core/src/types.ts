@@ -141,7 +141,7 @@ export interface HasContextMemory {
 }
 
 export type InterpreterHooks = {
-  beforeRunNewCommand? : (p : {sessionId : string, command : CommandData}) => Promise<void> // Todo: Using some input param, this could be more useful
+  beforeRunNewCommand? : (p : {sessionId : string, command : CommandData, flushCommandQueue : () => void;}) => Promise<void> // Todo: Using some input param, this could be more useful
   beforeStartSession? : (p : {sessionId : string}) => Promise<void>
   afterFinishSession? : (p : {sessionId : string}) => Promise<void>
   afterError? : (p : {sessionId : string, error : Error}) => Promise<void>
