@@ -4,6 +4,7 @@ import BuiltinDictionary from "./builtinDicts/english.js";
 import { Memory } from "./memory/memory.js";
 import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl, InterpreterHooks } from "./types.js";
 import { expressionEval } from "./expressionEval/expressionEval.js";
+import { turtleCommandPubSub } from "./pubsub/pubsubs.js";
 
 export class CommandsWithContext extends ExecutableWithContext {
   commands : Commands;
@@ -24,7 +25,7 @@ export class CommandsWithContext extends ExecutableWithContext {
     const commandLevelExecution = this.meta != undefined; // TODO : Currently the meta only means that this is a command
     for (let command of this.commands) {
       if (this.hooks.beforeRunNewCommand) {
-        await this.hooks.beforeRunNewCommand({command, sessionId: this.sessionId});
+        await this.hooks.beforeRunNewCommand({command, sessionId: this.sessionId, flushCommandQueue: () => turtleCommandPubSub.publish() });
       }
       try {
         const label = command.label;
