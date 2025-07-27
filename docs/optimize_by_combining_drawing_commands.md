@@ -18,3 +18,7 @@ Now execution with 100ms interruption is practically the same as before (3.7), b
 Commit hash: 3781556ee76acc4d6c31999b1418fe0463629cf3
 
 Issue is, that the interruption won't flush the command queue, but it was fixed in the next commit.
+
+# Combining messages
+
+Strangly, combining messages have no significant result

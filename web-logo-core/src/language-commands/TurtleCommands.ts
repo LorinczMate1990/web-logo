@@ -33,12 +33,14 @@ function go(distance: number, memory: AbstractMemory) {
       turtleCommandPubSub.addToQueue({
         topic: "drawing",
         command: "line",
-        x0: x,
-        y0: y,
-        x1: newX,
-        y1: newY,
-        color: turtle.pencolor.data as any,
-        penWidth: turtle.penwidth,
+        segments: [{
+          x0: x,
+          y0: y,
+          x1: newX,
+          y1: newY,
+          color: turtle.pencolor.data as any,
+          penWidth: turtle.penwidth,
+        }]
       });
     }
   });
