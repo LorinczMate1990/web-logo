@@ -187,7 +187,7 @@ export default class CoreCommands {
   
     let message = arg.map(formatStructuredData).join(" ");
     
-    turtleCommandPubSub.publish({
+    turtleCommandPubSub.addToQueue({
       topic: "systemCommand",
       command: "print",
       message,

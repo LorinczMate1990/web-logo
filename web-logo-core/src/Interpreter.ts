@@ -3,6 +3,7 @@ import { tokenizer } from "./Tokenizer.js";
 import initMemory from "./builtin-data/init-memory.js";
 import BuiltinDictionary from "./builtinDicts/english.js";
 import Core from "./core.js";
+import { turtleCommandPubSub } from "./pubsub/pubsubs.js";
 import { InterpreterHooks, StructuredMemoryData } from "./types.js";
 
 class Interpreter {
@@ -43,6 +44,7 @@ class Interpreter {
       throw e;
     }
     if (this.hooks.afterFinishSession) await this.hooks.afterFinishSession({ sessionId: uuid });
+    turtleCommandPubSub.publish();
   }
 }
 
