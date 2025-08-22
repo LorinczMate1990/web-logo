@@ -68,6 +68,22 @@ function rotate(angle: number, memory: AbstractMemory) {
   });
 }
 
+function lookAt(x : number, y : number, memory: AbstractMemory) {
+  forAllWatchingTurtles(memory, (turtle) => {
+    const dx = x - turtle.position.data.x;
+    const dy = y - turtle.position.data.y;
+    turtle.orientation = Math.atan2(dy, dx) / Math.PI * 180;
+    turtleCommandPubSub.addToQueue({
+      topic: "turtleCommand",
+      command: "move",
+      name: String.fromCharCode(...turtle.name.data),
+      x: turtle.position.data.x,
+      y: turtle.position.data.y,
+      orientation: turtle.orientation,
+    });
+  });
+}
+
 export default class TurtleCommands {
   @Arguments(['numeric'])
   static async forward(args: ArgType, memory: AbstractMemory) {
@@ -94,6 +110,14 @@ export default class TurtleCommands {
   static async right(args: ArgType, memory: AbstractMemory) {
     const angle = args[0] as number;
     rotate(angle, memory);
+    return {};
+  }
+
+  @Arguments(['numeric', 'numeric'])
+  static async lookAt(args: ArgType, memory: AbstractMemory) {
+    const x = args[0] as number;
+    const y = args[0] as number;
+    lookAt(x, y, memory);
     return {};
   }
 
