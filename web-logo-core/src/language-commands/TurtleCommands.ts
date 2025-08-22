@@ -12,8 +12,16 @@ function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) =>
   }
 }
 
+function forAllWatchingTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
+  forAllTurtles(memory, (turtle: GlobalTurtle) => {
+    if (turtle.listen) {
+      action(turtle);
+    }
+  })
+}
+
 function go(distance: number, memory: AbstractMemory) {
-  forAllTurtles(memory, (turtle) => {
+  forAllWatchingTurtles(memory, (turtle) => {
     const rad = turtle.orientation / 180 * Math.PI;
     const x = turtle.position.data.x;
     const y = turtle.position.data.y;
@@ -47,7 +55,7 @@ function go(distance: number, memory: AbstractMemory) {
 }
 
 function rotate(angle: number, memory: AbstractMemory) {
-  forAllTurtles(memory, (turtle) => {
+  forAllWatchingTurtles(memory, (turtle) => {
     turtle.orientation = (turtle.orientation + angle) % 360;
     turtleCommandPubSub.addToQueue({
       topic: "turtleCommand",
@@ -60,7 +68,7 @@ function rotate(angle: number, memory: AbstractMemory) {
   });
 }
 
-export default class CoreCommands {
+export default class TurtleCommands {
   @Arguments(['numeric'])
   static async forward(args: ArgType, memory: AbstractMemory) {
     const distance = args[0] as number;
@@ -91,7 +99,7 @@ export default class CoreCommands {
 
   @Arguments([])
   static async penUp(args: ArgType, memory: AbstractMemory) {
-    forAllTurtles(memory, (turtle) => {
+    forAllWatchingTurtles(memory, (turtle) => {
       turtle.penstate = 0;
     });
     return {};
@@ -99,7 +107,7 @@ export default class CoreCommands {
 
   @Arguments([])
   static async penDown(args: ArgType, memory: AbstractMemory) {
-    forAllTurtles(memory, (turtle) => {
+    forAllWatchingTurtles(memory, (turtle) => {
       turtle.penstate = 1;
     });
     return {};
@@ -128,7 +136,7 @@ export default class CoreCommands {
       BB = parseInt(colorCode.slice(5, 7), 16);
     }
 
-    forAllTurtles(memory, (turtle) => {
+    forAllWatchingTurtles(memory, (turtle) => {
       turtle.pencolor.data = [RR, GG, BB];
     });
     return {};
@@ -138,7 +146,7 @@ export default class CoreCommands {
   static async setPenWidth(args: ArgType, memory: AbstractMemory) {
     const width = args[0] as number;
 
-    forAllTurtles(memory, (turtle) => {
+    forAllWatchingTurtles(memory, (turtle) => {
       turtle.penwidth = width;
     });
     return {};
@@ -146,7 +154,7 @@ export default class CoreCommands {
 
   @Arguments([])
   static async goHome(args: ArgType, memory: AbstractMemory) {
-    forAllTurtles(memory, (turtle) => {
+    forAllWatchingTurtles(memory, (turtle) => {
       turtle.position.data.x = turtle.home.data.x;
       turtle.position.data.y = turtle.home.data.y;
       turtle.orientation = turtle.home.data.orientation;
@@ -165,7 +173,7 @@ export default class CoreCommands {
 
   @Arguments([])
   static async setHome(args: ArgType, memory: AbstractMemory) {
-    forAllTurtles(memory, (turtle) => {
+    forAllWatchingTurtles(memory, (turtle) => {
       turtle.home.data.x = turtle.position.data.x;
       turtle.home.data.y = turtle.position.data.y;
       turtle.home.data.orientation = turtle.orientation;
@@ -176,7 +184,7 @@ export default class CoreCommands {
   @Arguments({ max: 1, front: ['numeric'] })
   static async fill(args: ArgType, memory: AbstractMemory) {
     const tolerance = (args.length == 0) ? 0 : args[0] as number;
-    forAllTurtles(memory, (turtle) => {
+    forAllWatchingTurtles(memory, (turtle) => {
       turtleCommandPubSub.addToQueue({
         topic: "drawing",
         command: "fill",
@@ -196,6 +204,20 @@ export default class CoreCommands {
     });
     return {};
   }
+
+  @Arguments(['array'])
+  static async watch(args: ArgType, memory: AbstractMemory) {
+    const rawWatchPattern = args[0] as StructuredMemoryData & {data: number[]};
+    const watchPattern = String.fromCharCode(...rawWatchPattern.data);
+    const watchPatternRegex = new RegExp(watchPattern);
+    forAllTurtles(memory, (turtle) => {
+      const turtleName = String.fromCharCode(...turtle.name.data);
+      const turtleGroup = String.fromCharCode(...turtle.group.data);
+      turtle.listen = (watchPatternRegex.test(turtleName) || watchPatternRegex.test(turtleGroup))? 1 : 0;
+    });
+    return {};
+  }
+
 
   @Arguments(['array', 'array', 'numeric', 'numeric', 'numeric'])
   static async addTurtle(arg: ArgType, memory: AbstractMemory) {
@@ -235,7 +257,7 @@ export default class CoreCommands {
 
   @Arguments([])
   static async refreshTurtles(arg: ArgType, memory: AbstractMemory) {
-    forAllTurtles(memory, turtle => {
+    forAllWatchingTurtles(memory, turtle => {
       turtleCommandPubSub.addToQueue({
         topic: "turtleCommand",
         command: "move",
