@@ -10,6 +10,8 @@ function sleep(ms: number) {
 }
 
 export default class CoreCommands {
+  static waitingIsEnabled : boolean = true;
+
   @Arguments({max: 1, front: [ new Set(["array", "code", "numeric"]) ]})
   static async returnWithValue(args: ArgType, memory : AbstractMemory) {
     const value = (args.length == 1)?args[0] as ParamType:undefined;
@@ -65,15 +67,27 @@ export default class CoreCommands {
     return {};
   }
 
+  @Arguments([])
+  static async turnWait(args: ArgType, memory : AbstractMemory, enable : boolean) {
+    if (enable) {
+      CoreCommands.waitingIsEnabled = true; 
+    } else {
+      CoreCommands.waitingIsEnabled = false; 
+    }
+
+    return {};
+  }
+
   @Arguments({max: 1, front: ['numeric']})
   static async coWait(args: ArgType, memory : AbstractMemory) {
-    if (args.length == 1) { 
-      await sleep(args[0] as number);
-    } else {
-      await sleep(0);
-    } 
+    if (CoreCommands.waitingIsEnabled) {
+      if (args.length == 1) { 
+        await sleep(args[0] as number);
+      } else {
+        await sleep(0);
+      } 
+    }
     turtleCommandPubSub.publish();
-    console.log(turtleCommandPubSub.getQueueLength());
     return {};
   }
 

@@ -2,7 +2,7 @@ import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
 import { AbstractMemory, ArgType, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
-import { GlobalTurtle, isGlobalTurtles } from "../builtin-data/types.js";
+import { GlobalTurtle, isGlobalTurtles, StructuredPosition } from "../builtin-data/types.js";
 
 function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
   const turtles = memory.getVariable("$turtles");
@@ -20,37 +20,48 @@ function forAllWatchingTurtles(memory: AbstractMemory, action: (turtle: GlobalTu
   })
 }
 
-function go(distance: number, memory: AbstractMemory) {
+function goToPoint(turtle: GlobalTurtle, newX: number, newY: number, newOrientation: number) {
+  const x = turtle.position.data.x;
+  const y = turtle.position.data.y;
+
+  turtle.position.data.x = newX;
+  turtle.position.data.y = newY;
+  turtle.orientation = newOrientation;  
+
+  turtleCommandPubSub.addToQueue({
+    topic: "turtleCommand",
+    command: "move",
+    name: String.fromCharCode(...turtle.name.data),
+    x: turtle.position.data.x,
+    y: turtle.position.data.y,
+    orientation: turtle.orientation,
+  });
+
+  if (turtle.penstate) {
+    turtleCommandPubSub.addToQueue({
+      topic: "drawing",
+      command: "line",
+      segments: [{
+        x0: x,
+        y0: y,
+        x1: newX,
+        y1: newY,
+        color: turtle.pencolor.data as any,
+        penWidth: turtle.penwidth,
+      }]
+    });
+  }
+}
+
+function go(referenceDistance: number, memory: AbstractMemory) {
   forAllWatchingTurtles(memory, (turtle) => {
+    const distance = turtle.scale * referenceDistance;
     const rad = turtle.orientation / 180 * Math.PI;
     const x = turtle.position.data.x;
     const y = turtle.position.data.y;
     const newX = x + distance * Math.cos(rad);
     const newY = y + distance * Math.sin(rad);
-    turtle.position.data.x = newX;
-    turtle.position.data.y = newY;
-    turtleCommandPubSub.addToQueue({
-      topic: "turtleCommand",
-      command: "move",
-      name: String.fromCharCode(...turtle.name.data),
-      x: newX,
-      y: newY,
-      orientation: turtle.orientation,
-    });
-    if (turtle.penstate) {
-      turtleCommandPubSub.addToQueue({
-        topic: "drawing",
-        command: "line",
-        segments: [{
-          x0: x,
-          y0: y,
-          x1: newX,
-          y1: newY,
-          color: turtle.pencolor.data as any,
-          penWidth: turtle.penwidth,
-        }]
-      });
-    }
+    goToPoint(turtle, newX, newY, turtle.orientation)
   });
 }
 
@@ -68,7 +79,7 @@ function rotate(angle: number, memory: AbstractMemory) {
   });
 }
 
-function lookAt(x : number, y : number, memory: AbstractMemory) {
+function lookAt(x: number, y: number, memory: AbstractMemory) {
   forAllWatchingTurtles(memory, (turtle) => {
     const dx = x - turtle.position.data.x;
     const dy = y - turtle.position.data.y;
@@ -113,6 +124,24 @@ export default class TurtleCommands {
     return {};
   }
 
+  @Arguments(['numeric'])
+  static async scale(args: ArgType, memory: AbstractMemory) {
+    const scale = args[0] as number;
+    forAllWatchingTurtles(memory, (turtle) => {
+      turtle.scale = turtle.scale * scale;
+    });
+    return {};
+  }
+
+  @Arguments(['numeric'])
+  static async setScale(args: ArgType, memory: AbstractMemory) {
+    const scale = args[0] as number;
+    forAllWatchingTurtles(memory, (turtle) => {
+      turtle.scale = scale;
+    });
+    return {};
+  }
+
   @Arguments(['numeric', 'numeric'])
   static async lookAt(args: ArgType, memory: AbstractMemory) {
     const x = args[0] as number;
@@ -125,6 +154,32 @@ export default class TurtleCommands {
   static async penUp(args: ArgType, memory: AbstractMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
       turtle.penstate = 0;
+    });
+    return {};
+  }
+
+  @Arguments([])
+  static async pushPosition(args: ArgType, memory: AbstractMemory) {
+    forAllWatchingTurtles(memory, (turtle) => {
+      const currentPosition = new StructuredMemoryData({
+        x: turtle.position.data.x,
+        y: turtle.position.data.y,
+        orientation: turtle.orientation,
+      }) as StructuredPosition;
+      turtle.positionStack.data.push(currentPosition);
+    });
+    return {};
+  }
+
+  static async popPosition(args: ArgType, memory: AbstractMemory) {
+    forAllWatchingTurtles(memory, (turtle) => {
+      const currentPosition = turtle.positionStack.data.pop();
+      if (currentPosition === undefined) return;
+
+      const newX = currentPosition.data.x;
+      const newY = currentPosition.data.y;
+      const newOrientation = currentPosition.data.orientation;
+      goToPoint(turtle, newX, newY, newOrientation);
     });
     return {};
   }
@@ -179,18 +234,10 @@ export default class TurtleCommands {
   @Arguments([])
   static async goHome(args: ArgType, memory: AbstractMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
-      turtle.position.data.x = turtle.home.data.x;
-      turtle.position.data.y = turtle.home.data.y;
-      turtle.orientation = turtle.home.data.orientation;
-
-      turtleCommandPubSub.addToQueue({
-        topic: "turtleCommand",
-        command: "move",
-        name: String.fromCharCode(...turtle.name.data),
-        x: turtle.position.data.x,
-        y: turtle.position.data.y,
-        orientation: turtle.orientation,
-      });
+      const x = turtle.home.data.x;
+      const y = turtle.home.data.y;
+      const orientation = turtle.home.data.orientation;
+      goToPoint(turtle, x, y, orientation);
     });
     return {};
   }
@@ -231,13 +278,13 @@ export default class TurtleCommands {
 
   @Arguments(['array'])
   static async watch(args: ArgType, memory: AbstractMemory) {
-    const rawWatchPattern = args[0] as StructuredMemoryData & {data: number[]};
+    const rawWatchPattern = args[0] as StructuredMemoryData & { data: number[] };
     const watchPattern = String.fromCharCode(...rawWatchPattern.data);
     const watchPatternRegex = new RegExp(watchPattern);
     forAllTurtles(memory, (turtle) => {
       const turtleName = String.fromCharCode(...turtle.name.data);
       const turtleGroup = String.fromCharCode(...turtle.group.data);
-      turtle.listen = (watchPatternRegex.test(turtleName) || watchPatternRegex.test(turtleGroup))? 1 : 0;
+      turtle.listen = (watchPatternRegex.test(turtleName) || watchPatternRegex.test(turtleGroup)) ? 1 : 0;
     });
     return {};
   }
@@ -245,22 +292,24 @@ export default class TurtleCommands {
 
   @Arguments(['array', 'array', 'numeric', 'numeric', 'numeric'])
   static async addTurtle(arg: ArgType, memory: AbstractMemory) {
-    const name = arg[0] as StructuredMemoryData & {data: number[]};
-    const group = arg[1] as StructuredMemoryData & {data: number[]};
+    const name = arg[0] as StructuredMemoryData & { data: number[] };
+    const group = arg[1] as StructuredMemoryData & { data: number[] };
     const x = arg[2] as number;
     const y = arg[3] as number;
     const orientation = arg[4] as number;
 
-    const newTurtle : GlobalTurtle = {
+    const newTurtle: GlobalTurtle = {
       name,
       group,
       listen: 1,
       orientation,
-      position: new StructuredMemoryData({ x, y }) as StructuredMemoryData & {data: {x: number, y: number}},
-      home: new StructuredMemoryData({ x, y, orientation }) as StructuredMemoryData & {data: {x: number, y: number, orientation: number}},
-      pencolor: new StructuredMemoryData([0, 0, 0]) as StructuredMemoryData & {data: [number, number, number]},
+      position: new StructuredMemoryData({ x, y }) as StructuredMemoryData & { data: { x: number, y: number } },
+      home: new StructuredMemoryData({ x, y, orientation }) as StructuredPosition,
+      pencolor: new StructuredMemoryData([0, 0, 0]) as StructuredMemoryData & { data: [number, number, number] },
       penwidth: 1,
       penstate: 1,
+      scale: 1,
+      positionStack: new StructuredMemoryData([]) as StructuredMemoryData & { data: StructuredPosition[] },
       customData: new StructuredMemoryData({})
     };
 
