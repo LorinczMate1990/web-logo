@@ -116,7 +116,7 @@ export default class TurtleCommands {
   @Arguments(['numeric', 'numeric'])
   static async lookAt(args: ArgType, memory: AbstractMemory) {
     const x = args[0] as number;
-    const y = args[0] as number;
+    const y = args[1] as number;
     lookAt(x, y, memory);
     return {};
   }

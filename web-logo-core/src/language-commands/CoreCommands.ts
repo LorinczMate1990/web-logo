@@ -73,6 +73,7 @@ export default class CoreCommands {
       await sleep(0);
     } 
     turtleCommandPubSub.publish();
+    console.log(turtleCommandPubSub.getQueueLength());
     return {};
   }
 
