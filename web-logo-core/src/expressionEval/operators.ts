@@ -110,9 +110,22 @@ export function executeBinaryOperator(op: string, a?: ParamType, b?: ParamType):
       return a % b;
     }
     case "=": {
-      assertMustBeNumber(op, a);
-      assertMustBeNumber(op, b);
-      return Number(a == b);
+      if (typeof a === "number" && typeof b === "number") {
+        return Number(a == b);
+      }
+      if (isStructuredMemoryData(a) && isStructuredMemoryData(b)) {
+        if (Array.isArray(a.data) && (Array.isArray(b.data))) {
+          if (a.data.length !== a.data.length) return 0;
+          for (const i in a.data) {
+            if (a.data[i] != b.data[i]) return 0;
+          }
+          return 1;
+        } else {
+          // For objects, we check the references
+          return Number(a == b);
+        }
+      }
+      return 0;
     }
     case ">": {
       assertMustBeNumber(op, a);
