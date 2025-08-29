@@ -38,7 +38,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, chi
         tempCanvas.height = canvas.height;
         setCanvasSize({ width: canvas.width, height: canvas.height });
 
-        const tempContext = tempCanvas.getContext("2d");
+        const tempContext = tempCanvas.getContext("2d", {willReadFrequently: true});
         if (tempContext) {
           tempContext.drawImage(canvas, 0, 0);
         }
@@ -48,7 +48,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, chi
           canvas.width = parent.clientWidth;
           canvas.height = parent.clientHeight;
         }
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', {willReadFrequently: true});
         setContext(ctx);
 
         if (ctx && tempContext) {
@@ -74,7 +74,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, chi
 
   useEffect(() => {
     function clearCanvas() {
-      const ctx = canvasRef.current?.getContext('2d');
+      const ctx = canvasRef.current?.getContext('2d', {willReadFrequently: true});
       if (ctx && canvasRef.current) {
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvasRef.current.width ?? 0, canvasRef.current.height);
@@ -84,7 +84,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, chi
     function fill(x: number, y: number, fillColor: [number, number, number]) {
       const tolerance = 0.01;
 
-      const ctx = canvasRef.current?.getContext('2d');
+      const ctx = canvasRef.current?.getContext('2d', {willReadFrequently: true});
       if (!ctx || !canvasRef.current) return;
 
       const canvasWidth = canvasRef.current.width;
@@ -154,7 +154,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, chi
     }
 
     function drawLine(x0: number, y0: number, x1: number, y1: number, color: [number, number, number], penWidth: number) {
-      const ctx = canvasRef.current?.getContext('2d');
+      const ctx = canvasRef.current?.getContext('2d', {willReadFrequently: true});
       if (ctx) {
         ctx.beginPath();
         ctx.moveTo(x0, y0);
@@ -166,7 +166,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, chi
     }
 
     function getImageData(x : number, y : number, width : number, height : number) : ImageData | undefined {
-      const ctx = canvasRef.current?.getContext('2d');
+      const ctx = canvasRef.current?.getContext('2d', {willReadFrequently: true});
       if (ctx) {
         return ctx.getImageData(x, y, width, height);
       }
@@ -174,7 +174,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, chi
     }
 
     function putImageData(imageData : ImageData, x : number, y : number) {
-      const ctx = canvasRef.current?.getContext('2d');
+      const ctx = canvasRef.current?.getContext('2d', {willReadFrequently: true});
       if (ctx) {
         return ctx.putImageData(imageData, x, y);
       }
