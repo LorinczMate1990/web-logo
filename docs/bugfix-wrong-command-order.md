@@ -47,3 +47,6 @@ The only relevant thing here is the savecanvas and restorecanvas.
 
 Now it works with the original code, but won't work with a huger animation, that pointed to this error originally.
 
+The original animation contained a wait instruction.
+The issue was that the wait instruction waited, then flushed the queue. The order was wrong.
+

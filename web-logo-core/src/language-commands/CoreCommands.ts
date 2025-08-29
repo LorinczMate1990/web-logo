@@ -80,6 +80,7 @@ export default class CoreCommands {
 
   @Arguments({max: 1, front: ['numeric']})
   static async coWait(args: ArgType, memory : AbstractMemory) {
+    turtleCommandPubSub.publish();
     if (CoreCommands.waitingIsEnabled) {
       if (args.length == 1) { 
         await sleep(args[0] as number);
@@ -87,7 +88,6 @@ export default class CoreCommands {
         await sleep(0);
       } 
     }
-    turtleCommandPubSub.publish();
     return {};
   }
 
