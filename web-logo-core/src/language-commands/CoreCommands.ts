@@ -156,6 +156,30 @@ export default class CoreCommands {
     return {returnValue: arg[0]} as CommandControl;
   }
 
+  @Arguments(['array']) 
+  static async saveCanvas(args: ArgType, memory: AbstractMemory) {
+    let label = args[0] as StructuredMemoryData & {data: string[]};
+    turtleCommandPubSub.addToQueue({
+      topic: "systemCommand",
+      command: "saveCanvas",
+      label: StructuredMemoryData.convertToString(label),
+    });
+
+    return {};
+  }
+
+  @Arguments(['array']) 
+  static async restoreCanvas(args: ArgType, memory: AbstractMemory) {
+    let label = args[0] as StructuredMemoryData & {data: string[]};
+    turtleCommandPubSub.addToQueue({
+      topic: "systemCommand",
+      command: "restoreCanvas",
+      label: StructuredMemoryData.convertToString(label)
+    });
+
+    return {};
+  }
+
   @Arguments({min: 1, default: new Set<PossibleArgumentParsingMethods>(['array', 'numeric'])})
   static async print(arg: ArgType, memory: AbstractMemory, error: boolean) {
     function isStructuredMemoryDataAPrintableString(d : StructuredMemoryData) {

@@ -20,7 +20,7 @@ describe('Structured Variable Evaluation', () => {
         'arr': new StructuredMemoryData([1,2,3])
         }),//JSON.stringify({ bar: { spam: "42" }, arr: ["1", "2", "3"] }),
         'num': 5,
-        'str': StructuredMemoryData.build_from_string("Hello")
+        'str': StructuredMemoryData.buildFromString("Hello")
       };
       return variables[name] || 0;
     }
@@ -71,8 +71,8 @@ describe('Structured Variable Evaluation', () => {
     const data = new StructuredMemoryData({
       foo: new StructuredMemoryData({
         bar: new StructuredMemoryData({
-          spam: StructuredMemoryData.build_from_string("eggs"),
-          array: new StructuredMemoryData([1, 2, new StructuredMemoryData({nested: StructuredMemoryData.build_from_string("value")})])
+          spam: StructuredMemoryData.buildFromString("eggs"),
+          array: new StructuredMemoryData([1, 2, new StructuredMemoryData({nested: StructuredMemoryData.buildFromString("value")})])
         })
       })
     });
@@ -90,7 +90,7 @@ describe('Structured Variable Evaluation', () => {
     });
 
     it('retrieves a deeply nested property', () => {
-      expect((getDataMember('foo.bar.array[2].nested', data))).toEqual(StructuredMemoryData.build_from_string("value"));
+      expect((getDataMember('foo.bar.array[2].nested', data))).toEqual(StructuredMemoryData.buildFromString("value"));
     });
 
     it('throws an error for an undefined path', () => {

@@ -53,12 +53,21 @@ export class StructuredMemoryData {
 
   data : ParamType[] | { [key: string]: ParamType } = {};
 
-  static build_from_string(str: string): StructuredMemoryData {
+  static buildFromString(str: string): StructuredMemoryData {
     // Convert each character of the string to its ASCII value
     const asciiArray: number[] = Array.from(str, char => char.charCodeAt(0));
 
     // Create a new instance of StructuredMemoryData using the ASCII array
     return new StructuredMemoryData(asciiArray);
+  }
+
+  static convertToString(data: StructuredMemoryData): string {
+    if (!Array.isArray(data.data)) {
+      throw new Error("Tried to convert non-string structured data to string");
+    }
+    const stringArray: string[] = Array.from(data.data, a => String.fromCharCode(a as number));
+
+    return stringArray.join("");
   }
 
   constructor(data : ParamType[] | { [key: string]: ParamType }) {

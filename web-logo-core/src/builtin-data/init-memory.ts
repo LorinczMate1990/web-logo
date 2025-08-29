@@ -4,8 +4,8 @@ export default function initMemory(globalMemory : AbstractMemory) {
     // init memory
     const globalTurtles = new StructuredMemoryData([
         new StructuredMemoryData({
-        name: StructuredMemoryData.build_from_string("turtle_0"),
-        group: StructuredMemoryData.build_from_string("main"),
+        name: StructuredMemoryData.buildFromString("turtle_0"),
+        group: StructuredMemoryData.buildFromString("main"),
         listen: 1,
         orientation: 0,
         position: new StructuredMemoryData({ x: 200, y: 200 }),

@@ -15,7 +15,7 @@ describe('numericEval', () => {
           'x': 5,
           'y': 10,
           'z': 15, // Example of string that is a valid number
-          'invalid': StructuredMemoryData.build_from_string("not a number") // Example of invalid variable value
+          'invalid': StructuredMemoryData.buildFromString("not a number") // Example of invalid variable value
         };
         return variables[key];
       })
@@ -153,7 +153,7 @@ describe('evaluateVariableName', () => {
       const variables: { [key: string]: ParamType } = {
         'foo': new StructuredMemoryData({ bar: new StructuredMemoryData({ spam: 42 }), arr: new StructuredMemoryData([1,2,3]) }),
         'num': 5,
-        'str': StructuredMemoryData.build_from_string('hello'),
+        'str': StructuredMemoryData.buildFromString('hello'),
         'foo.arr[0]': 1
       };
       return variables[name] || 0;
@@ -321,14 +321,14 @@ describe("Handle strings", () => {
   };
 
   it('Simple string expression must be a structured memory data', () => {
-    expect(expressionEval('"asd"', mockGetter)).toEqual(StructuredMemoryData.build_from_string("asd"));
+    expect(expressionEval('"asd"', mockGetter)).toEqual(StructuredMemoryData.buildFromString("asd"));
   });
 
   it('String inside an array', () => {
     expect(expressionEval('["asd", "jkl"]', mockGetter)).toEqual(
       new StructuredMemoryData([
-        StructuredMemoryData.build_from_string("asd"), 
-        StructuredMemoryData.build_from_string("jkl")
+        StructuredMemoryData.buildFromString("asd"), 
+        StructuredMemoryData.buildFromString("jkl")
       ])
     );
   });
@@ -338,6 +338,6 @@ describe("Handle strings", () => {
   });
 
   it('Concatenating two strings', () => {
-    expect(expressionEval('"abc":"123"', mockGetter)).toEqual(StructuredMemoryData.build_from_string("abc123"));
+    expect(expressionEval('"abc":"123"', mockGetter)).toEqual(StructuredMemoryData.buildFromString("abc123"));
   });
 });

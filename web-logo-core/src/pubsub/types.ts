@@ -42,10 +42,24 @@ type ClearScreenMessage = {
   command: "clearScreen";
 };
 
+type SaveCanvas = {
+  topic: "systemCommand";
+  command: "saveCanvas";
+  label: string;
+};
+
+type RestoreCanvas = {
+  topic: "systemCommand";
+  command: "restoreCanvas";
+  label: string;
+};
+
 // Combine all messages into one TurtleCommandMessage type
 export type TurtleCommandMessage =
   | PrintMessage
   | ClearScreenMessage
   | DrawLine
   | FillArea
-  | MoveTurtle;
+  | MoveTurtle
+  | SaveCanvas 
+  | RestoreCanvas;
