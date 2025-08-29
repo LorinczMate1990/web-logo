@@ -14,7 +14,7 @@ describe('Memory', () => {
   describe("setVariable and getVariable", ()=> {
     it('setting a nonexisting variable must throw an error with parents', () => {
       const mem = new Memory(new Memory(undefined));
-      const setNonExistingVariable = () => mem.setVariable('nonExisting', StructuredMemoryData.build_from_string('nonExisting'));
+      const setNonExistingVariable = () => mem.setVariable('nonExisting', StructuredMemoryData.buildFromString('nonExisting'));
       expect(setNonExistingVariable).toThrow(NonExistingVariableMemoryError);
     });
     
@@ -28,22 +28,22 @@ describe('Memory', () => {
 
     it('setting a nonexisting variable must throw an error without parents', () => {
       const mem = new Memory(undefined);
-      const setNonExistingVariable = () => mem.setVariable('nonExisting', StructuredMemoryData.build_from_string('nonExisting'));
+      const setNonExistingVariable = () => mem.setVariable('nonExisting', StructuredMemoryData.buildFromString('nonExisting'));
       expect(setNonExistingVariable).toThrow(NonExistingVariableMemoryError);
     });
     it('setting an existing variable in the current level', () => {
       const mem = new Memory(undefined);
-      mem.createVariable('simpleKey', StructuredMemoryData.build_from_string('simpleValue'));
-      mem.setVariable('simpleKey', StructuredMemoryData.build_from_string('something else'));
-      expect(mem.getVariable('simpleKey')).toEqual(StructuredMemoryData.build_from_string('something else'));
+      mem.createVariable('simpleKey', StructuredMemoryData.buildFromString('simpleValue'));
+      mem.setVariable('simpleKey', StructuredMemoryData.buildFromString('something else'));
+      expect(mem.getVariable('simpleKey')).toEqual(StructuredMemoryData.buildFromString('something else'));
     });
 
     it('setting an existing variable in a parent level', () => {
       const mem = new Memory(undefined);
-      mem.createVariable('simpleKey', StructuredMemoryData.build_from_string('simpleValue'));
+      mem.createVariable('simpleKey', StructuredMemoryData.buildFromString('simpleValue'));
       const lowerMem = new Memory(mem);
-      lowerMem.setVariable('simpleKey', StructuredMemoryData.build_from_string('something else'));
-      expect(mem.getVariable('simpleKey')).toEqual(StructuredMemoryData.build_from_string('something else'));
+      lowerMem.setVariable('simpleKey', StructuredMemoryData.buildFromString('something else'));
+      expect(mem.getVariable('simpleKey')).toEqual(StructuredMemoryData.buildFromString('something else'));
       expect('simpleKey' in lowerMem.variables).toEqual(false);
     });
   });
@@ -51,8 +51,8 @@ describe('Memory', () => {
   describe("createVariable and getVariable", () => {
     it('creates and retrieves a simple string variable', () => {
       const mem = new Memory(undefined);
-      mem.createVariable('simpleKey', StructuredMemoryData.build_from_string('simpleValue'));
-      expect(mem.getVariable('simpleKey')).toEqual(StructuredMemoryData.build_from_string('simpleValue'));
+      mem.createVariable('simpleKey', StructuredMemoryData.buildFromString('simpleValue'));
+      expect(mem.getVariable('simpleKey')).toEqual(StructuredMemoryData.buildFromString('simpleValue'));
     });
 
     it('creates a structured variable', () => {
@@ -89,9 +89,9 @@ describe('Memory', () => {
 
     it('creates and retrieves a structured variable', () => {
       const mem = new Memory(undefined);
-      mem.createVariable('structured', new StructuredMemoryData({ some: StructuredMemoryData.build_from_string('data') })); // Assuming this is how you intended structured data to be set
+      mem.createVariable('structured', new StructuredMemoryData({ some: StructuredMemoryData.buildFromString('data') })); // Assuming this is how you intended structured data to be set
       const retrived = mem.getVariable('structured');
-      expect(retrived).toEqual(new StructuredMemoryData({ some: StructuredMemoryData.build_from_string('data') }));
+      expect(retrived).toEqual(new StructuredMemoryData({ some: StructuredMemoryData.buildFromString('data') }));
     });
 
     it('creates and retrieves an embedded structured variable', () => {
@@ -102,9 +102,9 @@ describe('Memory', () => {
 
     it('recreates a variable with a new value', () => {
       const mem = new Memory(undefined);
-      mem.createVariable('key', StructuredMemoryData.build_from_string('firstValue'));
-      mem.createVariable('key', StructuredMemoryData.build_from_string('secondValue'));
-      expect(mem.getVariable('key')).toEqual(StructuredMemoryData.build_from_string('secondValue'));
+      mem.createVariable('key', StructuredMemoryData.buildFromString('firstValue'));
+      mem.createVariable('key', StructuredMemoryData.buildFromString('secondValue'));
+      expect(mem.getVariable('key')).toEqual(StructuredMemoryData.buildFromString('secondValue'));
     });
 
     it('retrieves a variable from parent if not found in child', () => {
@@ -116,22 +116,22 @@ describe('Memory', () => {
 
     it('prefers a variable in child over parent if both exist', () => {
       const parent = new Memory(undefined);
-      parent.createVariable('sharedKey', StructuredMemoryData.build_from_string('parentValue'));
+      parent.createVariable('sharedKey', StructuredMemoryData.buildFromString('parentValue'));
       const child = new Memory(parent);
-      child.createVariable('sharedKey', StructuredMemoryData.build_from_string('childValue'));
-      expect(child.getVariable('sharedKey')).toEqual(StructuredMemoryData.build_from_string('childValue'));
+      child.createVariable('sharedKey', StructuredMemoryData.buildFromString('childValue'));
+      expect(child.getVariable('sharedKey')).toEqual(StructuredMemoryData.buildFromString('childValue'));
     });
 
     it('creates and retrieves structured variables via complex paths', () => {
       const mem = new Memory(undefined);
-      mem.createVariable('complex.path[0].to.key', StructuredMemoryData.build_from_string('value'));
-      expect(mem.getVariable('complex.path[0].to.key')).toEqual(StructuredMemoryData.build_from_string('value'));
+      mem.createVariable('complex.path[0].to.key', StructuredMemoryData.buildFromString('value'));
+      expect(mem.getVariable('complex.path[0].to.key')).toEqual(StructuredMemoryData.buildFromString('value'));
     });
 
     it('handles nested structured data creating and retrieval', () => {
       const mem = new Memory(undefined);
-      mem.createVariable('nested.structure', new StructuredMemoryData({ key: new StructuredMemoryData({ nestedKey: StructuredMemoryData.build_from_string('nestedValue') })}));
-      expect(mem.getVariable('nested.structure.key.nestedKey')).toEqual(StructuredMemoryData.build_from_string('nestedValue'));
+      mem.createVariable('nested.structure', new StructuredMemoryData({ key: new StructuredMemoryData({ nestedKey: StructuredMemoryData.buildFromString('nestedValue') })}));
+      expect(mem.getVariable('nested.structure.key.nestedKey')).toEqual(StructuredMemoryData.buildFromString('nestedValue'));
     });
 
     it('tries to read an index with variable where the index is in a lower level memory', () => {

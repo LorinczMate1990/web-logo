@@ -53,7 +53,7 @@ export class StructuredMemoryData {
 
   data : ParamType[] | { [key: string]: ParamType } = {};
 
-  static build_from_string(str: string): StructuredMemoryData {
+  static buildFromString(str: string): StructuredMemoryData {
     // Convert each character of the string to its ASCII value
     const asciiArray: number[] = Array.from(str, char => char.charCodeAt(0));
 

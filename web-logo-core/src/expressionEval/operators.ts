@@ -219,7 +219,7 @@ export const builtinFunctions: { [key: string]: { params: number, function: (a: 
     params: 1,
     function: (a: ParamType[]) => {
       assertMustBeNumber("tostring", a[0]);
-      return StructuredMemoryData.build_from_string(a.toString());
+      return StructuredMemoryData.buildFromString(a.toString());
     }
   },
   'length': {
