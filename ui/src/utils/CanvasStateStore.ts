@@ -27,7 +27,6 @@ export default class CanvasStateStore {
   restoreState(label: string): void {
     if (!this.canvas) throw new Error("2D context not available");
     const state = this.states[label];
-    console.log("label: ", label)
     if (!state) throw new Error(`No saved state with label: ${label}`);
     this.canvas.putImageData(state, 0, 0);
   }
