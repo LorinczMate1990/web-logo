@@ -36,14 +36,6 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
               error: message.error,
             })
             break;
-          case "saveCanvas":
-            console.log("Save canvas");
-            drawingCanvasStateStoreRef.current?.saveState(message.label);
-            break;
-          case "restoreCanvas":
-            console.log("Restore canvas");
-            drawingCanvasStateStoreRef.current?.restoreState(message.label);
-            break;
         };
       }
       if (message.topic == 'drawing') {
@@ -72,6 +64,14 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
             }
             break;
           }
+          case "saveCanvas":
+            console.log("Save canvas");
+            drawingCanvasStateStoreRef.current?.saveState(message.label);
+            break;
+          case "restoreCanvas":
+            console.log("Restore canvas");
+            drawingCanvasStateStoreRef.current?.restoreState(message.label);
+            break;
 
         };
       }

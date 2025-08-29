@@ -43,13 +43,13 @@ type ClearScreenMessage = {
 };
 
 type SaveCanvas = {
-  topic: "systemCommand";
+  topic: "drawing";
   command: "saveCanvas";
   label: string;
 };
 
 type RestoreCanvas = {
-  topic: "systemCommand";
+  topic: "drawing";
   command: "restoreCanvas";
   label: string;
 };

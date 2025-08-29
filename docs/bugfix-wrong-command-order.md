@@ -44,3 +44,6 @@ The current queue implementation won't keep the message order between different 
 This is not a bug, but a design choice. Every topics are independent.
 So I have to redesign the messages to keep the instructions in a single topic where order is important.
 The only relevant thing here is the savecanvas and restorecanvas.
+
+Now it works with the original code, but won't work with a huger animation, that pointed to this error originally.
+

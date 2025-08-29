@@ -160,7 +160,7 @@ export default class CoreCommands {
   static async saveCanvas(args: ArgType, memory: AbstractMemory) {
     let label = args[0] as StructuredMemoryData & {data: string[]};
     turtleCommandPubSub.addToQueue({
-      topic: "systemCommand",
+      topic: "drawing",
       command: "saveCanvas",
       label: StructuredMemoryData.convertToString(label),
     });
@@ -172,7 +172,7 @@ export default class CoreCommands {
   static async restoreCanvas(args: ArgType, memory: AbstractMemory) {
     let label = args[0] as StructuredMemoryData & {data: string[]};
     turtleCommandPubSub.addToQueue({
-      topic: "systemCommand",
+      topic: "drawing",
       command: "restoreCanvas",
       label: StructuredMemoryData.convertToString(label)
     });
