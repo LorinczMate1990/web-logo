@@ -48,11 +48,9 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
             break;
           }
           case "clearScreen":
-            console.log("Clear screen")
             drawingCanvasRef.current?.clearCanvas();
             break;
           case "line": {
-            console.log("Line: ", message.segments)
             for (const segment of message.segments) {
               const x0 = segment.x0;
               const y0 = segment.y0;
@@ -65,11 +63,9 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
             break;
           }
           case "saveCanvas":
-            console.log("Save canvas");
             drawingCanvasStateStoreRef.current?.saveState(message.label);
             break;
           case "restoreCanvas":
-            console.log("Restore canvas");
             drawingCanvasStateStoreRef.current?.restoreState(message.label);
             break;
 
