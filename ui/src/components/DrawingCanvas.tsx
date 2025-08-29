@@ -7,6 +7,10 @@ export interface DrawingCanvasRef {
   clearCanvas: () => void;
   drawLine: (x0: number, y0: number, x1: number, y1: number, color: [number, number, number], penWidth: number) => void;
   fill: (x: number, y: number, color: [number, number, number]) => void;
+  getCanvasWidth: () => number,
+  getCanvasHeight: () => number,
+  getImageData: (x : number, y : number, width : number, height : number) => ImageData | undefined,
+  putImageData: (imageData : ImageData, x : number, y : number) => void,
 }
 
 interface DrawingCanvasProps {
@@ -82,7 +86,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, chi
 
       const ctx = canvasRef.current?.getContext('2d');
       if (!ctx || !canvasRef.current) return;
-        
+
       const canvasWidth = canvasRef.current.width;
       const canvasHeight = canvasRef.current.height;
 
@@ -161,11 +165,30 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ ref, onFocus, onBlur, chi
       }
     }
 
+    function getImageData(x : number, y : number, width : number, height : number) : ImageData | undefined {
+      const ctx = canvasRef.current?.getContext('2d');
+      if (ctx) {
+        return ctx.getImageData(x, y, width, height);
+      }
+      return undefined;
+    }
+
+    function putImageData(imageData : ImageData, x : number, y : number) {
+      const ctx = canvasRef.current?.getContext('2d');
+      if (ctx) {
+        return ctx.putImageData(imageData, x, y);
+      }
+    }
+
     if (ref) {
-      (ref).current = {
+      ref.current = {
         clearCanvas,
         fill,
-        drawLine
+        drawLine,
+        getCanvasWidth: () => canvasRef.current?.width ?? 0,
+        getCanvasHeight: () => canvasRef.current?.height ?? 0,
+        getImageData,
+        putImageData
       };
     }
   }, [ref, canvasRef.current]);
