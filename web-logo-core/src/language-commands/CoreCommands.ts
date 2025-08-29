@@ -162,7 +162,7 @@ export default class CoreCommands {
     turtleCommandPubSub.addToQueue({
       topic: "systemCommand",
       command: "saveCanvas",
-      label,
+      label: StructuredMemoryData.convertToString(label),
     });
 
     return {};
@@ -174,7 +174,7 @@ export default class CoreCommands {
     turtleCommandPubSub.addToQueue({
       topic: "systemCommand",
       command: "restoreCanvas",
-      label: StructuredMemoryData.buildFromString label.data
+      label: StructuredMemoryData.convertToString(label)
     });
 
     return {};

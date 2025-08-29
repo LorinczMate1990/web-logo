@@ -61,6 +61,15 @@ export class StructuredMemoryData {
     return new StructuredMemoryData(asciiArray);
   }
 
+  static convertToString(data: StructuredMemoryData): string {
+    if (!Array.isArray(data.data)) {
+      throw new Error("Tried to convert non-string structured data to string");
+    }
+    const stringArray: string[] = Array.from(data.data, a => String.fromCharCode(a as number));
+
+    return stringArray.join("");
+  }
+
   constructor(data : ParamType[] | { [key: string]: ParamType }) {
     this.data = data;
   }
