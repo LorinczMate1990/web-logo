@@ -23,3 +23,24 @@ Workspace.tsx:44 Restore canvas
 This issue is propably in the message queue.
 
 Found a small bug there, but it had no anything with this bug.
+
+Checking the commands itself. Somehow it looks like the savecanvas goes to the end of the queue
+
+Other test code: 
+
+```
+clear
+savecanvas "originalSetup"
+forward 10
+print "Hello"
+forward 100
+restorecanvas "originalSetup"
+```
+
+Here, the lines are combined.
+
+Found the root cause and the bug I found in the pubsubs.ts was not a bug.
+The current queue implementation won't keep the message order between different topics.
+This is not a bug, but a design choice. Every topics are independent.
+So I have to redesign the messages to keep the instructions in a single topic where order is important.
+The only relevant thing here is the savecanvas and restorecanvas.
