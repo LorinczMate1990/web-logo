@@ -1,5 +1,5 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
+import { AbstractMemory, ArgType, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
 import { GlobalTurtle, isGlobalTurtles, StructuredDisplayProperties, StructuredPosition } from "../builtin-data/types.js";
@@ -298,11 +298,11 @@ export default class TurtleCommands {
     const y = arg[3] as number;
     const orientation = arg[4] as number;
 
-    const defaultDisplayProperties: StructuredDisplayProperties = new StructuredMemoryData({
-      image: new StructuredMemoryData([]),
+    const defaultDisplayProperties: StructuredDisplayProperties = packToStructuredMemoryData({
+      image: packToStructuredMemoryData([]),
       rotatable: 1,
       visible: 1,
-    }) as StructuredDisplayProperties;
+    });
 
     const newTurtle: GlobalTurtle = {
       name,
@@ -310,13 +310,13 @@ export default class TurtleCommands {
       listen: 1,
       displayProperties: defaultDisplayProperties,
       orientation,
-      coords: new StructuredMemoryData({ x, y }) as StructuredMemoryData & { data: { x: number, y: number } },
-      home: new StructuredMemoryData({ x, y, orientation }) as StructuredPosition,
-      pencolor: new StructuredMemoryData([0, 0, 0]) as StructuredMemoryData & { data: [number, number, number] },
+      coords: packToStructuredMemoryData({ x, y }),
+      home: packToStructuredMemoryData({ x, y, orientation }),
+      pencolor: packToStructuredMemoryData([0, 0, 0]),
       penwidth: 1,
       penstate: 1,
       scale: 1,
-      positionStack: new StructuredMemoryData([]) as StructuredMemoryData & { data: StructuredPosition[] },
+      positionStack: packToStructuredMemoryData([]),
       customData: new StructuredMemoryData({})
     };
 
