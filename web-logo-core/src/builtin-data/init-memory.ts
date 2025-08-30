@@ -4,9 +4,11 @@ import { GlobalTurtle, StructuredGlobalTurtles, StructuredPosition, StructuredGl
 export default function initMemory(globalMemory: AbstractMemory) {
   // init memory
   const defaultDisplayProperties = packToStructuredMemoryData({
-    image: packToStructuredMemoryData([]),
+    image: StructuredMemoryData.buildFromString("builtin://simple-turtle"),
     rotatable: 1,
     visible: 1,
+    offsetX: 18,
+    offsetY: 23,
   });
 
   const defaultTurtleData: GlobalTurtle = {

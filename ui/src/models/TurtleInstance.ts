@@ -1,12 +1,10 @@
-import { PenState, Orientation, Position, PenColor } from "web-logo-core";
-import simpleTurtle from '../assets/simple-turtle.png'
-import CoordSet from "../utils/CoordSet.js";
-import { rgbToHex } from "../utils/ColorManipulation.js";
+import { Orientation, Position } from "web-logo-core";
 
 type TurtlePicture = {
   path: string,
   offsetX: number,
-  offsetY: number
+  offsetY: number,
+  rotatable: boolean,
 };
 
 class TurtleInstance {
@@ -17,13 +15,12 @@ class TurtleInstance {
   constructor(
     position: Position,
     orientation: Orientation,
+    picture : TurtlePicture,
   ) {
     this.position = position;
     this.orientation = orientation;
     this.picture = {
-      offsetX: 18,
-      offsetY: 23,
-      path: simpleTurtle,
+      ...picture
     };
   }
 

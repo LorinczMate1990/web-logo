@@ -2,7 +2,7 @@ import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
 import { AbstractMemory, ArgType, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
-import { GlobalTurtle, isGlobalTurtles, StructuredDisplayProperties, StructuredPosition } from "../builtin-data/types.js";
+import { GlobalTurtle, isGlobalTurtles } from "../builtin-data/types.js";
 
 function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
   const turtles = memory.getVariable("$turtles");
@@ -35,6 +35,12 @@ function goToPoint(turtle: GlobalTurtle, newX: number, newY: number, newOrientat
     x: turtle.coords.data.x,
     y: turtle.coords.data.y,
     orientation: turtle.orientation,
+    image: {
+      path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+      offsetX: turtle.displayProperties.data.offsetX,
+      offsetY: turtle.displayProperties.data.offsetY,
+      rotatable: turtle.displayProperties.data.rotatable != 0,
+    }
   });
 
   if (turtle.penstate) {
@@ -75,6 +81,12 @@ function rotate(angle: number, memory: AbstractMemory) {
       x: turtle.coords.data.x,
       y: turtle.coords.data.y,
       orientation: turtle.orientation,
+      image: {
+        path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+        offsetX: turtle.displayProperties.data.offsetX,
+        offsetY: turtle.displayProperties.data.offsetY,
+        rotatable: turtle.displayProperties.data.rotatable != 0,
+      }
     });
   });
 }
@@ -91,6 +103,12 @@ function lookAt(x: number, y: number, memory: AbstractMemory) {
       x: turtle.coords.data.x,
       y: turtle.coords.data.y,
       orientation: turtle.orientation,
+      image: {
+        path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+        offsetX: turtle.displayProperties.data.offsetX,
+        offsetY: turtle.displayProperties.data.offsetY,
+        rotatable: turtle.displayProperties.data.rotatable != 0,
+      }
     });
   });
 }
@@ -161,11 +179,11 @@ export default class TurtleCommands {
   @Arguments([])
   static async pushPosition(args: ArgType, memory: AbstractMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
-      const currentPosition = new StructuredMemoryData({
+      const currentPosition = packToStructuredMemoryData({
         x: turtle.coords.data.x,
         y: turtle.coords.data.y,
         orientation: turtle.orientation,
-      }) as StructuredPosition;
+      });
       turtle.positionStack.data.push(currentPosition);
     });
     return {};
@@ -298,10 +316,12 @@ export default class TurtleCommands {
     const y = arg[3] as number;
     const orientation = arg[4] as number;
 
-    const defaultDisplayProperties: StructuredDisplayProperties = packToStructuredMemoryData({
-      image: packToStructuredMemoryData([]),
+    const defaultDisplayProperties = packToStructuredMemoryData({
+      image: StructuredMemoryData.buildFromString("builtin://simple-turtle"),
       rotatable: 1,
       visible: 1,
+      offsetX: 18,
+      offsetY: 23,
     });
 
     const newTurtle: GlobalTurtle = {
@@ -331,6 +351,12 @@ export default class TurtleCommands {
       x,
       y,
       orientation,
+      image: {
+        path: StructuredMemoryData.convertToString(defaultDisplayProperties.data.image),
+        offsetX: defaultDisplayProperties.data.offsetX,
+        offsetY: defaultDisplayProperties.data.offsetY,
+        rotatable: defaultDisplayProperties.data.rotatable != 0,
+      }
     });
     return {};
   }
@@ -345,6 +371,13 @@ export default class TurtleCommands {
         x: turtle.coords.data.x,
         y: turtle.coords.data.y,
         orientation: turtle.orientation,
+        image: {
+          path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+          offsetX: turtle.displayProperties.data.offsetX,
+          offsetY: turtle.displayProperties.data.offsetY,
+          rotatable: turtle.displayProperties.data.rotatable != 0,
+        }
+
       });
     });
     return {};

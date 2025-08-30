@@ -21,6 +21,8 @@ export type StructuredDisplayProperties = {
     image : StructuredNumericArray,
     rotatable : number,
     visible: number,
+    offsetX : number, 
+    offsetY : number,
   }
 } & StructuredMemoryData;
 

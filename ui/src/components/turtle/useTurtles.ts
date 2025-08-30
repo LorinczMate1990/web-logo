@@ -17,7 +17,9 @@ export default function useTurtles() {
         const y = message.y;
         const orientation = message.orientation / 180 * Math.PI;
 
-        const updatedInstance = new TurtleInstance({x, y}, orientation);
+        const image = message.image;
+
+        const updatedInstance = new TurtleInstance({x, y}, orientation, image);
 
         setTurtleInstances((instances) => {
           const ret = {...instances};

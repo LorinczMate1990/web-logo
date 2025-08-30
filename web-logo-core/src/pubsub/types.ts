@@ -3,11 +3,11 @@ import { PenColor, PenState } from "../turtle-types/DrawingTypes.js";
 type DrawLine = {
   topic: "drawing";
   command: "line";
-  segments: {  
-    x0 : number;
-    y0 : number;
-    x1 : number;
-    y1 : number;
+  segments: {
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
     color: [number, number, number];
     penWidth: number;
   }[]
@@ -16,18 +16,24 @@ type DrawLine = {
 type FillArea = {
   topic: "drawing";
   command: "fill";
-  x : number;
-  y : number;
+  x: number;
+  y: number;
   color: [number, number, number];
 };
 
 type MoveTurtle = {
   topic: "turtleCommand";
   command: "move";
-  x : number;
-  y : number;
+  x: number;
+  y: number;
   orientation: number;
   name: string;
+  image: {
+    path: string,
+    offsetX: number,
+    offsetY: number,
+    rotatable: boolean,
+  }
 };
 
 type PrintMessage = {
@@ -61,5 +67,5 @@ export type TurtleCommandMessage =
   | DrawLine
   | FillArea
   | MoveTurtle
-  | SaveCanvas 
+  | SaveCanvas
   | RestoreCanvas;
