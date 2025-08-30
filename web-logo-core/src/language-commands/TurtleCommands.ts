@@ -21,19 +21,19 @@ function forAllWatchingTurtles(memory: AbstractMemory, action: (turtle: GlobalTu
 }
 
 function goToPoint(turtle: GlobalTurtle, newX: number, newY: number, newOrientation: number) {
-  const x = turtle.position.data.x;
-  const y = turtle.position.data.y;
+  const x = turtle.coords.data.x;
+  const y = turtle.coords.data.y;
 
-  turtle.position.data.x = newX;
-  turtle.position.data.y = newY;
+  turtle.coords.data.x = newX;
+  turtle.coords.data.y = newY;
   turtle.orientation = newOrientation;  
 
   turtleCommandPubSub.addToQueue({
     topic: "turtleCommand",
     command: "move",
     name: String.fromCharCode(...turtle.name.data),
-    x: turtle.position.data.x,
-    y: turtle.position.data.y,
+    x: turtle.coords.data.x,
+    y: turtle.coords.data.y,
     orientation: turtle.orientation,
   });
 
@@ -57,8 +57,8 @@ function go(referenceDistance: number, memory: AbstractMemory) {
   forAllWatchingTurtles(memory, (turtle) => {
     const distance = turtle.scale * referenceDistance;
     const rad = turtle.orientation / 180 * Math.PI;
-    const x = turtle.position.data.x;
-    const y = turtle.position.data.y;
+    const x = turtle.coords.data.x;
+    const y = turtle.coords.data.y;
     const newX = x + distance * Math.cos(rad);
     const newY = y + distance * Math.sin(rad);
     goToPoint(turtle, newX, newY, turtle.orientation)
@@ -72,8 +72,8 @@ function rotate(angle: number, memory: AbstractMemory) {
       topic: "turtleCommand",
       command: "move",
       name: String.fromCharCode(...turtle.name.data),
-      x: turtle.position.data.x,
-      y: turtle.position.data.y,
+      x: turtle.coords.data.x,
+      y: turtle.coords.data.y,
       orientation: turtle.orientation,
     });
   });
@@ -81,15 +81,15 @@ function rotate(angle: number, memory: AbstractMemory) {
 
 function lookAt(x: number, y: number, memory: AbstractMemory) {
   forAllWatchingTurtles(memory, (turtle) => {
-    const dx = x - turtle.position.data.x;
-    const dy = y - turtle.position.data.y;
+    const dx = x - turtle.coords.data.x;
+    const dy = y - turtle.coords.data.y;
     turtle.orientation = Math.atan2(dy, dx) / Math.PI * 180;
     turtleCommandPubSub.addToQueue({
       topic: "turtleCommand",
       command: "move",
       name: String.fromCharCode(...turtle.name.data),
-      x: turtle.position.data.x,
-      y: turtle.position.data.y,
+      x: turtle.coords.data.x,
+      y: turtle.coords.data.y,
       orientation: turtle.orientation,
     });
   });
@@ -162,8 +162,8 @@ export default class TurtleCommands {
   static async pushPosition(args: ArgType, memory: AbstractMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
       const currentPosition = new StructuredMemoryData({
-        x: turtle.position.data.x,
-        y: turtle.position.data.y,
+        x: turtle.coords.data.x,
+        y: turtle.coords.data.y,
         orientation: turtle.orientation,
       }) as StructuredPosition;
       turtle.positionStack.data.push(currentPosition);
@@ -245,8 +245,8 @@ export default class TurtleCommands {
   @Arguments([])
   static async setHome(args: ArgType, memory: AbstractMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
-      turtle.home.data.x = turtle.position.data.x;
-      turtle.home.data.y = turtle.position.data.y;
+      turtle.home.data.x = turtle.coords.data.x;
+      turtle.home.data.y = turtle.coords.data.y;
       turtle.home.data.orientation = turtle.orientation;
     });
     return {};
@@ -260,8 +260,8 @@ export default class TurtleCommands {
         topic: "drawing",
         command: "fill",
         color: turtle.pencolor.data as any,
-        x: turtle.position.data.x,
-        y: turtle.position.data.y
+        x: turtle.coords.data.x,
+        y: turtle.coords.data.y
       });
     });
     return {};
@@ -303,7 +303,7 @@ export default class TurtleCommands {
       group,
       listen: 1,
       orientation,
-      position: new StructuredMemoryData({ x, y }) as StructuredMemoryData & { data: { x: number, y: number } },
+      coords: new StructuredMemoryData({ x, y }) as StructuredMemoryData & { data: { x: number, y: number } },
       home: new StructuredMemoryData({ x, y, orientation }) as StructuredPosition,
       pencolor: new StructuredMemoryData([0, 0, 0]) as StructuredMemoryData & { data: [number, number, number] },
       penwidth: 1,
@@ -335,8 +335,8 @@ export default class TurtleCommands {
         topic: "turtleCommand",
         command: "move",
         name: String.fromCharCode(...turtle.name.data),
-        x: turtle.position.data.x,
-        y: turtle.position.data.y,
+        x: turtle.coords.data.x,
+        y: turtle.coords.data.y,
         orientation: turtle.orientation,
       });
     });

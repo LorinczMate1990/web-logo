@@ -1,35 +1,43 @@
 import { isStructuredMemoryData, StructuredMemoryData } from "../types.js";
 
+export type StructuredCoords = {
+    data: { x: number, y: number }
+  } & StructuredMemoryData;
+
 export type StructuredPosition = {
-    data: { x: number, y: number, orientation: number }
+    data: { orientation: number }
+  } & StructuredCoords;
+
+export type StructuredPositionList = {
+    data: StructuredPosition[]
+  } & StructuredMemoryData;
+
+export type StructuredNumericArray = {
+    data: number[],
   } & StructuredMemoryData;
 
 export type GlobalTurtle = {
-  name: { data: number[] } & StructuredMemoryData,
-  group: { data: number[] } & StructuredMemoryData,
+  name: StructuredNumericArray,
+  group: StructuredNumericArray,
   listen: number,
   orientation: number,
-  position: {
-    data: { x: number, y: number }
-  } & StructuredMemoryData,
+  coords: StructuredCoords,
   home: StructuredPosition,
-  positionStack: {
-    data: StructuredPosition[]
-  } & StructuredMemoryData,
-  pencolor: {
-    data: number[],
-  } & StructuredMemoryData,
+  positionStack: StructuredPositionList,
+  pencolor: StructuredNumericArray,
   penwidth: number,
   penstate: number,
   scale: number,
   customData: StructuredMemoryData,
 };
 
-export type GlobalTurtles = {
+export type StructuredGlobalTurtle = { data: GlobalTurtle } & StructuredMemoryData;
+
+export type StructuredGlobalTurtles = {
   data: ({ data: GlobalTurtle } & StructuredMemoryData)[]
 } & StructuredMemoryData;
 
-export function isGlobalTurtles(input: any): input is GlobalTurtles {
+export function isGlobalTurtles(input: any): input is StructuredGlobalTurtles {
   if (!isStructuredMemoryData(input) || !Array.isArray(input.data)) return false;
   // TODO We could check the structs better, but it would damage the performance
   return true;
