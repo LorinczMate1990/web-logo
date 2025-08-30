@@ -16,10 +16,19 @@ export type StructuredNumericArray = {
     data: number[],
   } & StructuredMemoryData;
 
+export type StructuredDisplayProperties = {
+  data: {
+    image : StructuredNumericArray,
+    rotatable : number,
+    visible: number,
+  }
+} & StructuredMemoryData;
+
 export type GlobalTurtle = {
   name: StructuredNumericArray,
   group: StructuredNumericArray,
   listen: number,
+  displayProperties: StructuredDisplayProperties,
   orientation: number,
   coords: StructuredCoords,
   home: StructuredPosition,

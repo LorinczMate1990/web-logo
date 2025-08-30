@@ -2,7 +2,7 @@ import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
 import { AbstractMemory, ArgType, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
-import { GlobalTurtle, isGlobalTurtles, StructuredPosition } from "../builtin-data/types.js";
+import { GlobalTurtle, isGlobalTurtles, StructuredDisplayProperties, StructuredPosition } from "../builtin-data/types.js";
 
 function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
   const turtles = memory.getVariable("$turtles");
@@ -26,7 +26,7 @@ function goToPoint(turtle: GlobalTurtle, newX: number, newY: number, newOrientat
 
   turtle.coords.data.x = newX;
   turtle.coords.data.y = newY;
-  turtle.orientation = newOrientation;  
+  turtle.orientation = newOrientation;
 
   turtleCommandPubSub.addToQueue({
     topic: "turtleCommand",
@@ -298,10 +298,17 @@ export default class TurtleCommands {
     const y = arg[3] as number;
     const orientation = arg[4] as number;
 
+    const defaultDisplayProperties: StructuredDisplayProperties = new StructuredMemoryData({
+      image: new StructuredMemoryData([]),
+      rotatable: 1,
+      visible: 1,
+    }) as StructuredDisplayProperties;
+
     const newTurtle: GlobalTurtle = {
       name,
       group,
       listen: 1,
+      displayProperties: defaultDisplayProperties,
       orientation,
       coords: new StructuredMemoryData({ x, y }) as StructuredMemoryData & { data: { x: number, y: number } },
       home: new StructuredMemoryData({ x, y, orientation }) as StructuredPosition,
