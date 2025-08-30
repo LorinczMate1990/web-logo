@@ -60,6 +60,16 @@ type RestoreCanvas = {
   label: string;
 };
 
+type CaptureCanvasPart = {
+  topic: "drawing",
+  command: "capture",
+  label: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number
+}
+
 // Combine all messages into one TurtleCommandMessage type
 export type TurtleCommandMessage =
   | PrintMessage
@@ -68,4 +78,5 @@ export type TurtleCommandMessage =
   | FillArea
   | MoveTurtle
   | SaveCanvas
-  | RestoreCanvas;
+  | RestoreCanvas
+  | CaptureCanvasPart;

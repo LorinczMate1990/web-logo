@@ -168,6 +168,27 @@ export default class CoreCommands {
     return {};
   }
 
+  @Arguments(['array', 'numeric', 'numeric', 'numeric', 'numeric'])
+  static async captureCanvasPart(args: ArgType, memory: AbstractMemory) {
+    const label = args[0] as StructuredMemoryData & {data: string[]};
+    const x = args[1] as number;
+    const y = args[2] as number;
+    const width = args[3] as number;
+    const height = args[4] as number;
+    
+    turtleCommandPubSub.addToQueue({
+      topic: "drawing",
+      command: "capture",
+      label: StructuredMemoryData.convertToString(label),
+      x,
+      y,
+      width,
+      height
+    });
+
+    return {};
+  }
+
   @Arguments(['array']) 
   static async restoreCanvas(args: ArgType, memory: AbstractMemory) {
     let label = args[0] as StructuredMemoryData & {data: string[]};

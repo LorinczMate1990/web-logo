@@ -4,7 +4,7 @@ import { TurtleCommandMessage } from "./types.js";
 class CombineMessages implements MessageCombinator<TurtleCommandMessage> {
     combine(older: TurtleCommandMessage, newer: TurtleCommandMessage): TurtleCommandMessage | undefined {
         if (newer.topic === "drawing") {
-            if (newer.command === "clearScreen" && older.command !== "saveCanvas") return newer;
+            if (newer.command === "clearScreen" && older.command !== "saveCanvas" && older.command !== "capture") return newer;
             if (newer.command === "line" && older.command === "line") {
                 older.segments.push(...newer.segments);
                 return older;
