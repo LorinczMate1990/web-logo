@@ -1,8 +1,8 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
+import { AbstractMemory, ArgType, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
-import { GlobalTurtle, isGlobalTurtles, StructuredPosition } from "../builtin-data/types.js";
+import { GlobalTurtle, isGlobalTurtles } from "../builtin-data/types.js";
 
 function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
   const turtles = memory.getVariable("$turtles");
@@ -21,20 +21,27 @@ function forAllWatchingTurtles(memory: AbstractMemory, action: (turtle: GlobalTu
 }
 
 function goToPoint(turtle: GlobalTurtle, newX: number, newY: number, newOrientation: number) {
-  const x = turtle.position.data.x;
-  const y = turtle.position.data.y;
+  const x = turtle.coords.data.x;
+  const y = turtle.coords.data.y;
 
-  turtle.position.data.x = newX;
-  turtle.position.data.y = newY;
-  turtle.orientation = newOrientation;  
+  turtle.coords.data.x = newX;
+  turtle.coords.data.y = newY;
+  turtle.orientation = newOrientation;
 
   turtleCommandPubSub.addToQueue({
     topic: "turtleCommand",
     command: "move",
     name: String.fromCharCode(...turtle.name.data),
-    x: turtle.position.data.x,
-    y: turtle.position.data.y,
+    x: turtle.coords.data.x,
+    y: turtle.coords.data.y,
     orientation: turtle.orientation,
+    visible: turtle.visible != 0,
+    image: {
+      path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+      offsetX: turtle.displayProperties.data.offsetX,
+      offsetY: turtle.displayProperties.data.offsetY,
+      rotatable: turtle.displayProperties.data.rotatable != 0,
+    }
   });
 
   if (turtle.penstate) {
@@ -57,8 +64,8 @@ function go(referenceDistance: number, memory: AbstractMemory) {
   forAllWatchingTurtles(memory, (turtle) => {
     const distance = turtle.scale * referenceDistance;
     const rad = turtle.orientation / 180 * Math.PI;
-    const x = turtle.position.data.x;
-    const y = turtle.position.data.y;
+    const x = turtle.coords.data.x;
+    const y = turtle.coords.data.y;
     const newX = x + distance * Math.cos(rad);
     const newY = y + distance * Math.sin(rad);
     goToPoint(turtle, newX, newY, turtle.orientation)
@@ -72,25 +79,39 @@ function rotate(angle: number, memory: AbstractMemory) {
       topic: "turtleCommand",
       command: "move",
       name: String.fromCharCode(...turtle.name.data),
-      x: turtle.position.data.x,
-      y: turtle.position.data.y,
+      x: turtle.coords.data.x,
+      y: turtle.coords.data.y,
       orientation: turtle.orientation,
+      visible: turtle.visible != 0,
+      image: {
+        path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+        offsetX: turtle.displayProperties.data.offsetX,
+        offsetY: turtle.displayProperties.data.offsetY,
+        rotatable: turtle.displayProperties.data.rotatable != 0,
+      }
     });
   });
 }
 
 function lookAt(x: number, y: number, memory: AbstractMemory) {
   forAllWatchingTurtles(memory, (turtle) => {
-    const dx = x - turtle.position.data.x;
-    const dy = y - turtle.position.data.y;
+    const dx = x - turtle.coords.data.x;
+    const dy = y - turtle.coords.data.y;
     turtle.orientation = Math.atan2(dy, dx) / Math.PI * 180;
     turtleCommandPubSub.addToQueue({
       topic: "turtleCommand",
       command: "move",
       name: String.fromCharCode(...turtle.name.data),
-      x: turtle.position.data.x,
-      y: turtle.position.data.y,
+      x: turtle.coords.data.x,
+      y: turtle.coords.data.y,
       orientation: turtle.orientation,
+      visible: turtle.visible != 0,
+      image: {
+        path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+        offsetX: turtle.displayProperties.data.offsetX,
+        offsetY: turtle.displayProperties.data.offsetY,
+        rotatable: turtle.displayProperties.data.rotatable != 0,
+      }
     });
   });
 }
@@ -161,11 +182,11 @@ export default class TurtleCommands {
   @Arguments([])
   static async pushPosition(args: ArgType, memory: AbstractMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
-      const currentPosition = new StructuredMemoryData({
-        x: turtle.position.data.x,
-        y: turtle.position.data.y,
+      const currentPosition = packToStructuredMemoryData({
+        x: turtle.coords.data.x,
+        y: turtle.coords.data.y,
         orientation: turtle.orientation,
-      }) as StructuredPosition;
+      });
       turtle.positionStack.data.push(currentPosition);
     });
     return {};
@@ -245,8 +266,8 @@ export default class TurtleCommands {
   @Arguments([])
   static async setHome(args: ArgType, memory: AbstractMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
-      turtle.home.data.x = turtle.position.data.x;
-      turtle.home.data.y = turtle.position.data.y;
+      turtle.home.data.x = turtle.coords.data.x;
+      turtle.home.data.y = turtle.coords.data.y;
       turtle.home.data.orientation = turtle.orientation;
     });
     return {};
@@ -260,8 +281,8 @@ export default class TurtleCommands {
         topic: "drawing",
         command: "fill",
         color: turtle.pencolor.data as any,
-        x: turtle.position.data.x,
-        y: turtle.position.data.y
+        x: turtle.coords.data.x,
+        y: turtle.coords.data.y
       });
     });
     return {};
@@ -298,18 +319,27 @@ export default class TurtleCommands {
     const y = arg[3] as number;
     const orientation = arg[4] as number;
 
+    const defaultDisplayProperties = packToStructuredMemoryData({
+      image: StructuredMemoryData.buildFromString("builtin://simple-turtle"),
+      rotatable: 1,
+      offsetX: 18,
+      offsetY: 23,
+    });
+
     const newTurtle: GlobalTurtle = {
       name,
       group,
       listen: 1,
+      visible: 1,
+      displayProperties: defaultDisplayProperties,
       orientation,
-      position: new StructuredMemoryData({ x, y }) as StructuredMemoryData & { data: { x: number, y: number } },
-      home: new StructuredMemoryData({ x, y, orientation }) as StructuredPosition,
-      pencolor: new StructuredMemoryData([0, 0, 0]) as StructuredMemoryData & { data: [number, number, number] },
+      coords: packToStructuredMemoryData({ x, y }),
+      home: packToStructuredMemoryData({ x, y, orientation }),
+      pencolor: packToStructuredMemoryData([0, 0, 0]),
       penwidth: 1,
       penstate: 1,
       scale: 1,
-      positionStack: new StructuredMemoryData([]) as StructuredMemoryData & { data: StructuredPosition[] },
+      positionStack: packToStructuredMemoryData([]),
       customData: new StructuredMemoryData({})
     };
 
@@ -324,8 +354,77 @@ export default class TurtleCommands {
       x,
       y,
       orientation,
+      visible: true,
+      image: {
+        path: StructuredMemoryData.convertToString(defaultDisplayProperties.data.image),
+        offsetX: defaultDisplayProperties.data.offsetX,
+        offsetY: defaultDisplayProperties.data.offsetY,
+        rotatable: defaultDisplayProperties.data.rotatable != 0,
+      }
     });
     return {};
+  }
+
+  @Arguments(['numeric'])
+  static async visible(arg: ArgType, memory: AbstractMemory) {
+    const state = arg[0] as number;
+    forAllWatchingTurtles(memory, turtle => {
+      turtle.visible = state;
+      turtleCommandPubSub.addToQueue({
+        topic: "turtleCommand",
+        command: "move",
+        name: String.fromCharCode(...turtle.name.data),
+        x: turtle.coords.data.x,
+        y: turtle.coords.data.y,
+        orientation: turtle.orientation,
+        visible: turtle.visible != 0,
+        image: {
+          path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+          offsetX: turtle.displayProperties.data.offsetX,
+          offsetY: turtle.displayProperties.data.offsetY,
+          rotatable: turtle.displayProperties.data.rotatable != 0,
+        }
+      });
+    });
+    return {}
+  }
+
+  @Arguments(['array', 'array', 'numeric', 'numeric', 'numeric'])
+  static async setForm(arg: ArgType, memory: AbstractMemory) {
+    const typeOfForm = StructuredMemoryData.convertToString(arg[0] as StructuredMemoryData);
+    const path = StructuredMemoryData.convertToString(arg[1] as StructuredMemoryData);
+    const offsetX = arg[2] as number;
+    const offsetY = arg[3] as number;
+    const rotatable = arg[4] as number;
+
+    if (typeOfForm !== 'builtin' && typeOfForm !== 'memory') throw new Error(`Turtle can't take the form of type "${typeOfForm}"`);
+
+    const fullPath = `${typeOfForm}://${path}`;
+
+    forAllWatchingTurtles(memory, turtle => {
+      turtle.displayProperties = packToStructuredMemoryData({
+        image: StructuredMemoryData.buildFromString(fullPath),
+        offsetX,
+        offsetY,
+        rotatable,
+      });
+      turtleCommandPubSub.addToQueue({
+        topic: "turtleCommand",
+        command: "move",
+        name: String.fromCharCode(...turtle.name.data),
+        x: turtle.coords.data.x,
+        y: turtle.coords.data.y,
+        orientation: turtle.orientation,
+        visible: turtle.visible != 0,
+        image: {
+          path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+          offsetX: turtle.displayProperties.data.offsetX,
+          offsetY: turtle.displayProperties.data.offsetY,
+          rotatable: turtle.displayProperties.data.rotatable != 0,
+        }
+      });
+    });
+    return {}
   }
 
   @Arguments([])
@@ -335,9 +434,17 @@ export default class TurtleCommands {
         topic: "turtleCommand",
         command: "move",
         name: String.fromCharCode(...turtle.name.data),
-        x: turtle.position.data.x,
-        y: turtle.position.data.y,
+        x: turtle.coords.data.x,
+        y: turtle.coords.data.y,
         orientation: turtle.orientation,
+        visible: turtle.visible != 0,
+        image: {
+          path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+          offsetX: turtle.displayProperties.data.offsetX,
+          offsetY: turtle.displayProperties.data.offsetY,
+          rotatable: turtle.displayProperties.data.rotatable != 0,
+        }
+
       });
     });
     return {};

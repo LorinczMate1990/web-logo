@@ -1,7 +1,7 @@
 export interface CommandData {
-  getLineNumber() : number;
-  getCharNumber() : number;
-  getLabel() : string;
+  getLineNumber(): number;
+  getCharNumber(): number;
+  getLabel(): string;
 }
 
 export type SuccesfulExecuteResponse = {
@@ -22,43 +22,47 @@ export type ExecuteResponse = WrongfulExecuteResponse | SuccesfulExecuteResponse
 export type ParamType = number | ExecutableFactory | StructuredMemoryData;
 export type ArgType = (ParamType | string)[];
 
-export function isParamType(v : any) : v is ParamType {
+export function isParamType(v: any): v is ParamType {
   return (typeof v === "number" || isExecutableWithContext(v) || isStructuredMemoryData(v));
 }
 
-export function isExecutableWithContext(v : any) : v is ExecutableWithContext {
+export function isExecutableWithContext(v: any): v is ExecutableWithContext {
   return v.ExecutableWithContextSymbol === ExecutableWithContext.StaticExecutableWithContextSymbol;
 }
 
-export function isExecutableFactory(v : any) : v is ExecutableFactory {
+export function isExecutableFactory(v: any): v is ExecutableFactory {
   return v.ExecutableFactorySymbol === ExecutableFactory.StaticExecutableFactorySymbol;
 }
 
-export function isStructuredMemoryData(v : any) : v is StructuredMemoryData {
+export function isStructuredMemoryData(v: any): v is StructuredMemoryData {
   return v.StructuredMemoryDataSymbol === StructuredMemoryData.StaticStructuredMemoryData;
 }
 
 export type CommandControl = {
-  return? : boolean;
-  returnValue? : ParamType;
+  return?: boolean;
+  returnValue?: ParamType;
 };
 
 export interface Executable {
-  execute() : Promise<CommandControl>
+  execute(): Promise<CommandControl>
+}
+
+export function packToStructuredMemoryData< T extends (ParamType[] | { [key: string]: ParamType  }) >(data: T): StructuredMemoryData & { data: T } {
+  return new StructuredMemoryData(data) as StructuredMemoryData & { data: T };
 }
 
 export class StructuredMemoryData {
   static StaticStructuredMemoryData = Symbol('StructuredMemoryData');
   StructuredMemoryDataSymbol = StructuredMemoryData.StaticStructuredMemoryData;
 
-  data : ParamType[] | { [key: string]: ParamType } = {};
+  data: ParamType[] | { [key: string]: ParamType } = {};
 
-  static buildFromString(str: string): StructuredMemoryData {
+  static buildFromString(str: string): StructuredMemoryData & {data: number[]} {
     // Convert each character of the string to its ASCII value
     const asciiArray: number[] = Array.from(str, char => char.charCodeAt(0));
 
     // Create a new instance of StructuredMemoryData using the ASCII array
-    return new StructuredMemoryData(asciiArray);
+    return packToStructuredMemoryData(asciiArray);
   }
 
   static convertToString(data: StructuredMemoryData): string {
@@ -70,7 +74,7 @@ export class StructuredMemoryData {
     return stringArray.join("");
   }
 
-  constructor(data : ParamType[] | { [key: string]: ParamType }) {
+  constructor(data: ParamType[] | { [key: string]: ParamType }) {
     this.data = data;
   }
 
@@ -79,7 +83,7 @@ export class StructuredMemoryData {
     return !isNaN(parsed) && parsed.toString() === input.trim();
   }
 
-  getDataMember(index : string | number) {
+  getDataMember(index: string | number) {
     if (typeof index === "string" && StructuredMemoryData.isArrayIndexer(index)) {
       index = parseFloat(index);
     }
@@ -91,7 +95,7 @@ export class StructuredMemoryData {
     }
   }
 
-  setDataMember(index : string | number, data : ParamType) {
+  setDataMember(index: string | number, data: ParamType) {
     if (typeof index === "string" && StructuredMemoryData.isArrayIndexer(index)) {
       index = parseFloat(index);
     }
@@ -104,40 +108,40 @@ export class StructuredMemoryData {
     }
   }
 
-  
+
 
 }
 
 export abstract class ExecutableWithContext implements Executable, HasContextMemory {
   static StaticExecutableWithContextSymbol = Symbol('ExecutableWithContext');
   ExecutableWithContextSymbol = ExecutableWithContext.StaticExecutableWithContextSymbol;
-  
+
   abstract get context(): AbstractMemory;
   abstract execute(): Promise<CommandControl>;
-  abstract get meta() : MemoryMetaData | undefined;
+  abstract get meta(): MemoryMetaData | undefined;
 }
 
 export abstract class ExecutableFactory {
   static StaticExecutableFactorySymbol = Symbol('ExecutableFactory');
   ExecutableFactorySymbol = ExecutableFactory.StaticExecutableFactorySymbol;
 
-  abstract getNewExecutableWithContext() : ExecutableWithContext;
-  abstract get meta() : MemoryMetaData | undefined;
-  abstract set meta(m : MemoryMetaData | undefined);
+  abstract getNewExecutableWithContext(): ExecutableWithContext;
+  abstract get meta(): MemoryMetaData | undefined;
+  abstract set meta(m: MemoryMetaData | undefined);
 }
 
 export interface VariableGetter {
-  getVariable(key : string) : ParamType;
-  hasVariable(key : string) : boolean;
+  getVariable(key: string): ParamType;
+  hasVariable(key: string): boolean;
 }
 
 export interface VariableSetter {
-  setVariable(key : string, value : ParamType) : void;
-  createVariable(key : string, value : ParamType) : void;
+  setVariable(key: string, value: ParamType): void;
+  createVariable(key: string, value: ParamType): void;
 }
 
 export type MemoryMetaData = {
-  type: "command", 
+  type: "command",
   arguments: string[]
 }
 
@@ -146,12 +150,12 @@ export interface AbstractMemory extends VariableGetter, VariableSetter {
 }
 
 export interface HasContextMemory {
-  get context() : AbstractMemory;
+  get context(): AbstractMemory;
 }
 
 export type InterpreterHooks = {
-  beforeRunNewCommand? : (p : {sessionId : string, command : CommandData, flushCommandQueue : () => void;}) => Promise<void> // Todo: Using some input param, this could be more useful
-  beforeStartSession? : (p : {sessionId : string}) => Promise<void>
-  afterFinishSession? : (p : {sessionId : string}) => Promise<void>
-  afterError? : (p : {sessionId : string, error : Error}) => Promise<void>
+  beforeRunNewCommand?: (p: { sessionId: string, command: CommandData, flushCommandQueue: () => void; }) => Promise<void> // Todo: Using some input param, this could be more useful
+  beforeStartSession?: (p: { sessionId: string }) => Promise<void>
+  afterFinishSession?: (p: { sessionId: string }) => Promise<void>
+  afterError?: (p: { sessionId: string, error: Error }) => Promise<void>
 }

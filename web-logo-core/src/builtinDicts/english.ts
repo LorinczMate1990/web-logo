@@ -31,6 +31,8 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   "lookat": TurtleCommands.lookAt,
   "scale": TurtleCommands.scale,
   "setscale": TurtleCommands.setScale,
+  "visible": TurtleCommands.visible,
+  "form": TurtleCommands.setForm,
   
   "repeat": CoreCommands.repeat,
   "rep": CoreCommands.repeat,
@@ -47,6 +49,7 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   "while": CoreCommands.whileCycle,
   'savecanvas': CoreCommands.saveCanvas,
   'restorecanvas': CoreCommands.restoreCanvas,
+  'capture': CoreCommands.captureCanvasPart,
   
   "insertBeforeFirst": ArrayCommands.insertBeforeFirst,
   "insertAfterLast": ArrayCommands.insertAfterLast,
