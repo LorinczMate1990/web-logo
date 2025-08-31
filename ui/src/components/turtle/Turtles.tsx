@@ -1,11 +1,13 @@
+import CanvasStateStore from "../../utils/CanvasStateStore.js";
 import Turtle, { TurtleVisibility } from "./Turtle.js";
 import useTurtles from "./useTurtles.js"
 
 type TurtlesProps = {
   globalVisibility: TurtleVisibility;
+  canvasStateStore: CanvasStateStore;
 }
 
-export default function Turtles({globalVisibility} : TurtlesProps) {
+export default function Turtles({globalVisibility, canvasStateStore} : TurtlesProps) {
   const { turtleInstances } = useTurtles();
 
 
@@ -17,6 +19,7 @@ export default function Turtles({globalVisibility} : TurtlesProps) {
         globalVisibility={globalVisibility}
         moveTurtle={()=>0}
         rotateTurtle={()=>0}
+        canvasStateStore={canvasStateStore}
       />;
     }
   );

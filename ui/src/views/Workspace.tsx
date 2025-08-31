@@ -121,7 +121,7 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
                 ref={drawingCanvasRef}
               >
                 {/* Somehow I must detect every turtles here and build the turtles dynamically */}
-                <Turtles globalVisibility={turtleVisibility} />
+                <Turtles globalVisibility={turtleVisibility} canvasStateStore={drawingCanvasStateStoreRef.current} />
               </DrawingCanvas>
             </Panel>
             <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", height: "5px" }} />

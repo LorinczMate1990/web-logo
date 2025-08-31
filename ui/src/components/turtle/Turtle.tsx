@@ -1,8 +1,10 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import CanvasContext from '../CanvasContext.js';
 import Draggable from '../Draggable.js';
 import TurtleInstance from '../../models/TurtleInstance.js';
 import config from '../../config.js'
+import CanvasStateStore from '../../utils/CanvasStateStore.js';
+import TurtleImage from './TurtlePicture.js';
 
 export type TurtleVisibility = "visible" | "invisible";
 
@@ -11,29 +13,18 @@ interface TurtleProps {
 	globalVisibility: TurtleVisibility;
 	moveTurtle: (dx: number, dy: number) => void;
 	rotateTurtle: (deg: number) => void;
+	canvasStateStore: CanvasStateStore;
 }
 
-const Turtle: React.FC<TurtleProps> = ({ globalVisibility, turtle, moveTurtle, rotateTurtle }) => {
-	function getImageUrlFromPath(path: string): string {
-		const [place, label] = path.split("://");
 
-		if (place == "builtin") {
-			const src = Object.entries(config.images).find(([path]) =>
-				path.endsWith(`${label}.png`)
-			)?.[1].default;
-			return src ?? "";
-		}
-		return "";
-	}
 
+const Turtle: React.FC<TurtleProps> = ({ globalVisibility, turtle, moveTurtle, rotateTurtle, canvasStateStore }) => {
 	const context = useContext(CanvasContext);
 	// The turtle must rendered correctly above the Canvas
 	// This is the purpose of this component
 	if (turtle == null || globalVisibility == "invisible") {
 		return <></>
 	}
-
-	const imagePath = getImageUrlFromPath(turtle.picture.path);
 
 	return <Draggable
 		top={turtle.position.y}
@@ -56,11 +47,7 @@ const Turtle: React.FC<TurtleProps> = ({ globalVisibility, turtle, moveTurtle, r
 					left: -turtle.picture.offsetX,
 				}}
 			>
-				<img
-					onDragStart={(e) => e.preventDefault()}
-					draggable={false}
-					src={imagePath}
-				/>
+				<TurtleImage canvasStateStore={canvasStateStore} path={turtle.picture.path}/>
 			</div>
 		</div>
 	</Draggable>
