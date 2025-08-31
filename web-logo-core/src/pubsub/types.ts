@@ -27,6 +27,7 @@ type MoveTurtle = {
   x: number;
   y: number;
   orientation: number;
+  visible: boolean;
   name: string;
   image: {
     path: string,

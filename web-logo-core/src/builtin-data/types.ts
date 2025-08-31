@@ -30,6 +30,7 @@ export type GlobalTurtle = {
   name: StructuredNumericArray,
   group: StructuredNumericArray,
   listen: number,
+  visible: number,
   displayProperties: StructuredDisplayProperties,
   orientation: number,
   coords: StructuredCoords,

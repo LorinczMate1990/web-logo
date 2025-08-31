@@ -11,14 +11,17 @@ class TurtleInstance {
   position: Position;
   orientation: Orientation;
   picture: TurtlePicture;
+  visible: boolean;
 
   constructor(
     position: Position,
     orientation: Orientation,
     picture : TurtlePicture,
+    visible: boolean,
   ) {
     this.position = position;
     this.orientation = orientation;
+    this.visible = visible;
     this.picture = {
       ...picture
     };

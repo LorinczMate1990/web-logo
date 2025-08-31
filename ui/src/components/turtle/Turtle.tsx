@@ -22,7 +22,7 @@ const Turtle: React.FC<TurtleProps> = ({ globalVisibility, turtle, moveTurtle, r
 	const context = useContext(CanvasContext);
 	// The turtle must rendered correctly above the Canvas
 	// This is the purpose of this component
-	if (turtle == null || globalVisibility == "invisible") {
+	if (turtle == null || !turtle.visible || globalVisibility == "invisible") {
 		return <></>
 	}
 

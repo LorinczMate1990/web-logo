@@ -15,6 +15,7 @@ export default function initMemory(globalMemory: AbstractMemory) {
     name: StructuredMemoryData.buildFromString("turtle_0"),
     group: StructuredMemoryData.buildFromString("main"),
     listen: 1,
+    visible: 1,
     orientation: 0,
     displayProperties: defaultDisplayProperties,
     coords: packToStructuredMemoryData({ x: 200, y: 200 }),

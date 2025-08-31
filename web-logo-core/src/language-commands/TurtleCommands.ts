@@ -35,6 +35,7 @@ function goToPoint(turtle: GlobalTurtle, newX: number, newY: number, newOrientat
     x: turtle.coords.data.x,
     y: turtle.coords.data.y,
     orientation: turtle.orientation,
+    visible: turtle.visible != 0,
     image: {
       path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
       offsetX: turtle.displayProperties.data.offsetX,
@@ -81,6 +82,7 @@ function rotate(angle: number, memory: AbstractMemory) {
       x: turtle.coords.data.x,
       y: turtle.coords.data.y,
       orientation: turtle.orientation,
+      visible: turtle.visible != 0,
       image: {
         path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
         offsetX: turtle.displayProperties.data.offsetX,
@@ -103,6 +105,7 @@ function lookAt(x: number, y: number, memory: AbstractMemory) {
       x: turtle.coords.data.x,
       y: turtle.coords.data.y,
       orientation: turtle.orientation,
+      visible: turtle.visible != 0,
       image: {
         path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
         offsetX: turtle.displayProperties.data.offsetX,
@@ -328,6 +331,7 @@ export default class TurtleCommands {
       name,
       group,
       listen: 1,
+      visible: 1,
       displayProperties: defaultDisplayProperties,
       orientation,
       coords: packToStructuredMemoryData({ x, y }),
@@ -351,6 +355,7 @@ export default class TurtleCommands {
       x,
       y,
       orientation,
+      visible: true,
       image: {
         path: StructuredMemoryData.convertToString(defaultDisplayProperties.data.image),
         offsetX: defaultDisplayProperties.data.offsetX,
@@ -371,6 +376,7 @@ export default class TurtleCommands {
         x: turtle.coords.data.x,
         y: turtle.coords.data.y,
         orientation: turtle.orientation,
+        visible: turtle.visible != 0,
         image: {
           path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
           offsetX: turtle.displayProperties.data.offsetX,
