@@ -38,7 +38,7 @@ export type GlobalTurtle = {
   pencolor: StructuredNumericArray,
   penwidth: number,
   penstate: number,
-  scale: number,
+  scale: StructuredCoords,
   customData: StructuredMemoryData,
 };
 

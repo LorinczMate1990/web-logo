@@ -23,7 +23,7 @@ export default function initMemory(globalMemory: AbstractMemory) {
     positionStack: packToStructuredMemoryData([]),
     penwidth: 1,
     penstate: 1,
-    scale: 1,
+    scale: packToStructuredMemoryData({x: 1, y: 1}),
     customData: new StructuredMemoryData({})
   };
 
