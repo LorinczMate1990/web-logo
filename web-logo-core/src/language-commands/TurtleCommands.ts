@@ -322,7 +322,6 @@ export default class TurtleCommands {
     const defaultDisplayProperties = packToStructuredMemoryData({
       image: StructuredMemoryData.buildFromString("builtin://simple-turtle"),
       rotatable: 1,
-      visible: 1,
       offsetX: 18,
       offsetY: 23,
     });
@@ -364,6 +363,68 @@ export default class TurtleCommands {
       }
     });
     return {};
+  }
+
+  @Arguments(['numeric'])
+  static async visible(arg: ArgType, memory: AbstractMemory) {
+    const state = arg[0] as number;
+    forAllWatchingTurtles(memory, turtle => {
+      turtle.visible = state;
+      turtleCommandPubSub.addToQueue({
+        topic: "turtleCommand",
+        command: "move",
+        name: String.fromCharCode(...turtle.name.data),
+        x: turtle.coords.data.x,
+        y: turtle.coords.data.y,
+        orientation: turtle.orientation,
+        visible: turtle.visible != 0,
+        image: {
+          path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+          offsetX: turtle.displayProperties.data.offsetX,
+          offsetY: turtle.displayProperties.data.offsetY,
+          rotatable: turtle.displayProperties.data.rotatable != 0,
+        }
+      });
+    });
+    return {}
+  }
+
+  @Arguments(['array', 'array', 'numeric', 'numeric', 'numeric'])
+  static async setForm(arg: ArgType, memory: AbstractMemory) {
+    const typeOfForm = StructuredMemoryData.convertToString(arg[0] as StructuredMemoryData);
+    const path = StructuredMemoryData.convertToString(arg[1] as StructuredMemoryData);
+    const offsetX = arg[2] as number;
+    const offsetY = arg[3] as number;
+    const rotatable = arg[4] as number;
+
+    if (typeOfForm !== 'builtin' && typeOfForm !== 'memory') throw new Error(`Turtle can't take the form of type "${typeOfForm}"`);
+
+    const fullPath = `${typeOfForm}://${path}`;
+
+    forAllWatchingTurtles(memory, turtle => {
+      turtle.displayProperties = packToStructuredMemoryData({
+        image: StructuredMemoryData.buildFromString(fullPath),
+        offsetX,
+        offsetY,
+        rotatable,
+      });
+      turtleCommandPubSub.addToQueue({
+        topic: "turtleCommand",
+        command: "move",
+        name: String.fromCharCode(...turtle.name.data),
+        x: turtle.coords.data.x,
+        y: turtle.coords.data.y,
+        orientation: turtle.orientation,
+        visible: turtle.visible != 0,
+        image: {
+          path: StructuredMemoryData.convertToString(turtle.displayProperties.data.image),
+          offsetX: turtle.displayProperties.data.offsetX,
+          offsetY: turtle.displayProperties.data.offsetY,
+          rotatable: turtle.displayProperties.data.rotatable != 0,
+        }
+      });
+    });
+    return {}
   }
 
   @Arguments([])

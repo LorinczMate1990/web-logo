@@ -20,7 +20,6 @@ export type StructuredDisplayProperties = {
   data: {
     image : StructuredNumericArray,
     rotatable : number,
-    visible: number,
     offsetX : number, 
     offsetY : number,
   }

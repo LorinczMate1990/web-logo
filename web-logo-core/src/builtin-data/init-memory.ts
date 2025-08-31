@@ -6,7 +6,6 @@ export default function initMemory(globalMemory: AbstractMemory) {
   const defaultDisplayProperties = packToStructuredMemoryData({
     image: StructuredMemoryData.buildFromString("builtin://simple-turtle"),
     rotatable: 1,
-    visible: 1,
     offsetX: 18,
     offsetY: 23,
   });
