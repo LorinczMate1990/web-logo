@@ -68,7 +68,9 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
           case "restoreCanvas":
             drawingCanvasStateStoreRef.current?.restoreState(message.label);
             break;
-
+          case "capture":
+            drawingCanvasStateStoreRef.current?.savePart(message.label, message.x, message.y, message.width, message.height);
+            break;
         };
       }
     } catch (e) {
