@@ -62,12 +62,15 @@ function goToPoint(turtle: GlobalTurtle, newX: number, newY: number, newOrientat
 
 function go(referenceDistance: number, memory: AbstractMemory) {
   forAllWatchingTurtles(memory, (turtle) => {
-    const distance = turtle.scale * referenceDistance;
+    const distance = referenceDistance;
     const rad = turtle.orientation / 180 * Math.PI;
     const x = turtle.coords.data.x;
     const y = turtle.coords.data.y;
-    const newX = x + distance * Math.cos(rad);
-    const newY = y + distance * Math.sin(rad);
+    const dX = distance * Math.cos(rad);
+    const dY = distance * Math.sin(rad);
+    const newX = x+turtle.scale.data.x*dX;
+    const newY = y+turtle.scale.data.y*dY;
+    
     goToPoint(turtle, newX, newY, turtle.orientation)
   });
 }
@@ -145,20 +148,26 @@ export default class TurtleCommands {
     return {};
   }
 
-  @Arguments(['numeric'])
+  @Arguments({ variableArgumentLists: true, 1: ['numeric'], 2: ['numeric', 'numeric'] })
   static async scale(args: ArgType, memory: AbstractMemory) {
-    const scale = args[0] as number;
+    const scaleX = args[0] as number;
+    const scaleY = (args.length == 1)?scaleX:args[1] as number;
     forAllWatchingTurtles(memory, (turtle) => {
-      turtle.scale = turtle.scale * scale;
+      turtle.scale.data.x *= scaleX;
+      turtle.scale.data.y *= scaleY;
+      
     });
     return {};
   }
 
-  @Arguments(['numeric'])
+  @Arguments({ variableArgumentLists: true, 1: ['numeric'], 2: ['numeric', 'numeric'] })
   static async setScale(args: ArgType, memory: AbstractMemory) {
-    const scale = args[0] as number;
+    const scaleX = args[0] as number;
+    const scaleY = (args.length == 1)?scaleX:args[1] as number
     forAllWatchingTurtles(memory, (turtle) => {
-      turtle.scale = scale;
+      turtle.scale.data.x = scaleX;
+      turtle.scale.data.y = scaleY;
+      
     });
     return {};
   }
@@ -338,7 +347,7 @@ export default class TurtleCommands {
       pencolor: packToStructuredMemoryData([0, 0, 0]),
       penwidth: 1,
       penstate: 1,
-      scale: 1,
+      scale: packToStructuredMemoryData({x: 1, y: 1}),
       positionStack: packToStructuredMemoryData([]),
       customData: new StructuredMemoryData({})
     };
