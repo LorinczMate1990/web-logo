@@ -68,9 +68,9 @@ function go(referenceDistance: number, memory: AbstractMemory) {
     const y = turtle.coords.data.y;
     const dX = distance * Math.cos(rad);
     const dY = distance * Math.sin(rad);
-    const newX = x+turtle.scale.data.x*dX;
-    const newY = y+turtle.scale.data.y*dY;
-    
+    const newX = x + turtle.scale.data.x * dX;
+    const newY = y + turtle.scale.data.y * dY;
+
     goToPoint(turtle, newX, newY, turtle.orientation)
   });
 }
@@ -151,11 +151,11 @@ export default class TurtleCommands {
   @Arguments({ variableArgumentLists: true, 1: ['numeric'], 2: ['numeric', 'numeric'] })
   static async scale(args: ArgType, memory: AbstractMemory) {
     const scaleX = args[0] as number;
-    const scaleY = (args.length == 1)?scaleX:args[1] as number;
+    const scaleY = (args.length == 1) ? scaleX : args[1] as number;
     forAllWatchingTurtles(memory, (turtle) => {
       turtle.scale.data.x *= scaleX;
       turtle.scale.data.y *= scaleY;
-      
+
     });
     return {};
   }
@@ -163,11 +163,11 @@ export default class TurtleCommands {
   @Arguments({ variableArgumentLists: true, 1: ['numeric'], 2: ['numeric', 'numeric'] })
   static async setScale(args: ArgType, memory: AbstractMemory) {
     const scaleX = args[0] as number;
-    const scaleY = (args.length == 1)?scaleX:args[1] as number
+    const scaleY = (args.length == 1) ? scaleX : args[1] as number
     forAllWatchingTurtles(memory, (turtle) => {
       turtle.scale.data.x = scaleX;
       turtle.scale.data.y = scaleY;
-      
+
     });
     return {};
   }
@@ -177,6 +177,16 @@ export default class TurtleCommands {
     const x = args[0] as number;
     const y = args[1] as number;
     lookAt(x, y, memory);
+    return {};
+  }
+
+  @Arguments(['numeric', 'numeric'])
+  static async goto(args: ArgType, memory: AbstractMemory) {
+    const x = args[0] as number;
+    const y = args[1] as number;
+    forAllWatchingTurtles(memory, (turtle) => {
+      goToPoint(turtle, x, y, turtle.orientation)
+    });
     return {};
   }
 
@@ -347,7 +357,7 @@ export default class TurtleCommands {
       pencolor: packToStructuredMemoryData([0, 0, 0]),
       penwidth: 1,
       penstate: 1,
-      scale: packToStructuredMemoryData({x: 1, y: 1}),
+      scale: packToStructuredMemoryData({ x: 1, y: 1 }),
       positionStack: packToStructuredMemoryData([]),
       customData: new StructuredMemoryData({})
     };

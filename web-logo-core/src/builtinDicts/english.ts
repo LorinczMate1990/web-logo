@@ -33,6 +33,7 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   "setscale": TurtleCommands.setScale,
   "visible": TurtleCommands.visible,
   "form": TurtleCommands.setForm,
+  "goto": TurtleCommands.goto,
   
   "repeat": CoreCommands.repeat,
   "rep": CoreCommands.repeat,
