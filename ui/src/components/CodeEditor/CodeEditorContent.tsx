@@ -12,8 +12,35 @@ type CodeEditorContent = {
   interpreter: Interpreter;
 };
 
+function getLineForCursorPos(lines : string[], cursorPos : number) : number {
+  let charCounter = 0;
+  let lineNumber = 0; 
+  while (charCounter < cursorPos) {
+    charCounter += lines[lineNumber].length + 1; 
+    lineNumber++;
+  }
+  return lineNumber-1;
+}
+
+function getMarkedSections(code : string, firstChar : number, lastChar : number) : string {
+  const lines = code.split("\n");
+  if (firstChar == -1 || lastChar == -1 || firstChar > code.length || lastChar > code.length) return "";
+  let firstLine = getLineForCursorPos(lines, firstChar);
+  let lastLine = getLineForCursorPos(lines, lastChar);
+  
+  while (firstLine >= 0 && !lines[firstLine--].match(/^##.*/) );
+  firstLine++;
+  while (lastLine <= lines.length-1 && !lines[lastLine++].match(/^##.*/) );
+  lastLine--;
+
+  const selectedLines = lines.slice(firstLine, lastLine+1);
+  return selectedLines.join("\n");
+}
+
 export default function CodeEditorContent({ openedFile, executeCode, interpreter }: CodeEditorContent) {
   const [saved, setSaved] = useState(true);
+  const [firstHighlightedChar, setFirstHighlightedChar] = useState(-1);
+  const [lastHighlightedChar, setLastHighlightedChar] = useState(-1);
   const [fileContent, setFileContent] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,6 +83,7 @@ export default function CodeEditorContent({ openedFile, executeCode, interpreter
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <EditorMenu
         run={() => executeCode(fileContent)}
+        runSection={() => executeCode(getMarkedSections(fileContent, firstHighlightedChar, lastHighlightedChar))}
         save={async () => {
           const writableOpenedFile = await getWritableStream(openedFile);
           await writeFile(writableOpenedFile, fileContent);
@@ -65,6 +93,10 @@ export default function CodeEditorContent({ openedFile, executeCode, interpreter
 
       <MultilinedEditor
         keywords={interpreter.getKeywordList()}
+        onCursorPositionChange={(start, end) => {
+          setFirstHighlightedChar(start);
+          setLastHighlightedChar(end);
+        }}
         fileContent={fileContent}
         onValueChange={(code) => {
           setSaved(false);
