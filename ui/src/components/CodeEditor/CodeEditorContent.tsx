@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Interpreter } from "web-logo-core";
 import EditorMenu from './EditorMenu.js';
 import MultilinedEditor from './NumberedEditor.js';
+import "./LogoSyntax.css"
 
 type CodeEditorContent = {
   openedFile: FileSystemFileHandle;

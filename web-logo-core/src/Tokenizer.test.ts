@@ -186,15 +186,15 @@ describe('tokenizer', () => {
       it('tracks line and char numbers for tokens on multiple lines', () => {
         const tokens = tokenizer('token4\ntoken5\ntoken6');
         expect(tokens[0].lineNumber).toEqual(0);
-        expect(tokens[0].charNumber).toEqual(0); 
+        expect(tokens[0].charNumber).toEqual(0);
         expect(tokens[1].lineNumber).toEqual(1);
-        expect(tokens[1].charNumber).toEqual(0); 
+        expect(tokens[1].charNumber).toEqual(0);
         expect(tokens[2].lineNumber).toEqual(1);
-        expect(tokens[2].charNumber).toEqual(0); 
+        expect(tokens[2].charNumber).toEqual(0);
         expect(tokens[3].lineNumber).toEqual(2);
-        expect(tokens[3].charNumber).toEqual(0); 
+        expect(tokens[3].charNumber).toEqual(0);
         expect(tokens[4].lineNumber).toEqual(2);
-        expect(tokens[4].charNumber).toEqual(0); 
+        expect(tokens[4].charNumber).toEqual(0);
       });
 
       // Test tokens after characters and spaces on the same line
@@ -207,5 +207,33 @@ describe('tokenizer', () => {
       });
     });
 
+  })
+
+  describe("Comments", () => {
+    it('Must ignore tokens when first character is #', () => {
+      expect(tokenizer('#command5 command6').map(t => t.val)).toEqual([]);
+      expect(tokenizer('# command5 command6').map(t => t.val)).toEqual([]);
+    });
+    it('Newline must stop comment', () => {
+      expect(tokenizer('foo#command5\ncommand6').map(t => t.val)).toEqual(['foo', '\n', 'command6']);
+    });
+    it('Must ignore remaining tokens after #', () => {
+      expect(tokenizer('command5 #command6').map(t => t.val)).toEqual(['command5']);
+    });
+    it('Must ignore remaining tokens after #', () => {
+      expect(tokenizer('command5 #command6').map(t => t.val)).toEqual(['command5']);
+    });
+    it('Must ignore remaining tokens after # without space', () => {
+      expect(tokenizer('command5#command6').map(t => t.val)).toEqual(['command5']);
+    });
+    it('Must ignore # in strings', () => {
+      expect(tokenizer('command5 "#command6"').map(t => t.val)).toEqual(['command5', '"#command6"']);
+    });
+    it('Must process # in parenthesis', () => {
+      expect(() => tokenizer('command5 (3+#+4) ddd')).toThrow(UnclosedBracketError);
+    });
+    it('Must accept \'# as numeric constant', () => {
+      expect(tokenizer('\'# foo').map(t => t.val)).toEqual(['\'#', 'foo']);
+    })
   })
 });
