@@ -19,10 +19,17 @@ export default function getLogoLanguagePrismModel(keywords: string[]) {
       pattern: /'(?:\\.|[^\s\\])/, // Matches `'a` or `'\n`
       alias: 'number'
     },
-    comment: {
-      pattern: /([^'])#.*/,
-      greedy: true,
-      lookbehind: true,
-    },
+    comment: [
+      {
+        pattern: /^##.*\n/m,
+        greedy: true,
+        alias: 'section'
+      },
+      {
+        pattern: /(^|[^'])#.*/,
+        greedy: true,
+        lookbehind: true,
+      }
+    ]
   });
 }
