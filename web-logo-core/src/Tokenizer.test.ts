@@ -227,7 +227,10 @@ describe('tokenizer', () => {
       expect(tokenizer('command5#command6').map(t => t.val)).toEqual(['command5']);
     });
     it('Must ignore # in strings', () => {
-      expect(tokenizer('command5 "#command6"').map(t => t.val)).toEqual(['command5', '"#command6']);
+      expect(tokenizer('command5 "#command6"').map(t => t.val)).toEqual(['command5', '"#command6"']);
+    });
+    it('Must process # in parenthesis', () => {
+      expect(tokenizer('command5 "(3+#+4) ddd"').map(t => t.val)).toEqual(['command5', '(3+']);
     });
   })
 });
