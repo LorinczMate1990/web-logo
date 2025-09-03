@@ -30,6 +30,8 @@ export class Token {
 
 }
 
+type Environment = "string" | "braket" | "squareBraket" | "none" | "comment";
+
 export function tokenizer(command: string): Token[] {
   let lineCounter = 0;
   let charCounter = 0;
@@ -38,8 +40,8 @@ export function tokenizer(command: string): Token[] {
   let braketCounter = 0;
   let braceletCounter = 0;
   let squareBraketCounter = 0;
-  let previousEnvironment : "string" | "braket" | "squareBraket" | "none" = "none"; 
-  let currentEnvironment : "string" | "braket" | "squareBraket" | "none" = "none";
+  let previousEnvironment : Environment = "none"; 
+  let currentEnvironment : Environment = "none";
 
   function startNewToken() {
     tokens.push(currentToken);
@@ -49,7 +51,12 @@ export function tokenizer(command: string): Token[] {
   for (let i = 0; i < command.length; ++i) {
     charCounter++;
     const c = command[i];
-    if (currentEnvironment == "string") {
+    if (currentEnvironment == "comment" && c != "\n") {
+      // do nothing;
+    } else if ((c == '#') && (currentEnvironment == "none" || currentEnvironment == "braket" || currentEnvironment == "squareBraket")) {
+      previousEnvironment = currentEnvironment;
+      currentEnvironment = "comment";
+    } else if (currentEnvironment == "string") {
       currentToken.push(c);
       if (c=="\"" && i>0 && command[i-1] != "\\") {
         currentEnvironment = previousEnvironment;
@@ -69,11 +76,15 @@ export function tokenizer(command: string): Token[] {
       if (braketCounter > 0) throw new UnclosedBracketError(lineCounter);
       if (squareBraketCounter > 0) throw new UnclosedSquareBracketError(lineCounter);
       startNewToken();
-      currentToken = new Token("\n", lineCounter, charCounter);;
+      currentToken.push('\n');
       startNewToken();
+      if (currentEnvironment == "comment") {
+        // previousEnvironment must stay like commenting didn't happened
+        currentEnvironment = "none";
+      }
     } else if (c == ";" && braketCounter == 0) {
       startNewToken();
-      currentToken = new Token("\n", lineCounter, charCounter);;
+      currentToken.push('\n');
       startNewToken();
     } else if (c == "[") {
       if (currentEnvironment == "none") currentEnvironment = "squareBraket";

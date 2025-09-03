@@ -209,13 +209,13 @@ describe('tokenizer', () => {
 
   })
 
-  describe.only("Comments", () => {
+  describe("Comments", () => {
     it('Must ignore tokens when first character is #', () => {
       expect(tokenizer('#command5 command6').map(t => t.val)).toEqual([]);
       expect(tokenizer('# command5 command6').map(t => t.val)).toEqual([]);
     });
     it('Newline must stop comment', () => {
-      expect(tokenizer('#command5\ncommand6').map(t => t.val)).toEqual(['\n', 'command6']);
+      expect(tokenizer('foo#command5\ncommand6').map(t => t.val)).toEqual(['foo', '\n', 'command6']);
     });
     it('Must ignore remaining tokens after #', () => {
       expect(tokenizer('command5 #command6').map(t => t.val)).toEqual(['command5']);
@@ -230,7 +230,7 @@ describe('tokenizer', () => {
       expect(tokenizer('command5 "#command6"').map(t => t.val)).toEqual(['command5', '"#command6"']);
     });
     it('Must process # in parenthesis', () => {
-      expect(tokenizer('command5 "(3+#+4) ddd"').map(t => t.val)).toEqual(['command5', '(3+']);
+      expect(() => tokenizer('command5 (3+#+4) ddd')).toThrow(UnclosedBracketError);
     });
   })
 });
