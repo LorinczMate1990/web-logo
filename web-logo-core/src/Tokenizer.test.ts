@@ -232,5 +232,8 @@ describe('tokenizer', () => {
     it('Must process # in parenthesis', () => {
       expect(() => tokenizer('command5 (3+#+4) ddd')).toThrow(UnclosedBracketError);
     });
+    it('Must accept \'# as numeric constant', () => {
+      expect(tokenizer('\'# foo').map(t => t.val)).toEqual(['\'#', 'foo']);
+    })
   })
 });

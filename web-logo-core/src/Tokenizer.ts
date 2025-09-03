@@ -48,12 +48,13 @@ export function tokenizer(command: string): Token[] {
     currentToken = new Token("", lineCounter, charCounter);
   }
 
+  let prevC = "";
   for (let i = 0; i < command.length; ++i) {
     charCounter++;
     const c = command[i];
     if (currentEnvironment == "comment" && c != "\n") {
       // do nothing;
-    } else if ((c == '#') && (currentEnvironment == "none" || currentEnvironment == "braket" || currentEnvironment == "squareBraket")) {
+    } else if ((c == '#') && (prevC != "'") && (currentEnvironment == "none" || currentEnvironment == "braket" || currentEnvironment == "squareBraket")) {
       previousEnvironment = currentEnvironment;
       currentEnvironment = "comment";
     } else if (currentEnvironment == "string") {
@@ -125,6 +126,7 @@ export function tokenizer(command: string): Token[] {
     } else {
       currentToken.push(c);
     }
+    prevC = c;
   }
   startNewToken();
   if (braketCounter > 0) throw new UnclosedBracketError(lineCounter);
