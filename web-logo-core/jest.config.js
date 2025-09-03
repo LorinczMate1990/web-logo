@@ -1,10 +1,11 @@
-module.exports = {
-    preset: 'ts-jest',
-    testEnvironment: 'node',
-    testMatch: ['**/src/**/*.test.ts'], // Only run tests from the dist folder
-    transform: {
-      '^.+\\.ts$': 'ts-jest', // Transpile TypeScript files
-    },
-    moduleFileExtensions: ['ts', 'js'],
-    clearMocks: true,
-  };
+export default {
+  preset: 'ts-jest/presets/default-esm',
+  testEnvironment: 'node',
+  extensionsToTreatAsEsm: ['.ts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1' // if you're using .js extensions in imports
+  },
+  transform: {
+    '^.+\\.ts$': ['ts-jest', { useESM: true }]
+  }
+};
