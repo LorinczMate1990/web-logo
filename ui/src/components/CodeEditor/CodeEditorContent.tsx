@@ -5,6 +5,7 @@ import { Interpreter } from "web-logo-core";
 import EditorMenu from './EditorMenu.js';
 import MultilinedEditor from './NumberedEditor.js';
 import "./LogoSyntax.css"
+import { getFileCategory } from '../ProjectExplorer/Folder.js';
 
 type CodeEditorContent = {
   openedFile: FileSystemFileHandle;
@@ -42,6 +43,8 @@ export default function CodeEditorContent({ openedFile, executeCode, interpreter
   const [firstHighlightedChar, setFirstHighlightedChar] = useState(-1);
   const [lastHighlightedChar, setLastHighlightedChar] = useState(-1);
   const [fileContent, setFileContent] = useState<string | null>(null);
+
+  const fileName = openedFile.name;
 
   useEffect(() => {
     let isMounted = true;
@@ -89,6 +92,7 @@ export default function CodeEditorContent({ openedFile, executeCode, interpreter
           await writeFile(writableOpenedFile, fileContent);
           setSaved(true);
         }}
+        fileCategory={getFileCategory({name: fileName})}
       />
 
       <MultilinedEditor
