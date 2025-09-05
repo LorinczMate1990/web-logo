@@ -5,11 +5,27 @@ import File from "./File.js"
 import { createNewDirectory, createNewFile, deleteFileOrFolder } from "../../utils/FileHandling.js";
 import { Interpreter } from "web-logo-core";
 
+type FileOrFolderName = {
+  name: string
+}
+
 export type FileOrFolder = {
-  name: string;
   isFile: boolean;
   isFolder: boolean;
-};
+} & FileOrFolderName;
+
+export type FileCategory = "lgo" | "lgl" | "unknown";
+
+export function getFileCategory(file : FileOrFolderName) {
+  if ( isLgoFile(file) ) return "lgo";
+  if ( isLglFile(file) ) return "lgl";
+  return "unknown"; 
+}
+
+export function isLglFile(v : FileOrFolderName) {return v.name.endsWith(".lgl")}
+export function isLgoFile(v : FileOrFolderName) {return v.name.endsWith(".lgo")}
+export const alphabeticFileOrFolderSort = (a : FileOrFolderName, b : FileOrFolderName) => (a.name == b.name) ? 0 : Number(a.name > b.name)*2-1;
+
 
 type FolderProps = {
   name: string;
