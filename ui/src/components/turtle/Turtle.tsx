@@ -4,7 +4,7 @@ import Draggable from '../Draggable.js';
 import TurtleInstance from '../../models/TurtleInstance.js';
 import config from '../../config.js'
 import CanvasStateStore from '../../utils/CanvasStateStore.js';
-import TurtleImage from './TurtlePicture.js';
+import TurtleImage from './TurtleImage.js';
 
 export type TurtleVisibility = "visible" | "invisible";
 

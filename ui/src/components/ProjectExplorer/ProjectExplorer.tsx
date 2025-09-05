@@ -5,6 +5,7 @@ import Folder, { alphabeticFileOrFolderSort, FileOrFolder, isLglFile, isLgoFile 
 import File from "./File.js";
 import { createNewDirectory, createNewFile, executeFile } from "../../utils/FileHandling.js";
 import { Interpreter } from "web-logo-core";
+import { useLocalFiles } from "../../context/LocalFileContext.js";
 
 const ProjectExplorer: React.FC<{
   onFileDoubleClick: (file: FileSystemFileHandle) => void;
@@ -13,7 +14,7 @@ const ProjectExplorer: React.FC<{
 }> = ({ onFileDoubleClick, interpreter, openInterpreterSettings }) => {
   const rootHandle = useRef<FileSystemDirectoryHandle | null>(null);
   const [items, setItems] = useState<FileOrFolder[] | null>(null);
-  const [handles, setHandles] = useState<Record<string, FileSystemHandle>>({});
+  const localFileRegistry = useLocalFiles();
   const [isLoading, setIsLoading] = useState(false);
 
   const refresh = async () => {
@@ -37,7 +38,9 @@ const ProjectExplorer: React.FC<{
   const reloadContentList = async () => {
     const lglFiles: FileOrFolder[] = [];
     const newItems: FileOrFolder[] = [];
-    const newHandles: Record<string, FileSystemHandle> = {};
+    for (const key in localFileRegistry) {
+      delete localFileRegistry[key];
+    }
 
     setIsLoading(true);
     try {
@@ -53,13 +56,12 @@ const ProjectExplorer: React.FC<{
         };
         newItems.push(newItem);
         if (isLglFile(newItem)) lglFiles.push(newItem);
-        newHandles[name] = handle;
+        localFileRegistry[name] = handle;
       }
 
       const orderedNewItems = orderFilesAndFolders(newItems);
 
       setItems(orderedNewItems);
-      setHandles(newHandles);
     } catch (error) {
       console.error("Error opening folder:", error);
     } finally {
@@ -67,7 +69,7 @@ const ProjectExplorer: React.FC<{
     }
 
     for (const lglFile of lglFiles) {
-      const handle = newHandles[lglFile.name] as FileSystemFileHandle;
+      const handle = localFileRegistry[lglFile.name] as FileSystemFileHandle;
       await executeFile(handle, interpreter)
     }
   };
@@ -138,7 +140,7 @@ const ProjectExplorer: React.FC<{
                     interpreter={interpreter}
                     key={index}
                     name={item.name}
-                    handle={handles[item.name] as FileSystemDirectoryHandle}
+                    handle={localFileRegistry[item.name] as FileSystemDirectoryHandle}
                     parentDir={rootHandle.current!}
                     onFileDoubleClick={onFileDoubleClick}
                   />
@@ -148,7 +150,7 @@ const ProjectExplorer: React.FC<{
                     interpreter={interpreter}
                     name={item.name}
                     parentDir={rootHandle.current!}
-                    handle={handles[item.name] as FileSystemFileHandle}
+                    handle={localFileRegistry[item.name] as FileSystemFileHandle}
                   />
                 )
               )}

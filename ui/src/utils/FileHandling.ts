@@ -11,6 +11,15 @@ export const readFile = async (handle: FileSystemFileHandle) => {
   return content;
 }
 
+export const readBinaryFile = async (handle: FileSystemFileHandle) => {
+  // Get a file object from the handle
+  const file = await handle.getFile();
+
+  // Read the content of the file
+  const content = await file.arrayBuffer();
+  return content;
+}
+
 export const getWritableStream = async (handle: FileSystemFileHandle) => {
   return (handle as any).createWritable() as FileSystemWritableFileStream;
 };

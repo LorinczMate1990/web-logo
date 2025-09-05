@@ -416,7 +416,7 @@ export default class TurtleCommands {
     const offsetY = arg[3] as number;
     const rotatable = arg[4] as number;
 
-    if (typeOfForm !== 'builtin' && typeOfForm !== 'memory') throw new Error(`Turtle can't take the form of type "${typeOfForm}"`);
+    if (typeOfForm !== 'builtin' && typeOfForm !== 'memory' && typeOfForm !== 'file') throw new Error(`Turtle can't take the form of type "${typeOfForm}"`);
 
     const fullPath = `${typeOfForm}://${path}`;
 

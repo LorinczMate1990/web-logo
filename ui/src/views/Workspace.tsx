@@ -11,10 +11,13 @@ import InterpreterSettingsModal from '../components/InterpreterSettings/Interpre
 import WebInterpreterHooksConfig from '../interpreter-hooks/WebInterpreterHooksConfig.js';
 import Turtles from '../components/turtle/Turtles.js';
 import CanvasStateStore from '../utils/CanvasStateStore.js';
+import { FileRegistry, LocalFilesProvider } from '../context/LocalFileContext.js';
 
 export default function Workspace({ interpreter, interpreterConfig }: { interpreter: Interpreter, interpreterConfig: WebInterpreterHooksConfig }) {
   const drawingCanvasRef = useRef<DrawingCanvasRef | null>(null);
   const drawingCanvasStateStoreRef = useRef<CanvasStateStore>(new CanvasStateStore());
+
+  const localFileRegistry = useRef<FileRegistry>({});
 
   useEffect(() => {
     drawingCanvasStateStoreRef.current.setCanvas(drawingCanvasRef.current);
@@ -98,46 +101,46 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [isCanvasFocused]);
 
-  return <>
-    <div className="App" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <PanelGroup direction="horizontal">
-        {/* Resizable Side Panel */}
-        <Panel defaultSize={15} style={{ backgroundColor: "#f0f0f0" }}>
-          <ProjectExplorer
-            onFileDoubleClick={(e) => window.alert(`e: ${e}`)}
-            interpreter={interpreter}
-            openInterpreterSettings={() => setIsSettingsOpen(true)}
-          />
-        </Panel>
-        {/* Resize Handle */}
-        <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", width: "5px" }} />
-        {/* Main Content */}
-        <Panel minSize={1}>
-          <PanelGroup direction="vertical">
-            <Panel defaultSize={90} minSize={1}>
-              <DrawingCanvas
-                onFocus={() => setCanvasFocused(true)}
-                onBlur={() => setCanvasFocused(false)}
-                ref={drawingCanvasRef}
-              >
-                {/* Somehow I must detect every turtles here and build the turtles dynamically */}
-                <Turtles globalVisibility={turtleVisibility} canvasStateStore={drawingCanvasStateStoreRef.current} />
-              </DrawingCanvas>
-            </Panel>
-            <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", height: "5px" }} />
-            <Panel>
-              <CommandLine maxLines={10} interpreter={interpreter} />
-            </Panel>
-          </PanelGroup>
-        </Panel>
-      </PanelGroup>
-    </div>
+  return <LocalFilesProvider dictionary={localFileRegistry.current}>
+      <div className="App" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <PanelGroup direction="horizontal">
+          {/* Resizable Side Panel */}
+          <Panel defaultSize={15} style={{ backgroundColor: "#f0f0f0" }}>
+            <ProjectExplorer
+              onFileDoubleClick={(e) => window.alert(`e: ${e}`)}
+              interpreter={interpreter}
+              openInterpreterSettings={() => setIsSettingsOpen(true)}
+            />
+          </Panel>
+          {/* Resize Handle */}
+          <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", width: "5px" }} />
+          {/* Main Content */}
+          <Panel minSize={1}>
+            <PanelGroup direction="vertical">
+              <Panel defaultSize={90} minSize={1}>
+                <DrawingCanvas
+                  onFocus={() => setCanvasFocused(true)}
+                  onBlur={() => setCanvasFocused(false)}
+                  ref={drawingCanvasRef}
+                >
+                  {/* Somehow I must detect every turtles here and build the turtles dynamically */}
+                  <Turtles globalVisibility={turtleVisibility} canvasStateStore={drawingCanvasStateStoreRef.current} />
+                </DrawingCanvas>
+              </Panel>
+              <PanelResizeHandle style={{ backgroundColor: "#ccc", cursor: "col-resize", height: "5px" }} />
+              <Panel>
+                <CommandLine maxLines={10} interpreter={interpreter} />
+              </Panel>
+            </PanelGroup>
+          </Panel>
+        </PanelGroup>
+      </div>
 
 
-    <InterpreterSettingsModal
-      visible={isSettingsOpen}
-      onClose={() => setIsSettingsOpen(false)}
-      config={interpreterConfig}
-    />
-  </>
+      <InterpreterSettingsModal
+        visible={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        config={interpreterConfig}
+      />
+  </LocalFilesProvider>
 }
