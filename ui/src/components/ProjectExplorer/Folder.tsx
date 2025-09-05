@@ -11,6 +11,10 @@ export type FileOrFolder = {
   isFolder: boolean;
 };
 
+export function isLglFile(v : FileOrFolder) {return v.name.endsWith(".lgl")};
+export function isLgoFile(v : FileOrFolder) {return v.name.endsWith(".lgo");}
+export const alphabeticFileOrFolderSort = (a : FileOrFolder, b : FileOrFolder) => (a.name == b.name) ? 0 : Number(a.name > b.name)*2-1;
+
 type FolderProps = {
   name: string;
   handle: FileSystemDirectoryHandle;

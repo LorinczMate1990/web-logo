@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import './ProjectExplorer.css';
 import * as ContextMenu from "@radix-ui/react-context-menu";
-import Folder, { FileOrFolder } from "./Folder.js";
+import Folder, { alphabeticFileOrFolderSort, FileOrFolder, isLglFile, isLgoFile } from "./Folder.js";
 import File from "./File.js";
 import { createNewDirectory, createNewFile } from "../../utils/FileHandling.js";
 import { Interpreter } from "web-logo-core";
@@ -21,22 +21,17 @@ const ProjectExplorer: React.FC<{
   };
 
   const orderFilesAndFolders = (list : FileOrFolder[]) => {
-    // Order:
-    // - Every folders
-    // - Every LGL files
-    // - Every LGO files
-    // - Every other files
-    const isLglFile = (v : FileOrFolder) => v.name.endsWith(".lgl");
-    const isLgoFile = (v : FileOrFolder) => v.name.endsWith(".lgo");
-    const alphabeticSort = (a : FileOrFolder, b : FileOrFolder) => (a.name == b.name) ? 0 : Number(a.name > b.name)*2-1; 
+    const folders = list.filter(v => v.isFolder).sort(alphabeticFileOrFolderSort);
+    const lglFiles = list.filter(v => v.isFile && isLglFile(v)).sort(alphabeticFileOrFolderSort);
+    const lgoFiles = list.filter(v => v.isFile && isLgoFile(v)).sort(alphabeticFileOrFolderSort);
+    const otherFiles = list.filter(v => v.isFile && !isLgoFile(v) && !isLglFile(v)).sort(alphabeticFileOrFolderSort);
     
-
-    const folders = list.filter(v => v.isFolder).sort(alphabeticSort);
-    const lglFiles = list.filter(v => v.isFile && isLglFile(v)).sort(alphabeticSort);
-    const lgoFiles = list.filter(v => v.isFile && isLgoFile(v)).sort(alphabeticSort);
-    const otherFiles = list.filter(v => v.isFile && !isLgoFile(v) && !isLglFile(v)).sort(alphabeticSort);
-    
-    return [...folders, ...lglFiles, ...lgoFiles, ...otherFiles];
+    return [
+      ...folders,
+      ...lglFiles, 
+      ...lgoFiles, 
+      ...otherFiles
+    ];
   }
 
   const reloadContentList = async () => {
