@@ -20,6 +20,25 @@ const ProjectExplorer: React.FC<{
     await reloadContentList();
   };
 
+  const orderFilesAndFolders = (list : FileOrFolder[]) => {
+    // Order:
+    // - Every folders
+    // - Every LGL files
+    // - Every LGO files
+    // - Every other files
+    const isLglFile = (v : FileOrFolder) => v.name.endsWith(".lgl");
+    const isLgoFile = (v : FileOrFolder) => v.name.endsWith(".lgo");
+    const alphabeticSort = (a : FileOrFolder, b : FileOrFolder) => (a.name == b.name) ? 0 : Number(a.name > b.name)*2-1; 
+    
+
+    const folders = list.filter(v => v.isFolder).sort(alphabeticSort);
+    const lglFiles = list.filter(v => v.isFile && isLglFile(v)).sort(alphabeticSort);
+    const lgoFiles = list.filter(v => v.isFile && isLgoFile(v)).sort(alphabeticSort);
+    const otherFiles = list.filter(v => v.isFile && !isLgoFile(v) && !isLglFile(v)).sort(alphabeticSort);
+    
+    return [...folders, ...lglFiles, ...lgoFiles, ...otherFiles];
+  }
+
   const reloadContentList = async () => {
     try {
       if (!rootHandle.current) {
@@ -39,7 +58,9 @@ const ProjectExplorer: React.FC<{
         newHandles[name] = handle;
       }
 
-      setItems(newItems);
+      const orderedNewItems = orderFilesAndFolders(newItems);
+
+      setItems(orderedNewItems);
       setHandles(newHandles);
     } catch (error) {
       console.error("Error opening folder:", error);
