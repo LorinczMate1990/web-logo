@@ -49,6 +49,6 @@
   "devDependencies": {
     "@types/node": "^24.0.3",
     "@types/prismjs": "^1.26.5",
-    "typescript": "^5.8.2"
+    "typescript": "^5.9.2"
   }
 }
