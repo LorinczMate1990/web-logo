@@ -3,7 +3,7 @@ import './ProjectExplorer.css';
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import Folder, { alphabeticFileOrFolderSort, FileOrFolder, isLglFile, isLgoFile } from "./Folder.js";
 import File from "./File.js";
-import { createNewDirectory, createNewFile } from "../../utils/FileHandling.js";
+import { createNewDirectory, createNewFile, executeFile } from "../../utils/FileHandling.js";
 import { Interpreter } from "web-logo-core";
 
 const ProjectExplorer: React.FC<{
@@ -20,36 +20,39 @@ const ProjectExplorer: React.FC<{
     await reloadContentList();
   };
 
-  const orderFilesAndFolders = (list : FileOrFolder[]) => {
+  const orderFilesAndFolders = (list: FileOrFolder[]) => {
     const folders = list.filter(v => v.isFolder).sort(alphabeticFileOrFolderSort);
     const lglFiles = list.filter(v => v.isFile && isLglFile(v)).sort(alphabeticFileOrFolderSort);
     const lgoFiles = list.filter(v => v.isFile && isLgoFile(v)).sort(alphabeticFileOrFolderSort);
     const otherFiles = list.filter(v => v.isFile && !isLgoFile(v) && !isLglFile(v)).sort(alphabeticFileOrFolderSort);
-    
+
     return [
       ...folders,
-      ...lglFiles, 
-      ...lgoFiles, 
+      ...lglFiles,
+      ...lgoFiles,
       ...otherFiles
     ];
   }
 
   const reloadContentList = async () => {
+    const lglFiles: FileOrFolder[] = [];
+    const newItems: FileOrFolder[] = [];
+    const newHandles: Record<string, FileSystemHandle> = {};
+
+    setIsLoading(true);
     try {
       if (!rootHandle.current) {
         throw new Error("There is no root dir");
       }
-      setIsLoading(true);
-
-      const newItems: FileOrFolder[] = [];
-      const newHandles: Record<string, FileSystemHandle> = {};
 
       for await (const [name, handle] of rootHandle.current.entries()) {
-        newItems.push({
+        const newItem: FileOrFolder = {
           name,
           isFile: handle.kind === "file",
           isFolder: handle.kind === "directory",
-        });
+        };
+        newItems.push(newItem);
+        if (isLglFile(newItem)) lglFiles.push(newItem);
         newHandles[name] = handle;
       }
 
@@ -61,6 +64,11 @@ const ProjectExplorer: React.FC<{
       console.error("Error opening folder:", error);
     } finally {
       setIsLoading(false);
+    }
+
+    for (const lglFile of lglFiles) {
+      const handle = newHandles[lglFile.name] as FileSystemFileHandle;
+      await executeFile(handle, interpreter)
     }
   };
 
