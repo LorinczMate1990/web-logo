@@ -2,7 +2,7 @@ import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
 import { AbstractMemory, ArgType, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
-import { GlobalTurtle, isGlobalTurtles } from "../builtin-data/types.js";
+import { GlobalTurtle, isGlobalTurtles, StructuredGlobalTurtles } from "../builtin-data/types.js";
 
 function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
   const turtles = memory.getVariable("$turtles");
@@ -329,10 +329,30 @@ export default class TurtleCommands {
     return {};
   }
 
+  @Arguments(['array'])
+  static async removeTurtle(arg: ArgType, memory: AbstractMemory) {
+    const name = arg[0] as StructuredMemoryData & { data: number[] };
+    const nameStr = StructuredMemoryData.convertToString(name);
+
+    const turtles = memory.getVariable("$turtles") as StructuredGlobalTurtles;
+    if (!isStructuredMemoryData(turtles) || !Array.isArray(turtles.data)) { 
+      return {};
+    }
+
+    const index = turtles.data.findIndex(turtle => {
+      return  StructuredMemoryData.convertToString(turtle.data.name) == nameStr
+    });
+
+    if (index == -1) return {};
+    
+    turtles.data.splice(index, 1);
+    return {};
+  }
 
   @Arguments(['array', 'array', 'numeric', 'numeric', 'numeric'])
   static async addTurtle(arg: ArgType, memory: AbstractMemory) {
     const name = arg[0] as StructuredMemoryData & { data: number[] };
+    const nameStr = StructuredMemoryData.convertToString(name);
     const group = arg[1] as StructuredMemoryData & { data: number[] };
     const x = arg[2] as number;
     const y = arg[3] as number;
@@ -362,9 +382,13 @@ export default class TurtleCommands {
       customData: new StructuredMemoryData({})
     };
 
-    const turtles = memory.getVariable("$turtles");
+    const turtles = memory.getVariable("$turtles") as StructuredGlobalTurtles;
     if (!isStructuredMemoryData(turtles) || !Array.isArray(turtles.data)) return {};
-    turtles.data.push(new StructuredMemoryData(newTurtle));
+    const index = turtles.data.findIndex(turtle => StructuredMemoryData.convertToString(turtle.data.name) == nameStr);
+    if (index != -1) {
+      throw new Error(`Turtle already exists with name ${name}`);
+    }
+    turtles.data.push(packToStructuredMemoryData(newTurtle));
 
     turtleCommandPubSub.addToQueue({
       topic: "turtleCommand",

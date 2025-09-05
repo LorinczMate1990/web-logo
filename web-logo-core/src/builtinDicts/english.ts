@@ -26,6 +26,7 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   "clear": TurtleCommands.clearScreen,
   "cl": TurtleCommands.clearScreen,
   "newturtle": TurtleCommands.addTurtle,
+  "removeturtle": TurtleCommands.removeTurtle,
   "refreshturtles": TurtleCommands.refreshTurtles,
   "watch": TurtleCommands.watch,
   "lookat": TurtleCommands.lookAt,
