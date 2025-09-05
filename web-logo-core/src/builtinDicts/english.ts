@@ -59,6 +59,7 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   "removeLast": ArrayCommands.removeLast,
   "removeAny": ArrayCommands.removeAny,
   "slice": ArrayCommands.slice,
+  "filterArray": ArrayCommands.filterArray,
 
   "tick": DebugCommands.tick,
 };

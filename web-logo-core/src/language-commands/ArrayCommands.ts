@@ -63,6 +63,29 @@ export default class ArrayCommands {
       } as CommandControl;
   }
 
+  @Arguments(["array", "word", "code"])
+  static async filterArray(args: ArgType, memory: AbstractMemory) {
+      const array = args[0] as StructuredMemoryData & { data: ParamType[] };
+      const internalVariable = args[1] as string;
+      const filterCodeFactory = args[2] as ExecutableFactory;
+      filterCodeFactory.meta = {type: "command", arguments: []};
+      const filterCode = filterCodeFactory.getNewExecutableWithContext();
+      const filteredData : ParamType[] = [];
+      for (const element of array.data) {
+        filterCode.context.createVariable(internalVariable, element);
+        const commandControl = await filterCode.execute();
+        console.log({commandControl})
+        if (typeof(commandControl.returnValue) === "number" && commandControl.returnValue != 0) {
+            filteredData.push(element);
+        }
+      }
+
+
+      return {
+          returnValue: new StructuredMemoryData(filteredData),
+      } as CommandControl;
+  }
+
   @Arguments(["array", "numeric", ["array", "code", "numeric"]])
   static async insertAnywhere(args: ArgType, memory : AbstractMemory) {
     const array = args[0] as StructuredMemoryData & {data: ParamType[]};
