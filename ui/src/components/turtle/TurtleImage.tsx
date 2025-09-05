@@ -34,7 +34,7 @@ const TurtleImage: React.FC<{ path: string, canvasStateStore: CanvasStateStore }
 			const blob = new Blob([content]);
 			setImageUrl(URL.createObjectURL(blob));
 		});
-	}, [place]);
+	}, [place, label]);
 
 
 
