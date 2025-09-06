@@ -14,7 +14,6 @@ const ProjectExplorer: React.FC<{
   openInterpreterSettings: () => void;
   interpreterConfig: WebInterpreterHooksConfig;
 }> = ({ onFileDoubleClick, interpreter, openInterpreterSettings, interpreterConfig }) => {
-  console.log(interpreterConfig);
   const rootHandle = useRef<FileSystemDirectoryHandle | null>(null);
   const [items, setItems] = useState<FileOrFolder[] | null>(null);
   const localFileRegistry = useLocalFiles();

@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import TurtleInstance from "../../models/TurtleInstance.js";
 import { useSubscriber } from "../../pubsub/pubsubs.js";
 import { turtleCommandPubSub, TurtleCommandMessage } from 'web-logo-core';
-import Turtle from "./Turtle.js";
 
 export default function useTurtles() {
   const [turtleInstances, setTurtleInstances] = useState<{ [key: string]: TurtleInstance }>({});
