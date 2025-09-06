@@ -6,12 +6,15 @@ import File from "./File.js";
 import { createNewDirectory, createNewFile, executeFile } from "../../utils/FileHandling.js";
 import { Interpreter } from "web-logo-core";
 import { useLocalFiles } from "../../context/LocalFileContext.js";
+import WebInterpreterHooksConfig from "../../interpreter-hooks/WebInterpreterHooksConfig.js";
 
 const ProjectExplorer: React.FC<{
   onFileDoubleClick: (file: FileSystemFileHandle) => void;
   interpreter: Interpreter;
   openInterpreterSettings: () => void;
-}> = ({ onFileDoubleClick, interpreter, openInterpreterSettings }) => {
+  interpreterConfig: WebInterpreterHooksConfig;
+}> = ({ onFileDoubleClick, interpreter, openInterpreterSettings, interpreterConfig }) => {
+  console.log(interpreterConfig);
   const rootHandle = useRef<FileSystemDirectoryHandle | null>(null);
   const [items, setItems] = useState<FileOrFolder[] | null>(null);
   const localFileRegistry = useLocalFiles();
@@ -93,6 +96,14 @@ const ProjectExplorer: React.FC<{
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <button onClick={openFolder} style={{ padding: "10px 20px", fontSize: "16px" }}>
           Open Folder
+        </button>
+        <button
+          onMouseDown={() => interpreterConfig.stopEveryScripts()}
+          onMouseUp={() => interpreterConfig.letScriptsRunning()}
+          style={{ padding: "10px", fontSize: "16px" }}
+          title="Settings"
+        >
+          🛑
         </button>
         <button
           onClick={openInterpreterSettings}

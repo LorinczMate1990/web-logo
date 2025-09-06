@@ -6,12 +6,8 @@ export default class WebInterpreterHooks implements InterpreterHooks, WebInterpr
   lastTime = 0;
   table : {[key : string]: {startTime : number, lastSleep : number}} = {};
 
-  killTime = 100000;
   asyncTime = 100;
-
-  setKillTime(value: number) {
-    this.killTime = value;
-  }
+  preventStartingNewCommands = false;
 
   setAsyncTime(value: number) {
     this.asyncTime = value;
@@ -20,9 +16,13 @@ export default class WebInterpreterHooks implements InterpreterHooks, WebInterpr
   constructor() {
     this.lastTime = Date.now();
   }
-  getKillTime(): number {
-    return this.killTime;
+  stopEveryScripts(): void {
+    this.preventStartingNewCommands = true;
   }
+  letScriptsRunning(): void {
+    this.preventStartingNewCommands = false;
+  }
+
   getAsyncTime(): number {
     return this.asyncTime;
   }
@@ -44,7 +44,8 @@ export default class WebInterpreterHooks implements InterpreterHooks, WebInterpr
     if (!(sessionId in this.table)) {
       this.table[sessionId] = {startTime: Date.now(), lastSleep : Date.now()};
     }
-    if (currentTime - this.table[sessionId].startTime > this.killTime) throw new Error("Timeout");
+    
+    if (this.preventStartingNewCommands) throw new Error("The UI has blocked the continuation of the script");
 
     const lastTime = this.table[sessionId].lastSleep;
     if (currentTime - lastTime > this.asyncTime) {
