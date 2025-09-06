@@ -110,6 +110,7 @@ export default function Workspace({ interpreter, interpreterConfig }: { interpre
               onFileDoubleClick={(e) => window.alert(`e: ${e}`)}
               interpreter={interpreter}
               openInterpreterSettings={() => setIsSettingsOpen(true)}
+              interpreterConfig={interpreterConfig}
             />
           </Panel>
           {/* Resize Handle */}
