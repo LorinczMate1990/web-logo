@@ -5,25 +5,30 @@ import { turtleCommandPubSub, TurtleCommandMessage } from 'web-logo-core';
 import Turtle from "./Turtle.js";
 
 export default function useTurtles() {
-  const [turtleInstances, setTurtleInstances] = useState<{[key: string]: TurtleInstance}>({});
+  const [turtleInstances, setTurtleInstances] = useState<{ [key: string]: TurtleInstance }>({});
 
   useSubscriber<TurtleCommandMessage>(turtleCommandPubSub, (message) => {
     if (message.topic != "turtleCommand") return;
     switch (message.command) {
       case "move":
-        const name = message.name;
-
-        const x = message.x;
-        const y = message.y;
+        const {name, visible, x, y} = message;
         const orientation = message.orientation / 180 * Math.PI;
 
-        const updatedInstance = new TurtleInstance({x, y}, orientation, message.image, message.visible);
+        if (visible) {
+          const updatedInstance = new TurtleInstance({ x, y }, orientation, message.image, visible);
 
-        setTurtleInstances((instances) => {
-          const ret = {...instances};
-          ret[name] = updatedInstance;
-          return ret;
-        });
+          setTurtleInstances((instances) => {
+            const ret = { ...instances };
+            ret[name] = updatedInstance;
+            return ret;
+          });
+        } else {
+          setTurtleInstances((instances) => {
+            const ret = { ...instances };
+            delete ret[name];
+            return ret;
+          });
+        }
 
         break;
     }
