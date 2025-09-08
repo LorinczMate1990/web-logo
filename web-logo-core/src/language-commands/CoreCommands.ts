@@ -227,7 +227,7 @@ export default class CoreCommands {
     return {};
   }
 
-  @Arguments({min: 1, default: new Set<PossibleArgumentParsingMethods>(['array', 'numeric'])})
+  @Arguments({min: 1, default: new Set<PossibleArgumentParsingMethods>(['array', 'numeric', 'code', 'array', 'object'])})
   static async print(arg: ArgType, memory: AbstractMemory, error: boolean) {
     function isStructuredMemoryDataAPrintableString(d : StructuredMemoryData) {
       if (!Array.isArray(d.data)) return false;
