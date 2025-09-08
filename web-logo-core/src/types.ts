@@ -107,10 +107,11 @@ export class StructuredMemoryData {
       throw new Error(`setDataMember can't use this index for this object. Index: ${index}, type of it: ${typeof index}, data: ${data}`)
     }
   }
-
-
-
 }
+
+export type StructuredMemoryObject = StructuredMemoryData & {data: { [key: string]: ParamType }};
+export type StructuredMemoryArray = StructuredMemoryData & {data: ParamType[] };
+
 
 export abstract class ExecutableWithContext implements Executable, HasContextMemory {
   static StaticExecutableWithContextSymbol = Symbol('ExecutableWithContext');

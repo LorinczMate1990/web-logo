@@ -1,4 +1,4 @@
-import { isStructuredMemoryData, StructuredMemoryData } from "../types.js";
+import { isStructuredMemoryData, ParamType, StructuredMemoryData, StructuredMemoryObject } from "../types.js";
 
 export type StructuredCoords = {
     data: { x: number, y: number }
@@ -39,7 +39,7 @@ export type GlobalTurtle = {
   penwidth: number,
   penstate: number,
   scale: StructuredCoords,
-  customLogic: StructuredMemoryData,
+  customLogic: StructuredMemoryObject,
 };
 
 export type StructuredGlobalTurtle = { data: GlobalTurtle } & StructuredMemoryData;
