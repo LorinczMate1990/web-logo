@@ -1,0 +1,32 @@
+## Clear the state
+
+clear
+watch ".*" 
+visible 0
+$turtles := []
+
+## Create the createDrawer function that acts as a newturtle function
+
+learn createDrawer x y name sideNum {
+  new turtle := newturtle name "drawer" x y 270
+  print "sideNum" sideNum
+  learn polygon sideLength {
+    repeat sideNum {
+      forward sideLength
+      left 360/sideNum
+    }
+  }
+  turtle.customLogic.draw := eval polygon
+  return turtle 
+}
+
+## Create three specialized turtles
+
+createDrawer 500 500 "triangle" 3
+createDrawer 300 500 "rectangle" 4
+createDrawer 500 300 "pentagram" 5
+
+
+## Test emit
+
+emit "draw" 60

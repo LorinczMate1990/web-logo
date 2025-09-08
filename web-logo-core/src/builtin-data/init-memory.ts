@@ -1,4 +1,4 @@
-import { AbstractMemory, packToStructuredMemoryData, StructuredMemoryData } from "../types.js";
+import { AbstractMemory, packToStructuredMemoryData, StructuredMemoryData, StructuredMemoryObject } from "../types.js";
 import { GlobalTurtle, StructuredGlobalTurtles, StructuredPosition, StructuredGlobalTurtle } from "./types.js";
 
 export default function initMemory(globalMemory: AbstractMemory) {
@@ -24,7 +24,7 @@ export default function initMemory(globalMemory: AbstractMemory) {
     penwidth: 1,
     penstate: 1,
     scale: packToStructuredMemoryData({x: 1, y: 1}),
-    customData: new StructuredMemoryData({})
+    customLogic: new StructuredMemoryData({}) as StructuredMemoryObject,
   };
 
   const defaultTurtle: StructuredGlobalTurtle = packToStructuredMemoryData(defaultTurtleData);

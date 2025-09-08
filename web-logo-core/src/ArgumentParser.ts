@@ -1,8 +1,8 @@
 import BuiltinDictionary from "./builtinDicts/english.js";
 import { expressionEval } from "./expressionEval/expressionEval.js";
-import { AbstractMemory, ArgType, CommandControl, isExecutableFactory } from "./types.js";
+import { AbstractMemory, ArgType, CommandControl, isExecutableFactory, isStructuredMemoryData } from "./types.js";
 
-export type PossibleArgumentParsingMethods = 'word' | 'numeric' | 'code' | 'variable' | 'array' | "ignore";
+export type PossibleArgumentParsingMethods = 'word' | 'numeric' | 'code' | 'variable' | 'array' | 'object' | "ignore";
 
 type ArgumentListConstraint = {
   variableArgumentLists?: false, 
@@ -50,9 +50,17 @@ export function getProcessedArgumentList(args : ArgType, enabledTypes : Set<Poss
         validatedArgs.push(context.getVariable(arg));
       } else if (arg in BuiltinDictionary && enabledType.has('code')) {
         throw new Error(`Arg ${i} seems like a built-in command, but it cannot be used as argument. Use a wrapper function`);
-      } else if (enabledType.has('numeric') || enabledType.has('array')) {
+      } else if (enabledType.has('numeric') || enabledType.has('array') || enabledType.has('object')) {
         try {
-          validatedArgs.push(expressionEval(arg, context)); // TODO : Must be checked if the resulted type is enabled or not (string and array is the same)
+          const evaluated = expressionEval(arg, context);
+          if (!
+            ((enabledType.has('numeric') && typeof(evaluated) === 'number') || 
+              (enabledType.has('array') && isStructuredMemoryData(evaluated) && Array.isArray(evaluated.data) ) ||
+              (enabledType.has('object') && isStructuredMemoryData(evaluated) && !Array.isArray(evaluated.data)))
+          ) {
+              throw new Error("The evaluated expression returned with a type that is not enabled for this argument.")
+          }
+          validatedArgs.push(evaluated);
         } catch (e) {
           throw new Error(`Arg ${i} is not a valid expression: ${e}`);
         }
@@ -121,7 +129,7 @@ export function Arguments(constraints : ArgumentListConstraint) {
         } else if (localConstraints.default) {
           enabledType = toSet(localConstraints.default);
         }
-        if (enabledType.has('word') && (enabledType.has('variable') || enabledType.has('numeric') || enabledType.has('code') || enabledType.has('array'))) {
+        if (enabledType.has('word') && (enabledType.has('variable') || enabledType.has('numeric') || enabledType.has('code') || enabledType.has('array') || enabledType.has('object'))) {
           // These and words can't differentiated in every time
           throw new Error(`Coding error: ${String(propertyKey)} for ${i}. argument lets word and other types`)
         } 

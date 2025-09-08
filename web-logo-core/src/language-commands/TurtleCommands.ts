@@ -1,5 +1,5 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
+import { AbstractMemory, ArgType, CommandControl, isExecutableFactory, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
 import { GlobalTurtle, isGlobalTurtles, StructuredGlobalTurtles } from "../builtin-data/types.js";
@@ -177,6 +177,35 @@ export default class TurtleCommands {
     const x = args[0] as number;
     const y = args[1] as number;
     lookAt(x, y, memory);
+    return {};
+  }
+
+  @Arguments({min: 1, front: ['array'], default: new Set(['numeric', 'code', 'array', 'object'])})
+  static async emit(args: ArgType, memory: AbstractMemory) {
+    const structuredMethodName = args[0] as StructuredMemoryData & {data: number[]};
+    const methodName = StructuredMemoryData.convertToString(structuredMethodName);
+    const executedActions : Promise<CommandControl>[] = [];
+    
+    forAllWatchingTurtles(memory, (turtle) => {
+      // Check if methodName exists
+      const method = turtle.customLogic.data[methodName];
+      if (method !== undefined && isExecutableFactory(method)) {
+        const structuredTurtle = packToStructuredMemoryData(turtle);
+        const executable = method.getNewExecutableWithContext();
+        executable.context.createVariable("$turtles", packToStructuredMemoryData([structuredTurtle]));
+        executable.context.createVariable("this", turtle.customLogic);
+        if (method.meta) {
+          for (let i=0; i< method.meta.arguments.length; ++i) {
+            const currentArg = args[i+1] as ParamType;
+            executable.context.createVariable(method.meta.arguments[i], currentArg);
+          }
+        }
+        executedActions.push(executable.execute());
+      }
+    });
+
+    await Promise.all(executedActions);
+
     return {};
   }
 
@@ -379,7 +408,7 @@ export default class TurtleCommands {
       penstate: 1,
       scale: packToStructuredMemoryData({ x: 1, y: 1 }),
       positionStack: packToStructuredMemoryData([]),
-      customData: new StructuredMemoryData({})
+      customLogic: packToStructuredMemoryData({} as { [key: string]: ParamType; }),
     };
 
     const turtles = memory.getVariable("$turtles") as StructuredGlobalTurtles;
@@ -388,7 +417,8 @@ export default class TurtleCommands {
     if (index != -1) {
       throw new Error(`Turtle already exists with name ${name}`);
     }
-    turtles.data.push(packToStructuredMemoryData(newTurtle));
+    const structuredTurtle = packToStructuredMemoryData(newTurtle);
+    turtles.data.push(structuredTurtle);
 
     turtleCommandPubSub.addToQueue({
       topic: "turtleCommand",
@@ -405,7 +435,9 @@ export default class TurtleCommands {
         rotatable: defaultDisplayProperties.data.rotatable != 0,
       }
     });
-    return {};
+    return {
+      returnValue: structuredTurtle,
+    } as CommandControl;
   }
 
   @Arguments(['numeric'])
