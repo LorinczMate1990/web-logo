@@ -54,7 +54,7 @@ export class CommandsWithContext extends ExecutableWithContext {
           const commandIsCalled = executable.meta != undefined;
           if (commandIsCalled) {
             const numOfArguments = packedArguments.length;
-            const argTypes = Array.from({ length: packedArguments.length }, () => new Set<PossibleArgumentParsingMethods>(['numeric', 'array', 'code']));
+            const argTypes = Array.from({ length: packedArguments.length }, () => new Set<PossibleArgumentParsingMethods>(['numeric', 'array', 'code', 'object']));
             const processedArguments = getProcessedArgumentList(packedArguments, argTypes, this.context);
             
             for (let i = 0; i < numOfArguments; ++i) {
@@ -73,7 +73,7 @@ export class CommandsWithContext extends ExecutableWithContext {
               throw new Error("Expression can not contain any code block");
             }
           }).join(" ")}`;
-          const processedEvaluation = getProcessedArgumentList([fullExpression], [new Set<PossibleArgumentParsingMethods>(['numeric', 'array'])], this.context);
+          const processedEvaluation = getProcessedArgumentList([fullExpression], [new Set<PossibleArgumentParsingMethods>(['numeric', 'array', 'object'])], this.context);
           receviedCommandControl = {returnValue: processedEvaluation[0] as ParamType}
         }
         if (receviedCommandControl.return) {
