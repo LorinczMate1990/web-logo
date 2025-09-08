@@ -52,6 +52,7 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   'savecanvas': CoreCommands.saveCanvas,
   'restorecanvas': CoreCommands.restoreCanvas,
   'capture': CoreCommands.captureCanvasPart,
+  'random': CoreCommands.random,
   
   "insertBeforeFirst": ArrayCommands.insertBeforeFirst,
   "insertAfterLast": ArrayCommands.insertAfterLast,

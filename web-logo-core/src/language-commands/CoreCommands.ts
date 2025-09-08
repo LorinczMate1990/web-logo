@@ -12,6 +12,32 @@ function sleep(ms: number) {
 export default class CoreCommands {
   static waitingIsEnabled : boolean = true;
 
+  @Arguments({min: 0, front: [ new Set(['numeric', "array"]), 'numeric' ]}) 
+  static async random(args: ArgType, memory : AbstractMemory) {
+    let returnValue : ParamType = 0;
+    if (args.length == 0) {
+      returnValue = Math.random();
+    }
+    if (args.length == 1) {
+      if (typeof(args[0]) === "number") {
+        const upperLimit = args[0];
+        returnValue = Math.random() * upperLimit;
+      } else {
+        const collection = args[0] as StructuredMemoryData & {data: ParamType[]};
+        returnValue = collection.data[Math.floor(Math.random() * collection.data.length)];
+      }
+    } 
+    if (args.length == 2) {
+      const upperLimit = args[0] as number;
+      const lowerLimit = args[1] as number;
+      
+      returnValue = Math.random() * (upperLimit-lowerLimit)+lowerLimit;
+    } 
+    return {
+      returnValue
+    } as CommandControl;
+  }
+
   @Arguments({max: 1, front: [ new Set(["array", "code", "numeric"]) ]})
   static async returnWithValue(args: ArgType, memory : AbstractMemory) {
     const value = (args.length == 1)?args[0] as ParamType:undefined;
