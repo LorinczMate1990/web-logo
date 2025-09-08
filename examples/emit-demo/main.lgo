@@ -30,4 +30,3 @@ createDrawer 500 300 "pentagram" 5
 ## Test emit
 
 emit "draw" 60
-wait 1 # It doesn't work without flushing the mess

@@ -184,6 +184,7 @@ export default class TurtleCommands {
   static async emit(args: ArgType, memory: AbstractMemory) {
     const structuredMethodName = args[0] as StructuredMemoryData & {data: number[]};
     const methodName = StructuredMemoryData.convertToString(structuredMethodName);
+    const executedActions : Promise<CommandControl>[] = [];
     
     forAllWatchingTurtles(memory, (turtle) => {
       // Check if methodName exists
@@ -199,9 +200,11 @@ export default class TurtleCommands {
             executable.context.createVariable(method.meta.arguments[i], currentArg);
           }
         }
-        executable.execute();
+        executedActions.push(executable.execute());
       }
     });
+
+    await Promise.all(executedActions);
 
     return {};
   }
