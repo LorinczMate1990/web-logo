@@ -12,7 +12,7 @@ learn createDrawer x y name sideNum {
   print "sideNum" sideNum
   learn polygon sideLength {
     repeat sideNum {
-      forward 50
+      forward sideLength
       left 360/sideNum
     }
   }
