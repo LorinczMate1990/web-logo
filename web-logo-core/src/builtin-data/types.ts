@@ -39,7 +39,7 @@ export type GlobalTurtle = {
   penwidth: number,
   penstate: number,
   scale: StructuredCoords,
-  customData: StructuredMemoryData,
+  customLogic: StructuredMemoryData,
 };
 
 export type StructuredGlobalTurtle = { data: GlobalTurtle } & StructuredMemoryData;

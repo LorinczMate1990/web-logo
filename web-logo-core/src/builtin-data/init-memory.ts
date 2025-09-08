@@ -24,7 +24,7 @@ export default function initMemory(globalMemory: AbstractMemory) {
     penwidth: 1,
     penstate: 1,
     scale: packToStructuredMemoryData({x: 1, y: 1}),
-    customData: new StructuredMemoryData({})
+    customLogic: new StructuredMemoryData({})
   };
 
   const defaultTurtle: StructuredGlobalTurtle = packToStructuredMemoryData(defaultTurtleData);

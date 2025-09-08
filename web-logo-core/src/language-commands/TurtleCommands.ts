@@ -379,7 +379,7 @@ export default class TurtleCommands {
       penstate: 1,
       scale: packToStructuredMemoryData({ x: 1, y: 1 }),
       positionStack: packToStructuredMemoryData([]),
-      customData: new StructuredMemoryData({})
+      customLogic: new StructuredMemoryData({})
     };
 
     const turtles = memory.getVariable("$turtles") as StructuredGlobalTurtles;
