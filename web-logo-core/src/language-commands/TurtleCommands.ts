@@ -199,6 +199,7 @@ export default class TurtleCommands {
             executable.context.createVariable(method.meta.arguments[i], currentArg);
           }
         }
+        executable.execute();
       }
     });
 
