@@ -1,5 +1,5 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, isExecutableFactory, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
+import { AbstractMemory, ArgType, CommandControl, isExecutableFactory, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
 import { GlobalTurtle, isGlobalTurtles, StructuredGlobalTurtles } from "../builtin-data/types.js";
@@ -413,7 +413,8 @@ export default class TurtleCommands {
     if (index != -1) {
       throw new Error(`Turtle already exists with name ${name}`);
     }
-    turtles.data.push(packToStructuredMemoryData(newTurtle));
+    const structuredTurtle = packToStructuredMemoryData(newTurtle);
+    turtles.data.push(structuredTurtle);
 
     turtleCommandPubSub.addToQueue({
       topic: "turtleCommand",
@@ -430,7 +431,9 @@ export default class TurtleCommands {
         rotatable: defaultDisplayProperties.data.rotatable != 0,
       }
     });
-    return {};
+    return {
+      returnValue: structuredTurtle,
+    } as CommandControl;
   }
 
   @Arguments(['numeric'])
