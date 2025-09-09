@@ -1,5 +1,5 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, CommandControl, isExecutableFactory, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
+import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, isExecutableFactory, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
 import { GlobalTurtle, isGlobalTurtles, StructuredGlobalTurtles } from "../builtin-data/types.js";
@@ -378,15 +378,16 @@ export default class TurtleCommands {
     return {};
   }
 
-  @Arguments(['array', 'array', 'numeric', 'numeric', 'numeric'])
+  @Arguments({min: 5, front: ['array', 'array', 'numeric', 'numeric', 'numeric', "code"] })
   static async addTurtle(arg: ArgType, memory: AbstractMemory) {
     const name = arg[0] as StructuredMemoryData & { data: number[] };
     const nameStr = StructuredMemoryData.convertToString(name);
     const group = arg[1] as StructuredMemoryData & { data: number[] };
+    
     const x = arg[2] as number;
     const y = arg[3] as number;
     const orientation = arg[4] as number;
-
+    
     const defaultDisplayProperties = packToStructuredMemoryData({
       image: StructuredMemoryData.buildFromString("builtin://simple-turtle"),
       rotatable: 1,
@@ -435,6 +436,15 @@ export default class TurtleCommands {
         rotatable: defaultDisplayProperties.data.rotatable != 0,
       }
     });
+
+    if (arg.length > 5) {
+      const initCode = arg[5] as ExecutableFactory;
+      const executable = initCode.getNewExecutableWithContext();
+      executable.context.createVariable("$turtles", packToStructuredMemoryData([structuredTurtle]));
+      executable.context.createVariable("turtle", structuredTurtle);
+      await executable.execute();
+    }
+
     return {
       returnValue: structuredTurtle,
     } as CommandControl;
