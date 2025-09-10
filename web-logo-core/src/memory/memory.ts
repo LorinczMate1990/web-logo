@@ -25,7 +25,7 @@ export class Memory implements AbstractMemory {
   dataInjector? : VariableGetter;
   variables: { [key: string]: MemoryCell } = {};
 
-  constructor(parent: AbstractMemory | undefined, dataInjector : VariableGetter | undefined) {
+  constructor(parent: AbstractMemory | undefined, dataInjector? : VariableGetter) {
     this.parent = parent;
     this.dataInjector = dataInjector;
   }

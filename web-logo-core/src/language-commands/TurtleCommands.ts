@@ -1,5 +1,5 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, isExecutableFactory, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
+import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, isExecutableFactory, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData, VariableGetter } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
 import { GlobalTurtle, isGlobalTurtles, StructuredGlobalTurtles } from "../builtin-data/types.js";
@@ -439,8 +439,14 @@ export default class TurtleCommands {
 
     if (arg.length > 5) {
       const initCode = arg[5] as ExecutableFactory;
-      const executable = initCode.getNewExecutableWithContext();
-      executable.context.createVariable("$turtles", packToStructuredMemoryData([structuredTurtle]));
+      const turtlesGetter : VariableGetter = {
+        getVariable: (key : string) => {
+          if (key === "$turtles") return packToStructuredMemoryData([structuredTurtle]);
+          return 0;
+        }, 
+        hasVariable: (key: string) => key ===  "$turtles"
+      }
+      const executable = initCode.getNewExecutableWithContext(turtlesGetter);
       executable.context.createVariable("turtle", structuredTurtle);
       await executable.execute();
     }
