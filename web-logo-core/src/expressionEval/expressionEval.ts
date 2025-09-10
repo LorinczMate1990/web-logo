@@ -1,4 +1,4 @@
-import { isStructuredMemoryData, ParamType, StructuredMemoryData, VariableGetter } from "../types.js";
+import { isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData, VariableGetter } from "../types.js";
 import { isArrayToken, isNumeric, builtinFunctions, executeBinaryOperator, executeUnaryOperator, isBuiltinFunction, isOperator, isStrictlyUnaryOperator, precedence } from "./operators.js";
 import { stringToArrayAndCharToNumberConverter } from "./stringConverter.js";
 import toPolishNotation from "./toPolishNotation.js";
@@ -79,12 +79,47 @@ function handleBuiltinFunctions(stack: ParamType[], token: string) {
 function handleArrays(stack: ParamType[], token: string, memory: VariableGetter) {
   // Have to split on , when they are not inside of a ( ) or nested [ ] or " "
   const elements = splitArrayToElements(token.slice(1, token.length - 1));
-  let evaluatedArray = new StructuredMemoryData([]);
+  let isObject = false;
+  let isArray = false;
+  let evaluatedArray = packToStructuredMemoryData([] as ParamType[]);
+  let evaluatedObject = packToStructuredMemoryData({} as {[key : string]: ParamType});
+  console.log({elements})
   for (const element of elements) {
-    const evaluatedElement = expressionEval(element, memory);
-    (evaluatedArray.data as ParamType[]).push(evaluatedElement);
+    const keyValuePair = getKeyValuePair(element);
+    if (Array.isArray(keyValuePair) ) {
+      const [key, value] = keyValuePair;
+      console.log({key, value})
+      const evaluatedValue = expressionEval(value, memory);
+      evaluatedObject.data[key] = evaluatedValue;
+      isObject = true;
+    } else {
+      // This is an array
+      console.log("Array: ", element)
+      const evaluatedElement = expressionEval(element, memory);
+      evaluatedArray.data.push(evaluatedElement);
+      isArray = true;
+    }
   }
-  stack.push(evaluatedArray);
+  if (isObject && isArray) {
+    throw new Error("Mixing arrays and objects is forbidden")
+  }
+  if (!isObject) { // By default, empty [ ] expressions must be array
+    stack.push(evaluatedArray);
+  }
+  if (isObject) {
+    console.log(evaluatedObject)
+    stack.push(evaluatedObject);
+  }
+}
+
+function getKeyValuePair(element : string) : boolean | [string, string] {
+  const parts = element.split(':');
+  if (parts.length == 1) return false;
+  const possibleKey = parts[0];
+  if (/^\s*[a-zA-Z][a-zA-Z0-9]*\s*$/.test(possibleKey)) {
+    return [possibleKey.trim(), parts.slice(1).join(':')];
+  }
+  return false;
 }
 
 function splitArrayToElements(array: string): string[] {
