@@ -1,4 +1,4 @@
-import { ParamType, StructuredMemoryData, VariableGetter } from '../types.js';
+import { packToStructuredMemoryData, ParamType, StructuredMemoryData, VariableGetter } from '../types.js';
 import { evaluateVariableName, expressionEval } from './expressionEval.js';
 
 describe('numericEval', () => {
@@ -307,7 +307,7 @@ describe("Handling arrays as input variables", () => {
   
 });
 
-describe.only('Handling objects as input variable', () => {
+describe('Handling objects as input variable', () => {
   const mockGetter: VariableGetter = {
     hasVariable: (name : string): boolean => {
       return name in ['foo'];
@@ -336,10 +336,11 @@ describe.only('Handling objects as input variable', () => {
     }));
   });
   it('Complex, but constant object expressions', () => {
-    expect(expressionEval('[ foo:1+1   , bar :  2 *3    ,  spam 3 + (3+1+abs(-1)   )   ]', mockGetter)).toEqual(new StructuredMemoryData({
+    expect(expressionEval('[ foo:1+1   , bar :  2 *3    ,  spam :3 + (3+1+abs(-1)   ) , fish: "aaa" : "bbb"   ]', mockGetter)).toEqual(new StructuredMemoryData({
       foo: 2,
       bar: 6,
       spam: 8,
+      fish: StructuredMemoryData.buildFromString("aaabbb")
     }));
   });
   it('Complex, non-constant object expressions', () => {
@@ -361,6 +362,10 @@ describe.only('Handling objects as input variable', () => {
         bar: 4
       })
     );
+  });
+
+  it('Array-object mixed expression', () => {
+    expect(() => expressionEval('[ foo: a+b   , 2*a]', mockGetter)).toThrow(Error);
   });
 });
 
