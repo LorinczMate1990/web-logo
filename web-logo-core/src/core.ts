@@ -2,7 +2,7 @@ import { Commands } from "./CommandList.js";
 import { getProcessedArgumentList, PossibleArgumentParsingMethods } from "./ArgumentParser.js";
 import BuiltinDictionary from "./builtinDicts/english.js";
 import { Memory } from "./memory/memory.js";
-import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl, InterpreterHooks } from "./types.js";
+import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl, InterpreterHooks, VariableGetter } from "./types.js";
 import { expressionEval } from "./expressionEval/expressionEval.js";
 import { turtleCommandPubSub } from "./pubsub/pubsubs.js";
 
@@ -12,14 +12,16 @@ export class CommandsWithContext extends ExecutableWithContext {
   meta: MemoryMetaData | undefined;
   hooks : InterpreterHooks;
   sessionId : string;
+  dataInjector? : VariableGetter;
 
-  constructor(commands: Commands, context : AbstractMemory, meta : MemoryMetaData | undefined, hooks: InterpreterHooks, sessionId : string) {
+  constructor(commands: Commands, context : AbstractMemory, meta : MemoryMetaData | undefined, hooks: InterpreterHooks, sessionId : string, dataInjector?: VariableGetter) {
     super();
     this.sessionId = sessionId;
     this.commands = commands;
     this.context = context;
     this.meta = meta;
     this.hooks = hooks;
+    this.dataInjector = dataInjector;
   }
   async execute() : Promise<CommandControl> {
     const commandLevelExecution = this.meta != undefined; // TODO : Currently the meta only means that this is a command
@@ -50,7 +52,7 @@ export class CommandsWithContext extends ExecutableWithContext {
           const commandFactory = this.context.getVariable(label) as CommandsWithContextFactory;
           // Set variables
           // Check the numbers! This dialect doesn't support variable argument list
-          const executable = commandFactory.getNewExecutableWithContext();
+          const executable = commandFactory.getNewExecutableWithContext(this.dataInjector);
           const commandIsCalled = executable.meta != undefined;
           if (commandIsCalled) {
             const numOfArguments = packedArguments.length;
@@ -116,9 +118,10 @@ export class CommandsWithContextFactory extends ExecutableFactory {
   
   meta: MemoryMetaData | undefined;
 
-  getNewExecutableWithContext(): ExecutableWithContext {
-    const newMemory = new Memory(this.parentContext);
-    return new CommandsWithContext(this.commands, newMemory, this.meta, this.hooks, this.sessionId);
+  getNewExecutableWithContext(dataInjector? : VariableGetter): ExecutableWithContext {
+    const newMemory = new Memory(this.parentContext, dataInjector);
+
+    return new CommandsWithContext(this.commands, newMemory, this.meta, this.hooks, this.sessionId, dataInjector);
   }
 
 }
@@ -130,7 +133,7 @@ class Core {
   hooks : InterpreterHooks;
 
   constructor(hooks : InterpreterHooks) {
-    this.globalMemory = new Memory(undefined);
+    this.globalMemory = new Memory(undefined, undefined);
     this.hooks = hooks;
   }
 
