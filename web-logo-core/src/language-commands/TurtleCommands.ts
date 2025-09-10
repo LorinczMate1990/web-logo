@@ -3,6 +3,7 @@ import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, isExecutabl
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
 import { GlobalTurtle, isGlobalTurtles, StructuredGlobalTurtles } from "../builtin-data/types.js";
+import { StaticGetter } from "../memory/memory.js";
 
 function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
   const turtles = memory.getVariable("$turtles");
@@ -191,8 +192,8 @@ export default class TurtleCommands {
       const method = turtle.customLogic.data[methodName];
       if (method !== undefined && isExecutableFactory(method)) {
         const structuredTurtle = packToStructuredMemoryData(turtle);
-        const executable = method.getNewExecutableWithContext();
-        executable.context.createVariable("$turtles", packToStructuredMemoryData([structuredTurtle]));
+        const turtlesGetter = new StaticGetter({"$turtles": packToStructuredMemoryData([structuredTurtle])});
+        const executable = method.getNewExecutableWithContext(turtlesGetter);
         executable.context.createVariable("this", turtle.customLogic);
         if (method.meta) {
           for (let i=0; i< method.meta.arguments.length; ++i) {
@@ -439,13 +440,7 @@ export default class TurtleCommands {
 
     if (arg.length > 5) {
       const initCode = arg[5] as ExecutableFactory;
-      const turtlesGetter : VariableGetter = {
-        getVariable: (key : string) => {
-          if (key === "$turtles") return packToStructuredMemoryData([structuredTurtle]);
-          return 0;
-        }, 
-        hasVariable: (key: string) => key ===  "$turtles"
-      }
+      const turtlesGetter = new StaticGetter({"$turtles": packToStructuredMemoryData([structuredTurtle])});
       const executable = initCode.getNewExecutableWithContext(turtlesGetter);
       executable.context.createVariable("turtle", structuredTurtle);
       await executable.execute();
