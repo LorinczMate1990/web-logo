@@ -1,5 +1,5 @@
 import { evaluateVariableName } from "../expressionEval/expressionEval.js";
-import { AbstractMemory, ExecutableFactory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, isExecutableFactory, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types.js";
+import { AbstractMemory, ExecutableFactory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, VariableGetter, isExecutableFactory, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types.js";
 import { NonExistingVariableMemoryError } from "./errors.js";
 import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from "./structuredVariableHandler.js";
 
@@ -22,10 +22,12 @@ type MemoryCell = NumericMemoryCell | StructMemoryCell | CodeMemoryCell;
 
 export class Memory implements AbstractMemory {
   parent?: AbstractMemory;
+  dataInjector? : VariableGetter;
   variables: { [key: string]: MemoryCell } = {};
 
-  constructor(parent: AbstractMemory | undefined) {
+  constructor(parent: AbstractMemory | undefined, dataInjector : VariableGetter | undefined) {
     this.parent = parent;
+    this.dataInjector = dataInjector;
   }
 
   setVariable(key: string, value: ParamType): void {
@@ -42,6 +44,8 @@ export class Memory implements AbstractMemory {
   _setVariable(baseName : string, key : string, processedKey : string, value : ParamType) : void {
     if (baseName in this.variables) {
       this.createVariable(processedKey, value);
+    } else if (this.dataInjector?.hasVariable(baseName)) {
+      throw new Error(baseName+" is an injected variable, you can not modify it.");
     } else if (this.parent) {
       this.parent.setVariable(processedKey, value);
     } else {
@@ -88,7 +92,7 @@ export class Memory implements AbstractMemory {
 
   hasVariable(key: string): boolean {
     let {baseName} = getBaseVariableName(key);
-    return baseName in this.variables || (this.parent != undefined && this.parent.hasVariable(baseName));
+    return baseName in this.variables || (this.parent?.hasVariable(baseName))===true || (this.dataInjector?.hasVariable(baseName))===true;
   }
 
   getVariable(key: string): ParamType {
@@ -105,7 +109,12 @@ export class Memory implements AbstractMemory {
       const memoryCell = this.variables[key];
       return memoryCell.value;
     }
-    if (this.parent === undefined) throw new NonExistingVariableMemoryError("read", key); // TODO This should be an error
-    return this.parent.getVariable(key);
+    if (this.dataInjector?.hasVariable(key)===true) {
+      return this.dataInjector?.getVariable(key);
+    }
+    if (this.parent?.hasVariable(key)===true) {
+      return this.parent?.getVariable(key);
+    }
+    throw new NonExistingVariableMemoryError("read", key);
   }
 }
