@@ -75,10 +75,13 @@ export function tokenizer(command: string): Token[] {
       charCounter = 0;
       lineCounter += 1;
       if (braketCounter > 0) throw new UnclosedBracketError(lineCounter);
-      if (squareBraketCounter > 0) throw new UnclosedSquareBracketError(lineCounter);
-      startNewToken();
-      currentToken.push('\n');
-      startNewToken();
+      if (squareBraketCounter == 0) {
+        // TODO: '\n' token means explicitly, that the command is ended
+        // It should be a special token, not a \n token
+        startNewToken();
+        currentToken.push('\n');
+        startNewToken();
+      }
       if (currentEnvironment == "comment") {
         // previousEnvironment must stay like commenting didn't happened
         currentEnvironment = "none";

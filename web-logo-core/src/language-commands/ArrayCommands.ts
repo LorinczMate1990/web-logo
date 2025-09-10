@@ -74,7 +74,6 @@ export default class ArrayCommands {
       for (const element of array.data) {
         filterCode.context.createVariable(internalVariable, element);
         const commandControl = await filterCode.execute();
-        console.log({commandControl})
         if (typeof(commandControl.returnValue) === "number" && commandControl.returnValue != 0) {
             filteredData.push(element);
         }

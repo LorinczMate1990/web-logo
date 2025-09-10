@@ -83,18 +83,15 @@ function handleArrays(stack: ParamType[], token: string, memory: VariableGetter)
   let isArray = false;
   let evaluatedArray = packToStructuredMemoryData([] as ParamType[]);
   let evaluatedObject = packToStructuredMemoryData({} as {[key : string]: ParamType});
-  console.log({elements})
   for (const element of elements) {
     const keyValuePair = getKeyValuePair(element);
     if (Array.isArray(keyValuePair) ) {
       const [key, value] = keyValuePair;
-      console.log({key, value})
       const evaluatedValue = expressionEval(value, memory);
       evaluatedObject.data[key] = evaluatedValue;
       isObject = true;
     } else {
       // This is an array
-      console.log("Array: ", element)
       const evaluatedElement = expressionEval(element, memory);
       evaluatedArray.data.push(evaluatedElement);
       isArray = true;
@@ -107,7 +104,6 @@ function handleArrays(stack: ParamType[], token: string, memory: VariableGetter)
     stack.push(evaluatedArray);
   }
   if (isObject) {
-    console.log(evaluatedObject)
     stack.push(evaluatedObject);
   }
 }
