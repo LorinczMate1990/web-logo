@@ -48,6 +48,13 @@ export default class CoreCommands {
     } as CommandControl;
   }
 
+  @Arguments([])
+  static async initTurtleSandbox(args: ArgType, memory : InterceptableMemory) {
+    const turtlesGetter = new StaticGetter({"$turtles": packToStructuredMemoryData([])});
+    memory.setInterceptor(turtlesGetter);
+    return { };
+  }
+
   @Arguments(['ignore', 'code'])
   static async whileCycle(args: ArgType, memory : InterceptableMemory) {
     const expression = args[0] as string;
