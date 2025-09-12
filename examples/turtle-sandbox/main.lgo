@@ -73,3 +73,44 @@ learn shallowSandbox {
   # no injection happened here.
 }
 shallowSandbox
+
+## Creating a sandboxed environment by the right command 
+clear
+
+# This is how you should implement a turtle sandbox
+learn correctSandbox {
+  turtlesandbox
+  newturtle "g" "g" 1100 500 270 # This turtle will exists only in this local environment
+  penwidth 5
+  backward 50 
+  penwidth 1
+  
+  drawRectangle 
+}
+correctSandbox
+watch "g" # There is no turtle called g outside of the sandbox
+penwidth 100 
+f 100
+# Actually nobody watched here
+# But the turtle will stay in the view, because we didn't made it invisible before we lost the reference for it
+# We can reuse its name however
+
+
+## Creating a sandboxed environment, but the turtle will be created in the original $turtles first
+clear
+
+# This is how you should implement a turtle sandbox
+learn correctSandbox {
+  new g := newturtle "g" "g" 1100 800 270 
+  turtlesandbox
+  insertAfterLast $turtles g # We add the turtle to the local environment by reference
+  penwidth 5
+  backward 75 
+  penwidth 1
+  
+  drawRectangle 
+}
+correctSandbox
+watch "g"
+penwidth 100 
+f 20
