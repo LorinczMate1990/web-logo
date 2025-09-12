@@ -127,7 +127,7 @@ export default class CoreCommands {
     const codeFactory = args[args.length - 1] as ExecutableFactory;
     codeFactory.meta = {type: "command", arguments: argNames};
     memory.createVariable(commandName, codeFactory);
-    return {};
+    return {returnValue: codeFactory} as CommandControl;
   }
 
   @Arguments({min: 2, front: ['numeric', 'code'] })
