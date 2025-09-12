@@ -11,7 +11,7 @@ learn drawRectangle {
 watch ".*"
 visible 0
 clear
-$turtles := []
+removeallturtles
 newturtle "a" "a" 500 500 270
 
 ## Draw a rectangle with sandboxing

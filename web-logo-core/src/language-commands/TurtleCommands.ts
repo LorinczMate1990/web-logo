@@ -359,6 +359,18 @@ export default class TurtleCommands {
     return {};
   }
 
+  @Arguments([])
+  static async removeAllTurtles(arg: ArgType, memory: InterceptableMemory) {
+    const turtles = memory.getVariable("$turtles") as StructuredGlobalTurtles;
+    if (!isStructuredMemoryData(turtles) || !Array.isArray(turtles.data)) { 
+      return {};
+    }
+
+    console.log({turtles})
+    turtles.data.length = 0;
+    return {};
+  }
+
   @Arguments(['array'])
   static async removeTurtle(arg: ArgType, memory: InterceptableMemory) {
     const name = arg[0] as StructuredMemoryData & { data: number[] };
