@@ -37,9 +37,9 @@ newturtle "c" "c" 500 1100 270 {
 ## Creating a local $turtles reference in sandbox
 clear
 
-# This will work, but not as intended
-# You may create a local $turtles array, but nothing will use it
-# TODO: This is an error, a similar error should be trhown as previously
+# This will throw you an error, because you are not allowed to shadow the
+# $turtles when you are in an environment like this
+# Error during executing: Error: At line 7: Error: At line 8: Error: $turtles is an injected variable, you can not shadow it.
 newturtle "d" "d" 800 500 270 {
   new $turtles := []
   drawRectangle

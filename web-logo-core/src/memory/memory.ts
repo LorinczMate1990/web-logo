@@ -59,7 +59,7 @@ export class Memory implements AbstractMemory {
     if (baseName in this.variables) {
       this.createVariable(processedKey, value);
     } else if (this.dataInjector?.hasVariable(baseName)) {
-      throw new Error(baseName + " is an injected variable, you can not modify it.");
+      throw new Error(baseName + " is an injected variable, you can not modify its reference.");
     } else if (this.parent) {
       this.parent.setVariable(processedKey, value);
     } else {
@@ -68,6 +68,9 @@ export class Memory implements AbstractMemory {
   }
 
   createVariable(key: string, value: ParamType) {
+    if (this.dataInjector?.hasVariable(key)) {
+      throw new Error(key + " is an injected variable, you can not shadow it.");
+    }
     if (isStructuredVariableName(key)) {
       const { baseName, rest: variablePath } = getBaseVariableName(key);
       if (!(baseName in this.variables)) {
