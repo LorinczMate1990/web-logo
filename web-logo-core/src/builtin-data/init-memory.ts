@@ -1,7 +1,7 @@
-import { AbstractMemory, packToStructuredMemoryData, StructuredMemoryData, StructuredMemoryObject } from "../types.js";
+import { InterceptableMemory, packToStructuredMemoryData, StructuredMemoryData, StructuredMemoryObject } from "../types.js";
 import { GlobalTurtle, StructuredGlobalTurtles, StructuredPosition, StructuredGlobalTurtle } from "./types.js";
 
-export default function initMemory(globalMemory: AbstractMemory) {
+export default function initMemory(globalMemory: InterceptableMemory) {
   // init memory
   const defaultDisplayProperties = packToStructuredMemoryData({
     image: StructuredMemoryData.buildFromString("builtin://simple-turtle"),

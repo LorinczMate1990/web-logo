@@ -1,11 +1,11 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
+import { InterceptableMemory, ArgType, CommandControl, ExecutableFactory, ExecutableWithContext, isExecutableFactory, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments, PossibleArgumentParsingMethods } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
 
 export default class ArrayCommands {
   @Arguments({min:2, max:3, front: ["array", "numeric", "numeric"] })
-  static async slice(args: ArgType, memory : AbstractMemory) {
+  static async slice(args: ArgType, memory : InterceptableMemory) {
     const array = args[0] as StructuredMemoryData & {data: ParamType[]};
     const firstIndex = args[1] as number;
     const lastIndex = (args.length == 3)?args[2] as number:array.data.length;
@@ -15,7 +15,7 @@ export default class ArrayCommands {
   }
 
   @Arguments(["array"])
-  static async removeFirst(args: ArgType, memory : AbstractMemory) {
+  static async removeFirst(args: ArgType, memory : InterceptableMemory) {
     const array = args[0] as StructuredMemoryData & {data: ParamType[]};
     const removedValue = array.data.shift();
     return {
@@ -24,7 +24,7 @@ export default class ArrayCommands {
   }
 
   @Arguments(["array"])
-  static async removeLast(args: ArgType, memory : AbstractMemory) {
+  static async removeLast(args: ArgType, memory : InterceptableMemory) {
     const array = args[0] as StructuredMemoryData & {data: ParamType[]};
     const removedValue = array.data.pop();
     return {
@@ -33,7 +33,7 @@ export default class ArrayCommands {
   }
 
   @Arguments(["array", ["array", "code", "numeric"]])
-  static async insertBeforeFirst(args: ArgType, memory: AbstractMemory) {
+  static async insertBeforeFirst(args: ArgType, memory: InterceptableMemory) {
       const array = args[0] as StructuredMemoryData & { data: ParamType[] };
       const valueToInsert = args[1] as ParamType;
       array.data.unshift(valueToInsert);
@@ -41,7 +41,7 @@ export default class ArrayCommands {
   }
 
   @Arguments(["array", ["array", "code", "numeric"]])
-  static async insertAfterLast(args: ArgType, memory : AbstractMemory) {
+  static async insertAfterLast(args: ArgType, memory : InterceptableMemory) {
     const array = args[0] as StructuredMemoryData & {data: ParamType[]};
     const valueToInsert = args[1] as ParamType;
     array.data.push(valueToInsert);
@@ -49,7 +49,7 @@ export default class ArrayCommands {
   }
 
   @Arguments(["array", "numeric"])
-  static async removeAny(args: ArgType, memory: AbstractMemory) {
+  static async removeAny(args: ArgType, memory: InterceptableMemory) {
       const array = args[0] as StructuredMemoryData & { data: ParamType[] };
       const indexToRemove = args[1] as number;
   
@@ -64,7 +64,7 @@ export default class ArrayCommands {
   }
 
   @Arguments(["array", "word", "code"])
-  static async filterArray(args: ArgType, memory: AbstractMemory) {
+  static async filterArray(args: ArgType, memory: InterceptableMemory) {
       const array = args[0] as StructuredMemoryData & { data: ParamType[] };
       const internalVariable = args[1] as string;
       const filterCodeFactory = args[2] as ExecutableFactory;
@@ -86,7 +86,7 @@ export default class ArrayCommands {
   }
 
   @Arguments(["array", "numeric", ["array", "code", "numeric"]])
-  static async insertAnywhere(args: ArgType, memory : AbstractMemory) {
+  static async insertAnywhere(args: ArgType, memory : InterceptableMemory) {
     const array = args[0] as StructuredMemoryData & {data: ParamType[]};
     const indexToInsert = args[1] as number;
     const valueToInsert = args[2] as ParamType;

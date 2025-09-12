@@ -1,11 +1,11 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, isExecutableFactory, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData, VariableGetter } from "../types.js";
+import { InterceptableMemory, ArgType, CommandControl, ExecutableFactory, isExecutableFactory, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData, VariableGetter } from "../types.js";
 import { Arguments } from "../ArgumentParser.js";
 import ColorMap from "../utils/ColorMap.js";
 import { GlobalTurtle, isGlobalTurtles, StructuredGlobalTurtles } from "../builtin-data/types.js";
 import { StaticGetter } from "../memory/memory.js";
 
-function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
+function forAllTurtles(memory: InterceptableMemory, action: (turtle: GlobalTurtle) => any) {
   const turtles = memory.getVariable("$turtles");
   if (!isGlobalTurtles(turtles)) throw new Error("The global $turtles array is damaged");
   for (const turtle of turtles.data) {
@@ -13,7 +13,7 @@ function forAllTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) =>
   }
 }
 
-function forAllWatchingTurtles(memory: AbstractMemory, action: (turtle: GlobalTurtle) => any) {
+function forAllWatchingTurtles(memory: InterceptableMemory, action: (turtle: GlobalTurtle) => any) {
   forAllTurtles(memory, (turtle: GlobalTurtle) => {
     if (turtle.listen) {
       action(turtle);
@@ -61,7 +61,7 @@ function goToPoint(turtle: GlobalTurtle, newX: number, newY: number, newOrientat
   }
 }
 
-function go(referenceDistance: number, memory: AbstractMemory) {
+function go(referenceDistance: number, memory: InterceptableMemory) {
   forAllWatchingTurtles(memory, (turtle) => {
     const distance = referenceDistance;
     const rad = turtle.orientation / 180 * Math.PI;
@@ -76,7 +76,7 @@ function go(referenceDistance: number, memory: AbstractMemory) {
   });
 }
 
-function rotate(angle: number, memory: AbstractMemory) {
+function rotate(angle: number, memory: InterceptableMemory) {
   forAllWatchingTurtles(memory, (turtle) => {
     turtle.orientation = (turtle.orientation + angle) % 360;
     turtleCommandPubSub.addToQueue({
@@ -97,7 +97,7 @@ function rotate(angle: number, memory: AbstractMemory) {
   });
 }
 
-function lookAt(x: number, y: number, memory: AbstractMemory) {
+function lookAt(x: number, y: number, memory: InterceptableMemory) {
   forAllWatchingTurtles(memory, (turtle) => {
     const dx = x - turtle.coords.data.x;
     const dy = y - turtle.coords.data.y;
@@ -122,35 +122,35 @@ function lookAt(x: number, y: number, memory: AbstractMemory) {
 
 export default class TurtleCommands {
   @Arguments(['numeric'])
-  static async forward(args: ArgType, memory: AbstractMemory) {
+  static async forward(args: ArgType, memory: InterceptableMemory) {
     const distance = args[0] as number;
     go(distance, memory);
     return {};
   }
 
   @Arguments(['numeric'])
-  static async backward(args: ArgType, memory: AbstractMemory) {
+  static async backward(args: ArgType, memory: InterceptableMemory) {
     const distance = args[0] as number;
     go(-distance, memory);
     return {};
   }
 
   @Arguments(['numeric'])
-  static async left(args: ArgType, memory: AbstractMemory) {
+  static async left(args: ArgType, memory: InterceptableMemory) {
     const angle = args[0] as number;
     rotate(-angle, memory);
     return {};
   }
 
   @Arguments(['numeric'])
-  static async right(args: ArgType, memory: AbstractMemory) {
+  static async right(args: ArgType, memory: InterceptableMemory) {
     const angle = args[0] as number;
     rotate(angle, memory);
     return {};
   }
 
   @Arguments({ variableArgumentLists: true, 1: ['numeric'], 2: ['numeric', 'numeric'] })
-  static async scale(args: ArgType, memory: AbstractMemory) {
+  static async scale(args: ArgType, memory: InterceptableMemory) {
     const scaleX = args[0] as number;
     const scaleY = (args.length == 1) ? scaleX : args[1] as number;
     forAllWatchingTurtles(memory, (turtle) => {
@@ -162,7 +162,7 @@ export default class TurtleCommands {
   }
 
   @Arguments({ variableArgumentLists: true, 1: ['numeric'], 2: ['numeric', 'numeric'] })
-  static async setScale(args: ArgType, memory: AbstractMemory) {
+  static async setScale(args: ArgType, memory: InterceptableMemory) {
     const scaleX = args[0] as number;
     const scaleY = (args.length == 1) ? scaleX : args[1] as number
     forAllWatchingTurtles(memory, (turtle) => {
@@ -174,7 +174,7 @@ export default class TurtleCommands {
   }
 
   @Arguments(['numeric', 'numeric'])
-  static async lookAt(args: ArgType, memory: AbstractMemory) {
+  static async lookAt(args: ArgType, memory: InterceptableMemory) {
     const x = args[0] as number;
     const y = args[1] as number;
     lookAt(x, y, memory);
@@ -182,7 +182,7 @@ export default class TurtleCommands {
   }
 
   @Arguments({min: 1, front: ['array'], default: new Set(['numeric', 'code', 'array', 'object'])})
-  static async emit(args: ArgType, memory: AbstractMemory) {
+  static async emit(args: ArgType, memory: InterceptableMemory) {
     const structuredMethodName = args[0] as StructuredMemoryData & {data: number[]};
     const methodName = StructuredMemoryData.convertToString(structuredMethodName);
     const executedActions : Promise<CommandControl>[] = [];
@@ -211,7 +211,7 @@ export default class TurtleCommands {
   }
 
   @Arguments(['numeric', 'numeric'])
-  static async goto(args: ArgType, memory: AbstractMemory) {
+  static async goto(args: ArgType, memory: InterceptableMemory) {
     const x = args[0] as number;
     const y = args[1] as number;
     forAllWatchingTurtles(memory, (turtle) => {
@@ -221,7 +221,7 @@ export default class TurtleCommands {
   }
 
   @Arguments([])
-  static async penUp(args: ArgType, memory: AbstractMemory) {
+  static async penUp(args: ArgType, memory: InterceptableMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
       turtle.penstate = 0;
     });
@@ -229,7 +229,7 @@ export default class TurtleCommands {
   }
 
   @Arguments([])
-  static async pushPosition(args: ArgType, memory: AbstractMemory) {
+  static async pushPosition(args: ArgType, memory: InterceptableMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
       const currentPosition = packToStructuredMemoryData({
         x: turtle.coords.data.x,
@@ -241,7 +241,7 @@ export default class TurtleCommands {
     return {};
   }
 
-  static async popPosition(args: ArgType, memory: AbstractMemory) {
+  static async popPosition(args: ArgType, memory: InterceptableMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
       const currentPosition = turtle.positionStack.data.pop();
       if (currentPosition === undefined) return;
@@ -255,7 +255,7 @@ export default class TurtleCommands {
   }
 
   @Arguments([])
-  static async penDown(args: ArgType, memory: AbstractMemory) {
+  static async penDown(args: ArgType, memory: InterceptableMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
       turtle.penstate = 1;
     });
@@ -263,7 +263,7 @@ export default class TurtleCommands {
   }
 
   @Arguments({ variableArgumentLists: true, 1: ['word'], 3: ['numeric', 'numeric', 'numeric'] })
-  static async setPenColor(args: ArgType, memory: AbstractMemory) {
+  static async setPenColor(args: ArgType, memory: InterceptableMemory) {
     // The color can be any of the following formats: "colorname" or "#RRGGBB"
     // This function must convert them to RGB
 
@@ -292,7 +292,7 @@ export default class TurtleCommands {
   }
 
   @Arguments(['numeric'])
-  static async setPenWidth(args: ArgType, memory: AbstractMemory) {
+  static async setPenWidth(args: ArgType, memory: InterceptableMemory) {
     const width = args[0] as number;
 
     forAllWatchingTurtles(memory, (turtle) => {
@@ -302,7 +302,7 @@ export default class TurtleCommands {
   }
 
   @Arguments([])
-  static async goHome(args: ArgType, memory: AbstractMemory) {
+  static async goHome(args: ArgType, memory: InterceptableMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
       const x = turtle.home.data.x;
       const y = turtle.home.data.y;
@@ -313,7 +313,7 @@ export default class TurtleCommands {
   }
 
   @Arguments([])
-  static async setHome(args: ArgType, memory: AbstractMemory) {
+  static async setHome(args: ArgType, memory: InterceptableMemory) {
     forAllWatchingTurtles(memory, (turtle) => {
       turtle.home.data.x = turtle.coords.data.x;
       turtle.home.data.y = turtle.coords.data.y;
@@ -323,7 +323,7 @@ export default class TurtleCommands {
   }
 
   @Arguments({ max: 1, front: ['numeric'] })
-  static async fill(args: ArgType, memory: AbstractMemory) {
+  static async fill(args: ArgType, memory: InterceptableMemory) {
     const tolerance = (args.length == 0) ? 0 : args[0] as number;
     forAllWatchingTurtles(memory, (turtle) => {
       turtleCommandPubSub.addToQueue({
@@ -338,7 +338,7 @@ export default class TurtleCommands {
   }
 
   @Arguments([])
-  static async clearScreen(arg: ArgType, memory: AbstractMemory) {
+  static async clearScreen(arg: ArgType, memory: InterceptableMemory) {
     turtleCommandPubSub.addToQueue({
       topic: "drawing",
       command: "clearScreen"
@@ -347,7 +347,7 @@ export default class TurtleCommands {
   }
 
   @Arguments(['array'])
-  static async watch(args: ArgType, memory: AbstractMemory) {
+  static async watch(args: ArgType, memory: InterceptableMemory) {
     const rawWatchPattern = args[0] as StructuredMemoryData & { data: number[] };
     const watchPattern = String.fromCharCode(...rawWatchPattern.data);
     const watchPatternRegex = new RegExp(watchPattern);
@@ -359,8 +359,20 @@ export default class TurtleCommands {
     return {};
   }
 
+  @Arguments([])
+  static async removeAllTurtles(arg: ArgType, memory: InterceptableMemory) {
+    const turtles = memory.getVariable("$turtles") as StructuredGlobalTurtles;
+    if (!isStructuredMemoryData(turtles) || !Array.isArray(turtles.data)) { 
+      return {};
+    }
+
+    console.log({turtles})
+    turtles.data.length = 0;
+    return {};
+  }
+
   @Arguments(['array'])
-  static async removeTurtle(arg: ArgType, memory: AbstractMemory) {
+  static async removeTurtle(arg: ArgType, memory: InterceptableMemory) {
     const name = arg[0] as StructuredMemoryData & { data: number[] };
     const nameStr = StructuredMemoryData.convertToString(name);
 
@@ -380,7 +392,7 @@ export default class TurtleCommands {
   }
 
   @Arguments({min: 5, front: ['array', 'array', 'numeric', 'numeric', 'numeric', "code"] })
-  static async addTurtle(arg: ArgType, memory: AbstractMemory) {
+  static async addTurtle(arg: ArgType, memory: InterceptableMemory) {
     const name = arg[0] as StructuredMemoryData & { data: number[] };
     const nameStr = StructuredMemoryData.convertToString(name);
     const group = arg[1] as StructuredMemoryData & { data: number[] };
@@ -452,7 +464,7 @@ export default class TurtleCommands {
   }
 
   @Arguments(['numeric'])
-  static async visible(arg: ArgType, memory: AbstractMemory) {
+  static async visible(arg: ArgType, memory: InterceptableMemory) {
     const state = arg[0] as number;
     forAllWatchingTurtles(memory, turtle => {
       turtle.visible = state;
@@ -476,7 +488,7 @@ export default class TurtleCommands {
   }
 
   @Arguments(['array', 'array', 'numeric', 'numeric', 'numeric'])
-  static async setForm(arg: ArgType, memory: AbstractMemory) {
+  static async setForm(arg: ArgType, memory: InterceptableMemory) {
     const typeOfForm = StructuredMemoryData.convertToString(arg[0] as StructuredMemoryData);
     const path = StructuredMemoryData.convertToString(arg[1] as StructuredMemoryData);
     const offsetX = arg[2] as number;
@@ -514,7 +526,7 @@ export default class TurtleCommands {
   }
 
   @Arguments([])
-  static async refreshTurtles(arg: ArgType, memory: AbstractMemory) {
+  static async refreshTurtles(arg: ArgType, memory: InterceptableMemory) {
     forAllWatchingTurtles(memory, turtle => {
       turtleCommandPubSub.addToQueue({
         topic: "turtleCommand",

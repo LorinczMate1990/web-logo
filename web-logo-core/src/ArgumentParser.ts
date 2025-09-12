@@ -1,6 +1,6 @@
 import BuiltinDictionary from "./builtinDicts/english.js";
 import { expressionEval } from "./expressionEval/expressionEval.js";
-import { AbstractMemory, ArgType, CommandControl, isExecutableFactory, isStructuredMemoryData } from "./types.js";
+import { InterceptableMemory, ArgType, CommandControl, isExecutableFactory, isStructuredMemoryData } from "./types.js";
 
 export type PossibleArgumentParsingMethods = 'word' | 'numeric' | 'code' | 'variable' | 'array' | 'object' | "ignore";
 
@@ -30,7 +30,7 @@ function toSet(a: PossibleArgumentParsingMethods | Set<PossibleArgumentParsingMe
   return a;
 }
 
-export function getProcessedArgumentList(args : ArgType, enabledTypes : Set<PossibleArgumentParsingMethods>[], context: AbstractMemory) : ArgType {
+export function getProcessedArgumentList(args : ArgType, enabledTypes : Set<PossibleArgumentParsingMethods>[], context: InterceptableMemory) : ArgType {
   const validatedArgs : ArgType = [];
   for (let i=0; i<args.length; ++i) {
     let arg = args[i];
@@ -90,10 +90,10 @@ export function Arguments(constraints : ArgumentListConstraint) {
   return function(
     target: Object,
     propertyKey: string | symbol,
-    descriptor: TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory, ...extraArgs: any[]) => Promise<CommandControl>>
-  ) : TypedPropertyDescriptor<(args: ArgType, memory: AbstractMemory, ...extraArgs: any[]) => Promise<CommandControl>> {
+    descriptor: TypedPropertyDescriptor<(args: ArgType, memory: InterceptableMemory, ...extraArgs: any[]) => Promise<CommandControl>>
+  ) : TypedPropertyDescriptor<(args: ArgType, memory: InterceptableMemory, ...extraArgs: any[]) => Promise<CommandControl>> {
     const originalMethod = descriptor.value!;
-    descriptor.value = async function(args: ArgType, context: AbstractMemory, ...extraArgs: any[]) {
+    descriptor.value = async function(args: ArgType, context: InterceptableMemory, ...extraArgs: any[]) {
       let localConstraints = constraints;
       if (!Array.isArray(localConstraints) && localConstraints.variableArgumentLists) {
         const argumentList = localConstraints[args.length]

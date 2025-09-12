@@ -117,7 +117,7 @@ export abstract class ExecutableWithContext implements Executable, HasContextMem
   static StaticExecutableWithContextSymbol = Symbol('ExecutableWithContext');
   ExecutableWithContextSymbol = ExecutableWithContext.StaticExecutableWithContextSymbol;
 
-  abstract get context(): AbstractMemory;
+  abstract get context(): InterceptableMemory;
   abstract execute(): Promise<CommandControl>;
   abstract get meta(): MemoryMetaData | undefined;
 }
@@ -147,11 +147,15 @@ export type MemoryMetaData = {
 }
 
 export interface AbstractMemory extends VariableGetter, VariableSetter {
+}
 
+export interface InterceptableMemory extends AbstractMemory {
+  setInterceptor(readInterceptor : VariableGetter | undefined) : void;
+  getInterceptor() : VariableGetter | undefined;
 }
 
 export interface HasContextMemory {
-  get context(): AbstractMemory;
+  get context(): InterceptableMemory;
 }
 
 export type InterpreterHooks = {
