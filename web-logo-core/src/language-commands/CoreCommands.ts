@@ -1,7 +1,8 @@
 import { turtleCommandPubSub } from "../pubsub/pubsubs.js";
-import { AbstractMemory, ArgType, CommandControl, ExecutableFactory, isExecutableFactory, isStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
+import { InterceptableMemory, ArgType, CommandControl, ExecutableFactory, isExecutableFactory, isStructuredMemoryData, packToStructuredMemoryData, ParamType, StructuredMemoryData } from "../types.js";
 import { Arguments, PossibleArgumentParsingMethods } from "../ArgumentParser.js";
 import { expressionEval } from "../expressionEval/expressionEval.js";
+import { StaticGetter } from "../memory/memory.js";
 
 function sleep(ms: number) {
   return new Promise((resolve, reject) => {
@@ -13,7 +14,7 @@ export default class CoreCommands {
   static waitingIsEnabled : boolean = true;
 
   @Arguments({min: 0, front: [ new Set(['numeric', "array"]), 'numeric' ]}) 
-  static async random(args: ArgType, memory : AbstractMemory) {
+  static async random(args: ArgType, memory : InterceptableMemory) {
     let returnValue : ParamType = 0;
     if (args.length == 0) {
       returnValue = Math.random();
@@ -39,7 +40,7 @@ export default class CoreCommands {
   }
 
   @Arguments({max: 1, front: [ new Set(["array", "code", "numeric"]) ]})
-  static async returnWithValue(args: ArgType, memory : AbstractMemory) {
+  static async returnWithValue(args: ArgType, memory : InterceptableMemory) {
     const value = (args.length == 1)?args[0] as ParamType:undefined;
     return {
       return: true,
@@ -48,7 +49,7 @@ export default class CoreCommands {
   }
 
   @Arguments(['ignore', 'code'])
-  static async whileCycle(args: ArgType, memory : AbstractMemory) {
+  static async whileCycle(args: ArgType, memory : InterceptableMemory) {
     const expression = args[0] as string;
     let expressionResult = expressionEval(expression, memory);
     if (typeof expressionResult != "number") throw new Error("First parameter of while must be an expression with numeric value");
@@ -63,7 +64,7 @@ export default class CoreCommands {
   }
 
   @Arguments( {variableArgumentLists: true, 2 : ['numeric', 'code'], 3: ['word', 'numeric', 'code']} )
-  static async repeat(args: ArgType, memory : AbstractMemory) {
+  static async repeat(args: ArgType, memory : InterceptableMemory) {
     const repeatNumber = parseFloat(String(args[(args.length == 2)?0:1]));
     const nameOfCylceParameter = (args.length == 2)?"i":(args[0] as string);
     const cycleCoreFactory = ((args.length == 2)?args[1]:args[2]) as ExecutableFactory;
@@ -78,7 +79,7 @@ export default class CoreCommands {
   }
 
   @Arguments( {variableArgumentLists: true, 2 : ['array', 'code'], 3: ['word', 'array', 'code']} )
-  static async each(args: ArgType, memory : AbstractMemory) {
+  static async each(args: ArgType, memory : InterceptableMemory) {
     const arrayIndex = (args.length == 2)?0:1;
     if (!(isStructuredMemoryData(args[arrayIndex]) && Array.isArray(args[arrayIndex].data))) throw new Error("TODO To decorator"); // TODO
     const collection = args[arrayIndex].data as ParamType[];
@@ -94,7 +95,7 @@ export default class CoreCommands {
   }
 
   @Arguments([])
-  static async turnWait(args: ArgType, memory : AbstractMemory, enable : boolean) {
+  static async turnWait(args: ArgType, memory : InterceptableMemory, enable : boolean) {
     if (enable) {
       CoreCommands.waitingIsEnabled = true; 
     } else {
@@ -105,7 +106,7 @@ export default class CoreCommands {
   }
 
   @Arguments({max: 1, front: ['numeric']})
-  static async coWait(args: ArgType, memory : AbstractMemory) {
+  static async coWait(args: ArgType, memory : InterceptableMemory) {
     turtleCommandPubSub.publish();
     if (CoreCommands.waitingIsEnabled) {
       if (args.length == 1) { 
@@ -118,7 +119,7 @@ export default class CoreCommands {
   }
 
   @Arguments({min: 2, back: ['code'], default: 'word'})
-  static async learn(args: ArgType, memory : AbstractMemory) {
+  static async learn(args: ArgType, memory : InterceptableMemory) {
     /**
      * usage: learn commandName param1 param2 param3 ... paramN { code block }
      */
@@ -131,7 +132,7 @@ export default class CoreCommands {
   }
 
   @Arguments({min: 2, front: ['numeric', 'code'] })
-  static async conditionalBranching(args: ArgType, memory : AbstractMemory, elifWord : string, elseWord : string) {
+  static async conditionalBranching(args: ArgType, memory : InterceptableMemory, elifWord : string, elseWord : string) {
     /**
      * usage: if condition { code block if true} [elif (condition) { code block}] else { code block if false }
      */
@@ -178,12 +179,12 @@ export default class CoreCommands {
   }
 
   @Arguments([['numeric', 'code', 'array']])
-  static async eval(arg : ArgType, memory : AbstractMemory) {
+  static async eval(arg : ArgType, memory : InterceptableMemory) {
     return {returnValue: arg[0]} as CommandControl;
   }
 
   @Arguments(['array']) 
-  static async saveCanvas(args: ArgType, memory: AbstractMemory) {
+  static async saveCanvas(args: ArgType, memory: InterceptableMemory) {
     let label = args[0] as StructuredMemoryData & {data: string[]};
     turtleCommandPubSub.addToQueue({
       topic: "drawing",
@@ -195,7 +196,7 @@ export default class CoreCommands {
   }
 
   @Arguments(['array', 'numeric', 'numeric', 'numeric', 'numeric'])
-  static async captureCanvasPart(args: ArgType, memory: AbstractMemory) {
+  static async captureCanvasPart(args: ArgType, memory: InterceptableMemory) {
     const label = args[0] as StructuredMemoryData & {data: string[]};
     const x = args[1] as number;
     const y = args[2] as number;
@@ -216,7 +217,7 @@ export default class CoreCommands {
   }
 
   @Arguments(['array']) 
-  static async restoreCanvas(args: ArgType, memory: AbstractMemory) {
+  static async restoreCanvas(args: ArgType, memory: InterceptableMemory) {
     let label = args[0] as StructuredMemoryData & {data: string[]};
     turtleCommandPubSub.addToQueue({
       topic: "drawing",
@@ -228,7 +229,7 @@ export default class CoreCommands {
   }
 
   @Arguments({min: 1, default: new Set<PossibleArgumentParsingMethods>(['array', 'numeric', 'code', 'array', 'object'])})
-  static async print(arg: ArgType, memory: AbstractMemory, error: boolean) {
+  static async print(arg: ArgType, memory: InterceptableMemory, error: boolean) {
     function isStructuredMemoryDataAPrintableString(d : StructuredMemoryData) {
       if (!Array.isArray(d.data)) return false;
       let retValue = "";

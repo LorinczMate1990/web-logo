@@ -2,26 +2,25 @@ import { Commands } from "./CommandList.js";
 import { getProcessedArgumentList, PossibleArgumentParsingMethods } from "./ArgumentParser.js";
 import BuiltinDictionary from "./builtinDicts/english.js";
 import { Memory } from "./memory/memory.js";
-import { AbstractMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl, InterpreterHooks, VariableGetter } from "./types.js";
+import { InterceptableMemory, ExecutableWithContext, ExecutableFactory, MemoryMetaData, ParamType, CommandControl, InterpreterHooks, VariableGetter } from "./types.js";
 import { expressionEval } from "./expressionEval/expressionEval.js";
 import { turtleCommandPubSub } from "./pubsub/pubsubs.js";
 
 export class CommandsWithContext extends ExecutableWithContext {
   commands : Commands;
-  context : AbstractMemory;
+  context : InterceptableMemory;
   meta: MemoryMetaData | undefined;
   hooks : InterpreterHooks;
   sessionId : string;
   dataInjector? : VariableGetter;
 
-  constructor(commands: Commands, context : AbstractMemory, meta : MemoryMetaData | undefined, hooks: InterpreterHooks, sessionId : string, dataInjector?: VariableGetter) {
+  constructor(commands: Commands, context : InterceptableMemory, meta : MemoryMetaData | undefined, hooks: InterpreterHooks, sessionId : string) {
     super();
     this.sessionId = sessionId;
     this.commands = commands;
     this.context = context;
     this.meta = meta;
     this.hooks = hooks;
-    this.dataInjector = dataInjector;
   }
   async execute() : Promise<CommandControl> {
     const commandLevelExecution = this.meta != undefined; // TODO : Currently the meta only means that this is a command
@@ -52,7 +51,7 @@ export class CommandsWithContext extends ExecutableWithContext {
           const commandFactory = this.context.getVariable(label) as CommandsWithContextFactory;
           // Set variables
           // Check the numbers! This dialect doesn't support variable argument list
-          const executable = commandFactory.getNewExecutableWithContext(this.dataInjector);
+          const executable = commandFactory.getNewExecutableWithContext(this.context.getInterceptor());
           const commandIsCalled = executable.meta != undefined;
           if (commandIsCalled) {
             const numOfArguments = packedArguments.length;
@@ -104,11 +103,11 @@ export class CommandsWithContext extends ExecutableWithContext {
 
 export class CommandsWithContextFactory extends ExecutableFactory {
   commands : Commands;
-  parentContext : AbstractMemory;
+  parentContext : InterceptableMemory;
   hooks : InterpreterHooks;
   sessionId : string;
   
-  constructor(commands: Commands, parentContext: AbstractMemory, hooks: InterpreterHooks, sessionId : string) {
+  constructor(commands: Commands, parentContext: InterceptableMemory, hooks: InterpreterHooks, sessionId : string) {
     super();
     this.commands = commands;
     this.parentContext = parentContext;
@@ -121,7 +120,7 @@ export class CommandsWithContextFactory extends ExecutableFactory {
   getNewExecutableWithContext(dataInjector? : VariableGetter): ExecutableWithContext {
     const newMemory = new Memory(this.parentContext, dataInjector);
 
-    return new CommandsWithContext(this.commands, newMemory, this.meta, this.hooks, this.sessionId, dataInjector);
+    return new CommandsWithContext(this.commands, newMemory, this.meta, this.hooks, this.sessionId);
   }
 
 }
@@ -129,7 +128,7 @@ export class CommandsWithContextFactory extends ExecutableFactory {
 // TODO This whole code is too coupled. I have to create interfaces
 
 class Core {
-  globalMemory : AbstractMemory;
+  globalMemory : InterceptableMemory;
   hooks : InterpreterHooks;
 
   constructor(hooks : InterpreterHooks) {

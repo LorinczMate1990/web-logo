@@ -2,10 +2,10 @@ import ArrayCommands from "../language-commands/ArrayCommands.js";
 import CoreCommands from "../language-commands/CoreCommands.js";
 import TurtleCommands from "../language-commands/TurtleCommands.js";
 import DebugCommands from "../language-commands/DebugCommands.js";
-import { AbstractMemory, ArgType, CommandControl, VariableGetter, VariableSetter } from "../types.js";
+import { InterceptableMemory, ArgType, CommandControl, VariableGetter, VariableSetter } from "../types.js";
 
 // This is the English dict
-const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) => Promise<CommandControl>} = {
+const EnglishCommands : {[i : string] : (args: ArgType, memory: InterceptableMemory) => Promise<CommandControl>} = {
   "forward": TurtleCommands.forward,
   "f": TurtleCommands.forward,
   "backward": TurtleCommands.backward,
@@ -40,20 +40,21 @@ const EnglishCommands : {[i : string] : (args: ArgType, memory: AbstractMemory) 
   "repeat": CoreCommands.repeat,
   "rep": CoreCommands.repeat,
   "learn": CoreCommands.learn,
-  "if": (args: ArgType, memory: AbstractMemory) => CoreCommands.conditionalBranching(args, memory, "elif", "else"),
+  "if": (args: ArgType, memory: InterceptableMemory) => CoreCommands.conditionalBranching(args, memory, "elif", "else"),
   "each": CoreCommands.each,
-  "turnoffwait": (args: ArgType, memory: AbstractMemory) => CoreCommands.turnWait(args, memory, false),
-  "turnonwait": (args: ArgType, memory: AbstractMemory) => CoreCommands.turnWait(args, memory, true),
+  "turnoffwait": (args: ArgType, memory: InterceptableMemory) => CoreCommands.turnWait(args, memory, false),
+  "turnonwait": (args: ArgType, memory: InterceptableMemory) => CoreCommands.turnWait(args, memory, true),
   "wait": CoreCommands.coWait,
   "return": CoreCommands.returnWithValue,
   "eval": CoreCommands.eval,
-  "print": (args: ArgType, memory: AbstractMemory) => CoreCommands.print(args, memory, false),
-  "error": (args: ArgType, memory: AbstractMemory) => CoreCommands.print(args, memory, true),
+  "print": (args: ArgType, memory: InterceptableMemory) => CoreCommands.print(args, memory, false),
+  "error": (args: ArgType, memory: InterceptableMemory) => CoreCommands.print(args, memory, true),
   "while": CoreCommands.whileCycle,
   'savecanvas': CoreCommands.saveCanvas,
   'restorecanvas': CoreCommands.restoreCanvas,
   'capture': CoreCommands.captureCanvasPart,
   'random': CoreCommands.random,
+  'turtlesandbox': CoreCommands.initTurtleSandbox,
   
   "insertBeforeFirst": ArrayCommands.insertBeforeFirst,
   "insertAfterLast": ArrayCommands.insertAfterLast,

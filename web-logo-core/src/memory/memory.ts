@@ -1,5 +1,5 @@
 import { evaluateVariableName } from "../expressionEval/expressionEval.js";
-import { AbstractMemory, ExecutableFactory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, VariableGetter, isExecutableFactory, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types.js";
+import { InterceptableMemory, ExecutableFactory, ExecutableWithContext, MemoryMetaData, ParamType, StructuredMemoryData, VariableGetter, isExecutableFactory, isExecutableWithContext, isParamType, isStructuredMemoryData } from "../types.js";
 import { NonExistingVariableMemoryError } from "./errors.js";
 import { getBaseVariableName, getDataMember, isStructuredVariableName, setDataMember } from "./structuredVariableHandler.js";
 
@@ -34,15 +34,22 @@ export class StaticGetter implements VariableGetter {
   }
 }
 
-export class Memory implements AbstractMemory {
-  parent?: AbstractMemory;
-  dataInjector?: VariableGetter;
+export class Memory implements InterceptableMemory {
+  parent?: InterceptableMemory;
+  interceptor?: VariableGetter;
   variables: { [key: string]: MemoryCell } = {};
 
-  constructor(parent: AbstractMemory | undefined, dataInjector?: VariableGetter) {
+  constructor(parent: InterceptableMemory | undefined, interceptor?: VariableGetter) {
     this.parent = parent;
-    this.dataInjector = dataInjector;
+    this.interceptor = interceptor;
   }
+  setInterceptor(interceptor: VariableGetter | undefined): void {
+    this.interceptor = interceptor;
+  }
+  getInterceptor(): VariableGetter | undefined {
+    return this.interceptor;
+  }
+
 
   setVariable(key: string, value: ParamType): void {
     const { baseName, rest: variablePath } = getBaseVariableName(key);
@@ -58,7 +65,7 @@ export class Memory implements AbstractMemory {
   _setVariable(baseName: string, key: string, processedKey: string, value: ParamType): void {
     if (baseName in this.variables) {
       this.createVariable(processedKey, value);
-    } else if (this.dataInjector?.hasVariable(baseName)) {
+    } else if (this.interceptor?.hasVariable(baseName)) {
       throw new Error(baseName + " is an injected variable, you can not modify its reference.");
     } else if (this.parent) {
       this.parent.setVariable(processedKey, value);
@@ -68,7 +75,7 @@ export class Memory implements AbstractMemory {
   }
 
   createVariable(key: string, value: ParamType) {
-    if (this.dataInjector?.hasVariable(key)) {
+    if (this.interceptor?.hasVariable(key)) {
       throw new Error(key + " is an injected variable, you can not shadow it.");
     }
     if (isStructuredVariableName(key)) {
@@ -109,7 +116,7 @@ export class Memory implements AbstractMemory {
 
   hasVariable(key: string): boolean {
     let { baseName } = getBaseVariableName(key);
-    return baseName in this.variables || (this.parent?.hasVariable(baseName)) === true || (this.dataInjector?.hasVariable(baseName)) === true;
+    return baseName in this.variables || (this.parent?.hasVariable(baseName)) === true || (this.interceptor?.hasVariable(baseName)) === true;
   }
 
   getVariable(key: string): ParamType {
@@ -126,8 +133,8 @@ export class Memory implements AbstractMemory {
       const memoryCell = this.variables[key];
       return memoryCell.value;
     }
-    if (this.dataInjector?.hasVariable(key) === true) {
-      return this.dataInjector?.getVariable(key);
+    if (this.interceptor?.hasVariable(key) === true) {
+      return this.interceptor?.getVariable(key);
     }
     if (this.parent?.hasVariable(key) === true) {
       return this.parent?.getVariable(key);
