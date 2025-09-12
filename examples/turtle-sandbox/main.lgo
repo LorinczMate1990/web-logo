@@ -1,0 +1,75 @@
+# This function is bound to the global $turtles array
+# because it will search for the $turtles inside its own scope (there is not)
+# and in the upper scope (which is the global)
+learn drawRectangle {
+  repeat 4 {
+    forward 100
+    left 90
+  }
+}
+
+watch ".*"
+visible 0
+clear
+$turtles := []
+newturtle "a" "a" 500 500 270
+
+## Draw a rectangle with sandboxing
+clear
+
+# This must draw only a single rectangle, because the addturtle injects
+# a specific $turtle variable to its calltree
+newturtle "b" "b" 500 800 270 {
+  drawRectangle
+}
+
+## Modify $turtles reference in sandbox
+clear
+
+# This will throw you an error, because you are not allowed to modify the
+# reference of $turtles when you are in an environment like this
+# Error: At line 8: Error: $turtles is an injected variable, you can not modify it.
+newturtle "c" "c" 500 1100 270 {
+  $turtles := []
+  drawRectangle
+}
+
+## Creating a local $turtles reference in sandbox
+clear
+
+# This will work, but not as intended
+# You may create a local $turtles array, but nothing will use it
+# TODO: This is an error, a similar error should be trhown as previously
+newturtle "d" "d" 800 500 270 {
+  new $turtles := []
+  drawRectangle
+}
+
+## Mutate $turtles in sandbox
+clear
+
+# The array itself is mutable directly (by array manipulation)
+# or indirectly
+# This is also by design, without it, you couldn't control the turtle
+newturtle "e" "e" 800 800 270 {
+  removeFirst $turtles
+  drawRectangle
+}
+
+
+## Creating a sandboxed environment by simply creating a local $turtles 
+clear
+
+# This is how you should not implement a turtle sandbox
+learn shallowSandbox {
+  new localTurtle := newturtle "f" "f" 800 1100 270
+  new $turtles := [localTurtle]
+  forward 50 # This will control only the localTurtle, because
+  # buildin commands start searching for the turtle object from 
+  # this scope
+  
+  drawRectangle # This will however start searching for $turtles from its
+  # own scope and it will find the global turtle, because
+  # no injection happened here.
+}
+shallowSandbox
