@@ -138,48 +138,52 @@ export default class CoreCommands {
     return {returnValue: codeFactory} as CommandControl;
   }
 
-  @Arguments({min: 2, front: ['numeric', 'code'] })
+  @Arguments({min: 2 })
   static async conditionalBranching(args: ArgType, memory : InterceptableMemory, elifWord : string, elseWord : string) {
     /**
      * usage: if condition { code block if true} [elif (condition) { code block}] else { code block if false }
      */
-    let condition = args[0] as number;
-    let branchIndex = 1; 
-
-    while (condition == 0 && args.length > 2) {
-      const controlWord = args[branchIndex+1];
-      if (typeof controlWord !== "string") {
-        throw new Error(`IF commmand must have an ${elifWord} or ${elseWord} after a command branch, but the ${branchIndex+1} is ${controlWord}`);
-      }
-      if (controlWord == elseWord) {
-        branchIndex+=2;
-        condition = 1; 
-      } else if (controlWord == elifWord) {
-        const conditionExpression = args[branchIndex+2];
-        if (typeof conditionExpression !== "string") {
-          throw new Error(`Invalid expression for IF command: ${conditionExpression}`)
+    // This array let me handle the first element as everything else
+    const homogeneousArray : ArgType = [elifWord, ...args];
+    
+    let branchIndex = undefined; 
+    let i = 0;
+    while (i<homogeneousArray.length) {
+      const controlWord = homogeneousArray[i] as string;
+      if (controlWord == elifWord) {
+        if (homogeneousArray.length <= i+2) {
+          console.log({homogeneousArray, i})
+          throw new Error(`If command has not enough arguments after elif`);
         }
-        const evaluatedCondition = expressionEval(conditionExpression, memory);
-        if (typeof evaluatedCondition !== "number") {
-          throw new Error(`Invalid expression for IF command: ${conditionExpression}, it should be number`)
+        const expression = homogeneousArray[i+1] as string;
+        if (typeof expression !== "string" && typeof expression !== "number") {
+          throw new Error(`Invalid expression for IF command: ${expression}`);
         }
-        condition = evaluatedCondition;
-        branchIndex+=3;
+        const condition = expressionEval(expression, memory) != 0;
+        if (condition) {
+          branchIndex = i+2;
+          break;
+        }
+        i=i+3;
+      } else if (controlWord == elseWord) {
+        if (homogeneousArray.length <= i+1) {
+          throw new Error(`If command has not enough arguments after else`);
+        }        
+        branchIndex = i+1;
+        break;
       } else {
         throw new Error(`IF commmand: After a control block there must be ${elseWord} or ${elifWord}, got ${controlWord}`);
       }
+
     }
 
-    let commandControl = {} as CommandControl;
-    
-    const executableBranchFactory = args[branchIndex];
-    if (!isExecutableFactory(executableBranchFactory)) {
-      throw new Error(`Invalid codeblock at IF command at position ${branchIndex}`);
-    }
-    const branch = executableBranchFactory.getNewExecutableWithContext();
-
-    if (condition) {
-      commandControl = await branch.execute();
+    if (branchIndex !== undefined) {
+      const executableBranchFactory = homogeneousArray[branchIndex];
+      if (!isExecutableFactory(executableBranchFactory)) {
+        throw new Error(`Invalid codeblock at IF command at position ${branchIndex}`);
+      }
+      const branch = executableBranchFactory.getNewExecutableWithContext();
+      const commandControl = await branch.execute();
       if (commandControl.return) return commandControl;
     }
     return {};
